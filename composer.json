@@ -1,0 +1,45 @@
+{
+	"name" : "pluf/orm",
+	"description" : "Pluf object relation mapping",
+	"type" : "library",
+	"homepage" : "http://pluf.ir",
+	"license" : "GPL-3.0+",
+	"minimum-stability" : "stable",
+	"authors" : [{
+			"name" : "Maos",
+			"email" : "mostafa.barmshory@gmail.com"
+		}, {
+			"name" : "hadi",
+			"email" : "hadi.mansouri@gmail.com"
+		}
+	],
+	"support" : {
+		"email" : "info@pluf.ir",
+		"issues" : "http://a",
+		"forum" : "http://a",
+		"wiki" : "http://a",
+		"irc" : "http://a",
+		"source" : "http://a"
+	},
+	"autoload" : {
+		"psr-4" : {
+			"Pluf\\" : "src"
+		}
+	},
+	"autoload-dev" : {
+		"psr-4" : {
+			"Pluf\\Tests\\" : "tests",
+			"Pluf\\" : "examples"
+		}
+	},
+	"keywords" : [
+		"orm"
+	],
+	"require" : {
+		"phayes/geophp" : "^1.2",
+		"psr/log" : "~1.1"
+	},
+	"require-dev" : {
+		"phpunit/phpunit" : "^9"
+	}
+}
