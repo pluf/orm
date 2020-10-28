@@ -3,7 +3,6 @@ namespace Pluf\Data\Schema;
 
 use Pluf\Options;
 use Pluf\Data\ModelDescription;
-use Pluf;
 
 /**
  * Generator of the schemas corresponding to a given model.
@@ -199,7 +198,7 @@ class SQLiteSchema extends \Pluf\Data\Schema
             }
             if ($property->unique) {
                 // Add tenant column to index if config and table are multitenant.
-                $columns = (Pluf::getConfig('multitenant', false) && $model->multitinant) ? 'tenant,' . $col : $col;
+                $columns = (/* Pluf::getConfig('multitenant', false) && */ $model->multitinant) ? 'tenant,' . $col : $col;
                 $index[$table . '_' . $col . '_unique'] = sprintf('CREATE UNIQUE INDEX %s ON %s (%s);', $table . '_' . $col . '_unique_idx', $table, self::qn($columns));
             }
         }
