@@ -1,0 +1,233 @@
+<?php
+/*
+ * This file is part of Pluf Framework, a simple PHP Application Framework.
+ * Copyright (C) 2010-2020 Phoinex Scholars Co. (http://dpq.co.ir)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+namespace Pluf\Tests\Data;
+
+use function Composer\Autoload\includeFile;
+use PHPUnit\Framework\TestCase;
+use Pluf\Data\ModelDescriptionRepository;
+use Pluf\Data\Query;
+use Pluf\Data\Repository;
+use Pluf\Data\Loader\MapModelDescriptionLoader;
+use Pluf\Data\Schema\SQLiteSchema;
+use Pluf\Db\Connection;
+use Pluf\Tests\NoteBook\Book;
+use Pluf\Options;
+
+class RepositoryTest extends TestCase
+{
+
+    public $connection;
+
+    public $schema;
+
+    /**
+     *
+     * @before
+     */
+    public function installApplication()
+    {
+        $this->connection = Connection::connect($GLOBALS['DB_DSN'], $GLOBALS['DB_USER'], $GLOBALS['DB_PASSWD']);
+        switch ($GLOBALS['DB_SCHEMA']) {
+            case 'sqlite':
+                $this->schema = new SQLiteSchema([]);
+                break;
+            case 'mysql':
+                $this->schema = new SQLiteSchema([]);
+                break;
+        }
+        $this->mdr = new ModelDescriptionRepository([
+            new MapModelDescriptionLoader([
+                Book::class => require __DIR__ . '/../NoteBook/BookMD.php'
+            ])
+        ]);
+        $this->schema->createTables(
+            // DB connection
+            $this->connection, 
+            // Model description
+            $this->mdr->getModelDescription(Book::class));
+    }
+
+    /**
+     *
+     * @after
+     */
+    public static function deleteApplication()
+    {
+        // $m = new Pluf_Migration();
+        // $m->uninstall();
+    }
+
+    /**
+     * Getting list of books with repository model
+     *
+     * @test
+     */
+    public function getListOfBookByOptions()
+    {
+        $repo = Repository::getInstance([
+            'connection' => $this->connection, // Connection
+            'schema' => $this->schema, // Schema builder (optionall)
+            'mdr' => $this->mdr, // storage of model descriptions (optionall)
+            'model' => Book::class
+        ]);
+        $this->assertNotNull($repo);
+        $query = new Query([
+            'filter' => [
+                [
+                    'title',
+                    '=',
+                    'my title'
+                ],
+                [
+                    'id',
+                    '>',
+                    5
+                ]
+            ]
+        ]);
+        $items = $repo->get($query);
+        $this->assertNotNull($items);
+    }
+
+    /**
+     * Getting list of books with repository model
+     *
+     * @test
+     */
+    public function getListOfBookByClassName()
+    {
+        $repo = Repository::getInstance([
+            'connection' => $this->connection, // Connection
+            'model' => Book::class
+        ]);
+        $this->assertNotNull($repo);
+        // XXX: maso, 2020: implement some automated model descritpion
+        // $query = new Query([
+        // 'filter' => [
+        // [
+        // 'title',
+        // '=',
+        // 'my title'
+        // ],
+        // [
+        // 'id',
+        // '>',
+        // 5
+        // ]
+        // ]
+        // ]);
+        // $items = $repo->get($query);
+        // $this->assertNotNull($items);
+    }
+
+    /**
+     * Getting list of books with repository model
+     *
+     * @test
+     */
+    public function getListOfBookByOptionsModel()
+    {
+        $repo = Repository::getInstance(new Options([
+            'connection' => $this->connection, // Connection
+            'schema' => $this->schema, // Schema builder (optionall)
+            'mdr' => $this->mdr, // storage of model descriptions (optionall)
+            'model' => Book::class
+        ]));
+        $this->assertNotNull($repo);
+
+        $query = new Query([
+            'filter' => [
+                [
+                    'title',
+                    '=',
+                    'my title'
+                ],
+                [
+                    'id',
+                    '>',
+                    5
+                ]
+            ]
+        ]);
+
+        $items = $repo->get($query);
+        $this->assertNotNull($items);
+    }
+
+    /**
+     *
+     * @test
+     */
+    public function putBooksByOptionsModel()
+    {
+        $repo = Repository::getInstance([
+            'connection' => $this->connection, // Connection
+            'schema' => $this->schema, // Schema builder (optionall)
+            'mdr' => $this->mdr, // storage of model descriptions (optionall)
+            'model' => Book::class
+        ]);
+        $this->assertNotNull($repo);
+
+        $book = new Book();
+        $book->title = 'Hi';
+        $book->description = 'Hi';
+        $repo->create($book);
+        $this->assertTrue(isset($book->id));
+
+        $items = $repo->get();
+        $this->assertNotNull($items);
+        $this->assertTrue(count($items) > 0);
+    }
+
+    /**
+     *
+     * @test
+     */
+    public function updateBooksByOptionsModelByRepo()
+    {
+        $repo = Repository::getInstance([
+            'connection' => $this->connection, // Connection
+            'schema' => $this->schema, // Schema builder (optionall)
+            'mdr' => $this->mdr, // storage of model descriptions (optionall)
+            'model' => Book::class
+        ]);
+        $this->assertNotNull($repo);
+
+        $book = new Book();
+        $book->title = 'Hi';
+        $repo->create($book);
+        $this->assertTrue(isset($book->id));
+
+        $items = $repo->get();
+        $this->assertNotNull($items);
+        $this->assertTrue(count($items) > 0);
+
+        $book2 = $repo->getById($book->id);
+        $this->assertTrue(isset($book2->id));
+        $this->assertEquals($book->title, $book2->title);
+
+        $book2->title = rand() . '-name';
+        $repo->update($book2);
+
+        $book3 = $repo->getById($book->id);
+        $this->assertTrue(isset($book3->id));
+        $this->assertEquals($book2->title, $book3->title);
+    }
+}
+
