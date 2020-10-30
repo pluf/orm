@@ -67,10 +67,15 @@ class RepositoryTest extends TestCase
      *
      * @after
      */
-    public static function deleteApplication()
+    public function deleteApplication()
     {
         // $m = new Pluf_Migration();
         // $m->uninstall();
+        $this->schema->dropTables(
+            // DB connection
+            $this->connection,
+            // Model description
+            $this->mdr->getModelDescription(Book::class));
     }
 
     /**
@@ -114,6 +119,7 @@ class RepositoryTest extends TestCase
     {
         $repo = Repository::getInstance([
             'connection' => $this->connection, // Connection
+            'mdr' => $this->mdr, // storage of model descriptions (optionall)
             'model' => Book::class
         ]);
         $this->assertNotNull($repo);

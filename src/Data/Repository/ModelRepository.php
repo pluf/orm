@@ -1,6 +1,7 @@
 <?php
 namespace Pluf\Data\Repository;
 
+use Pluf\Options;
 use Pluf\Data\Exception;
 use Pluf\Data\ModelDescription;
 use Pluf\Data\Query;
@@ -25,13 +26,6 @@ class ModelRepository extends \Pluf\Data\Repository
 {
 
     /**
-     * Stores an instance of the model type
-     *
-     * @var \Pluf\Model
-     */
-    public $model;
-
-    /**
      * Store the model description of current model
      *
      * This is a virtual attribute and is build from the current model. It will
@@ -40,6 +34,12 @@ class ModelRepository extends \Pluf\Data\Repository
      * @var ModelDescription
      */
     public ?ModelDescription $modelDescription = null;
+
+    public function __construct(Options $options)
+    {
+        parent::__construct($options);
+        $this->modelDescription = $this->getModelDescription($options->model);
+    }
 
     /**
      *
@@ -65,7 +65,7 @@ class ModelRepository extends \Pluf\Data\Repository
     {
         $connection = $this->getConnection();
         $schema = $this->getSchema();
-        $md = $this->getModelDescription($this->model);
+        $md = $this->modelDescription;
 
         $stm = $connection->query()
             ->table($schema->getTableName($md))
@@ -113,15 +113,15 @@ class ModelRepository extends \Pluf\Data\Repository
      */
     public function create($model)
     {
-        if (! is_a($model, $this->model)) {
+        if (! $this->modelDescription->isInstanceOf($model)) {
             throw new Exception([
                 'message' => 'Trying to store model {model} in reposiotory type {type}.',
                 'model' => get_class($model),
-                'type' => $this->model
+                'type' => $this->modelDescription->type
             ]);
         }
         // TODO: maso, 2019: pre create
-        $md = $this->getModelDescription($this->model);
+        $md = $this->modelDescription;
         $schema = $this->getSchema();
         $connection = $this->getConnection();
 
@@ -153,7 +153,7 @@ class ModelRepository extends \Pluf\Data\Repository
         $connection = $this->getConnection();
 
         // TODO: maso, 2020: Get identifire from the object
-        if (!isset($model->id)) {
+        if (! isset($model->id)) {
             throw new Exception([
                 'message' => 'Impossible to update anonymous object'
             ]);
@@ -167,7 +167,7 @@ class ModelRepository extends \Pluf\Data\Repository
                 ]
             ]
         ]);
-        
+
         // TODO: maso, 2019: to support pre update hook
 
         $stm = $connection->query()
@@ -240,7 +240,7 @@ class ModelRepository extends \Pluf\Data\Repository
     {
         // TODO: maso, 2020: support cache
         $schema = $this->getSchema();
-        $md = $this->getModelDescription($this->model);
+        $md = $this->modelDescription;
         $connection = $this->getConnection();
 
         // fields

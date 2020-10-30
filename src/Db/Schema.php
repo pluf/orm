@@ -2,8 +2,7 @@
 namespace Pluf\Db;
 
 use Pluf\Options;
-use Pluf;
-use Pluf\Model;
+use Pluf\Data\ModelDescription;
 
 /**
  * Create the schema of a given Pluf_Model for a given database.
@@ -83,7 +82,7 @@ abstract class Schema
         $this->prefix = $prefix;
     }
 
-    public function getRelationTable(Model $from, Model $to, ?string $relationName = null): String
+    public function getRelationTable($from, $to, ?string $relationName = null): String
     {
         $hay = array(
             strtolower($from->_a['model']),
@@ -316,7 +315,7 @@ abstract class Schema
 //         ));
 //     }
 
-    public function getTableName(Model $model): string
+    public function getTableName($model): string
     {
         return str_replace('\\', '_', $this->prefix . $model->_a['table']);
     }
@@ -337,22 +336,22 @@ abstract class Schema
      */
     public abstract function qn(string $name): string;
 
-    public abstract function createTableQueries(Model $model): array;
+    public abstract function createTableQueries(ModelDescription $model): array;
 
     /**
      * Get the SQL to drop the tables corresponding to the model.
      *
-     * @param Model $model
+     * @param ModelDescription $model
      *            Model to create sql for
      * @return array SQL strings ready to execute.
      */
-    public abstract function dropTableQueries(Model $model): array;
+    public abstract function dropTableQueries(ModelDescription $model): array;
 
-    public abstract function createIndexQueries(Model $model): array;
+    public abstract function createIndexQueries(ModelDescription $model): array;
 
-    public abstract function createConstraintQueries(Model $model): array;
+    public abstract function createConstraintQueries(ModelDescription $model): array;
 
-    public abstract function dropConstraintQueries(Model $model): array;
+    public abstract function dropConstraintQueries(ModelDescription $model): array;
 
     public static function skipeName(String $name): String
     {
