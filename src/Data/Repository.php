@@ -21,11 +21,10 @@ namespace Pluf\Data;
 use Pluf\Options;
 use Pluf\Data\Repository\ModelRepository;
 use Pluf\Data\Repository\RelationRepository;
-use Pluf\Db\Connection;
-use PDOStatement;
-use Pluf\Model;
 use Pluf\Data\Schema\MySQLSchema;
 use Pluf\Data\Schema\SQLiteSchema;
+use Pluf\Db\Connection;
+use PDOStatement;
 
 /**
  * Repositories are object or components that encapsulate the logic required to access data sources.
@@ -208,14 +207,14 @@ abstract class Repository
      *
      * If the $modal is a query, then all matched items will be removed
      *
-     * @param mixed|Model|Query $model
+     * @param mixed|Query $model
      */
     public abstract function delete($model);
 
     /**
      * Crates the model in repository
      *
-     * @param mixed|array|Model $model
+     * @param mixed|array $model
      *            to create into the db
      */
     public abstract function create($model);
@@ -223,7 +222,7 @@ abstract class Repository
     /**
      * Updates the model in repository
      *
-     * @param mixed|array|Model $model
+     * @param mixed|array $model
      *            to create into the db
      */
     public abstract function update($model);
