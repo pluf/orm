@@ -18,7 +18,7 @@ class ModelProperty
     public ?string $description = null;
 
     // "unit" => null,
-    // "defaultValue" => null,
+    public $defaultValue;
     // "required" => false,
     // "visible" => false,
     // "priority" => 0,

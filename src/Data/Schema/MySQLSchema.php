@@ -64,8 +64,11 @@ class MySQLSchema extends \Pluf\Data\Schema
      *
      * @param Options $options
      */
-    public function __construct(?Options $options = null)
+    public function __construct($options = null)
     {
+        if (is_array($options)) {
+            $options = new Options($options);
+        }
         parent::__construct($options);
     }
 
@@ -167,11 +170,11 @@ class MySQLSchema extends \Pluf\Data\Schema
 
         // Now for the many to many
         foreach ($manytomany as $many) {
-//             $omodel = new $cols[$many]['model']();
-//             $table = ModelUtils::getAssocTable($model, $omodel);
-//             $alter_tbl = 'ALTER TABLE ' . $table;
-//             $constraints[] = $alter_tbl . ' DROP CONSTRAINT ' . $this->getShortenedFKeyName($table . '_fkey1');
-//             $constraints[] = $alter_tbl . ' DROP CONSTRAINT ' . $this->getShortenedFKeyName($table . '_fkey2');
+            // $omodel = new $cols[$many]['model']();
+            // $table = ModelUtils::getAssocTable($model, $omodel);
+            // $alter_tbl = 'ALTER TABLE ' . $table;
+            // $constraints[] = $alter_tbl . ' DROP CONSTRAINT ' . $this->getShortenedFKeyName($table . '_fkey1');
+            // $constraints[] = $alter_tbl . ' DROP CONSTRAINT ' . $this->getShortenedFKeyName($table . '_fkey2');
         }
         return $constraints;
     }
@@ -201,21 +204,21 @@ class MySQLSchema extends \Pluf\Data\Schema
     public function dropTableQueries(ModelDescription $smd): array
     {
         $modelTable = $this->getTableName($smd);
-        $manytomany = array();
+//         $manytomany = array();
         $sql = 'DROP TABLE IF EXISTS `' . $modelTable . '`';
 
-        foreach ($smd as $col => $val) {
-            if ($val['type'] == self::MANY_TO_MANY) {
-                $manytomany[] = $col;
-            }
-        }
+//         foreach ($smd as $col => $val) {
+//             if ($val['type'] == self::MANY_TO_MANY) {
+//                 $manytomany[] = $col;
+//             }
+//         }
 
-        // Now for the many to many
-        foreach ($manytomany as $many) {
-            $omodel = new $cols[$many]['model']();
-            $table = $this->getRelationTable($model, $omodel);
-            $sql .= ', `' . $table . '`';
-        }
+//         // Now for the many to many
+//         foreach ($manytomany as $many) {
+//             $omodel = new $cols[$many]['model']();
+//             $table = $this->getRelationTable($model, $omodel);
+//             $sql .= ', `' . $table . '`';
+//         }
         return array(
             $sql
         );
@@ -232,98 +235,95 @@ class MySQLSchema extends \Pluf\Data\Schema
         $manytomany = array();
         $sql = 'CREATE TABLE `' . $this->getTableName($smd) . '` (';
 
-        foreach ($smd as $col => $val) {
+        foreach ($smd as $col) {
             // $field = new $val['type']();
-            $type = $val['type'];
-            if ($type != self::MANY_TO_MANY) {
-                $sql .= $this->qn($col) . ' ';
-                $_tmp = $this->mappings[$type];
-                if ($type == self::VARCHAR) {
-                    if (isset($val['size'])) {
-                        $_tmp = sprintf($this->mappings[$type], $val['size']);
-                    } else {
-                        $_tmp = sprintf($this->mappings[$type], '150');
-                    }
-                }
-                if ($type == self::FLOAT) {
-                    if (! isset($val['max_digits'])) {
-                        $val['max_digits'] = 32;
-                    }
-                    if (! isset($val['decimal_places'])) {
-                        $val['decimal_places'] = 8;
-                    }
-                    $_tmp = sprintf($this->mappings[$type], $val['max_digits'], $val['decimal_places']);
-                }
-                $sql .= $_tmp;
-                if (empty($val['is_null'])) {
-                    $sql .= ' NOT NULL';
-                }
-                if ($type != self::TEXT && $type != self::BLOB && $type != self::GEOMETRY) {
-                    if (isset($val['default'])) {
-                        $sql .= ' default ';
-                        $sql .= $model->_toDb($val['default'], $col);
-                    } elseif ($type != self::SEQUENCE) {
-                        $sql .= ' default ' . $this->defaults[$type];
-                    }
-                }
-                $sql .= ',';
-            } else {
+            if ($col->type == self::MANY_TO_MANY) {
                 $manytomany[] = $col;
+                continue;
             }
+            $sql .= $this->qn($col->name) . ' ';
+            $_tmp = $this->mappings[$col->type];
+
+            if ($col->type == self::VARCHAR) {
+                if (isset($col->size)) {
+                    $_tmp = sprintf($this->mappings[$col->type], $col->size);
+                } else {
+                    $_tmp = sprintf($this->mappings[$col->type], '150');
+                }
+            }
+            if ($col->type == self::FLOAT) {
+                if (! isset($col->max_digits)) {
+                    $col->max_digits = 32;
+                }
+                if (! isset($col->decimal_places)) {
+                    $col->decimal_places = 8;
+                }
+                $_tmp = sprintf($this->mappings[$col->type], $col->max_digits, $col->decimal_places);
+            }
+            $sql .= $_tmp;
+            if (empty($col->is_null)) {
+                $sql .= ' NOT NULL';
+            }
+            if ($col->type != self::TEXT && $col->type != self::BLOB && $col->type != self::GEOMETRY) {
+                if (isset($col->defaultValue)) {
+                    $sql .= ' DEFAULT ';
+                    $sql .= $this->toDb($col, $col->defaultValue);
+                } elseif ($col->type != self::SEQUENCE) {
+                    $sql .= ' DEFAULT ' . $this->defaults[$col->type];
+                }
+            }
+            $sql .= ',';
         }
         $sql .= ' PRIMARY KEY (`id`))';
         $engine = 'InnoDB';
-        if (key_exists('engine', $model->_a)) {
-            $engine = $model->_a['engine'];
-        }
         $sql .= 'ENGINE=' . $engine . ' DEFAULT CHARSET=utf8;';
-        $tables[$this->prefix . $model->_a['table']] = $sql;
+        $tables[$this->prefix . $this->getTableName($smd)] = $sql;
 
-//         // Now for the many to many
-//         foreach ($manytomany as $many) {
-//             $omodel = new $cols[$many]['model']();
-//             $table = ModelUtils::getAssocTable($model, $omodel);
+        // Now for the many to many
+        foreach ($manytomany as $many) {
+            // $omodel = new $cols[$many]['model']();
+            // $table = ModelUtils::getAssocTable($model, $omodel);
 
-//             $ra = ModelUtils::getAssocField($model);
-//             $rb = ModelUtils::getAssocField($omodel);
+            // $ra = ModelUtils::getAssocField($model);
+            // $rb = ModelUtils::getAssocField($omodel);
 
-//             $sql = 'CREATE TABLE `' . $table . '` (';
-//             $sql .= $ra . ' ' . $this->mappings[self::FOREIGNKEY] . ' default 0,';
-//             $sql .= $rb . ' ' . $this->mappings[self::FOREIGNKEY] . ' default 0,';
-//             $sql .= 'PRIMARY KEY (' . $ra . ', ' . $rb . ')';
-//             $sql .= ') ENGINE=InnoDB';
-//             $sql .= ' DEFAULT CHARSET=utf8;';
-//             $tables[$table] = $sql;
-//         }
+            // $sql = 'CREATE TABLE `' . $table . '` (';
+            // $sql .= $ra . ' ' . $this->mappings[self::FOREIGNKEY] . ' default 0,';
+            // $sql .= $rb . ' ' . $this->mappings[self::FOREIGNKEY] . ' default 0,';
+            // $sql .= 'PRIMARY KEY (' . $ra . ', ' . $rb . ')';
+            // $sql .= ') ENGINE=InnoDB';
+            // $sql .= ' DEFAULT CHARSET=utf8;';
+            // $tables[$table] = $sql;
+        }
         return $tables;
     }
 
     public function createIndexQueries(ModelDescription $smd): array
     {
-        $index = array();
-        $indexes = $model->getIndexes();
-        $modelTable = $this->getTableName($model);
-        foreach ($indexes as $idx => $val) {
-            if (! isset($val['col'])) {
-                $val['col'] = $idx;
-            }
-            $type = '';
-            if (isset($val['type']) && strcasecmp($val['type'], 'normal') != 0) {
-                $type = $val['type'];
-            }
-            $index[$modelTable . '_' . $idx] = sprintf('CREATE %s INDEX `%s` ON `%s` (%s);', $type, $idx, $modelTable, $this->qn($val['col']));
-        }
-//         foreach ($model->_a['cols'] as $col => $val) {
-//             $type = $val['type'];
-//             if ($type == self::FOREIGNKEY) {
-//                 $index[$modelTable . '_' . $col . '_foreignkey'] = sprintf('CREATE INDEX `%s` ON `%s` (`%s`);', $col . '_foreignkey_idx', $modelTable, $col);
-//             }
-//             if (isset($val['unique']) && $val['unique'] == true) {
-//                 // Add tenant column to index if config and table are multitenant.
-//                 $columns = (Pluf::f('multitenant', false) && $model->_a['multitenant']) ? 'tenant,' . $col : $col;
-//                 $index[$modelTable . '_' . $col . '_unique'] = sprintf('CREATE UNIQUE INDEX `%s` ON `%s` (%s);', $col . '_unique_idx', $modelTable, $this->qn($columns));
-//             }
-//         }
+        $index = [];
+        // $indexes = $smd->getIndexes();
+        // $modelTable = $this->getTableName($smd);
+        // foreach ($indexes as $idx => $val) {
+        // if (! isset($val['col'])) {
+        // $val['col'] = $idx;
+        // }
+        // $type = '';
+        // if (isset($val['type']) && strcasecmp($val['type'], 'normal') != 0) {
+        // $type = $val['type'];
+        // }
+        // $index[$modelTable . '_' . $idx] = sprintf('CREATE %s INDEX `%s` ON `%s` (%s);', $type, $idx, $modelTable, $this->qn($val['col']));
+        // }
+        // foreach ($model->_a['cols'] as $col => $val) {
+        // $type = $val['type'];
+        // if ($type == self::FOREIGNKEY) {
+        // $index[$modelTable . '_' . $col . '_foreignkey'] = sprintf('CREATE INDEX `%s` ON `%s` (`%s`);', $col . '_foreignkey_idx', $modelTable, $col);
+        // }
+        // if (isset($val['unique']) && $val['unique'] == true) {
+        // // Add tenant column to index if config and table are multitenant.
+        // $columns = (Pluf::f('multitenant', false) && $model->_a['multitenant']) ? 'tenant,' . $col : $col;
+        // $index[$modelTable . '_' . $col . '_unique'] = sprintf('CREATE UNIQUE INDEX `%s` ON `%s` (%s);', $col . '_unique_idx', $modelTable, $this->qn($columns));
+        // }
+        // }
         return $index;
     }
 
