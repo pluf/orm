@@ -19,7 +19,7 @@ return [
             'readable' => true
         ],
         'description' => [
-            'type' => 'Text',
+            'type' => \Pluf\Data\Schema::TEXT,
             'blank' => false,
             'editable' => false,
             'readable' => true

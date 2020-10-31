@@ -41,10 +41,8 @@ class Book
 
     public $creation_dtime;
 
-    function preSave()
+    public function __construct()
     {
-        if ($this->id == '') {
-            $this->creation_dtime = gmdate('Y-m-d H:i:s');
-        }
+        $this->creation_dtime = gmdate('Y-m-d H:i:s');
     }
 }

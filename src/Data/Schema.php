@@ -1,7 +1,6 @@
 <?php
 namespace Pluf\Data;
 
-use Pluf\Model;
 use Pluf\Options;
 use Pluf\Utils;
 use Pluf\Db\Connection;
@@ -1133,9 +1132,9 @@ abstract class Schema
             case self::SEQUENCE:
             case self::MANY_TO_ONE:
             case self::FOREIGNKEY:
-                if ($val instanceof Model) {
-                    return $val->id;
-                }
+//                 if ($val instanceof Model) {
+//                     return $val->id;
+//                 }
                 if (is_numeric($val)) {
                     return $val;
                 }

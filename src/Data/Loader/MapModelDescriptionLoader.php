@@ -40,7 +40,11 @@ class MapModelDescriptionLoader implements ModelDescriptionLoaderInterface
         // load descriptions
         $md->setDefaults($mda);
         $md->type = $class;
-        $md->views = $mda['views'];
+        if (array_key_exists('views', $mda)) {
+            $md->views = $mda['views'];
+            // } else {
+            // $md->views = [];
+        }
         if (array_key_exists('multitinant', $mda)) {
             $md->multitinant = $mda['multitenant'];
         } else {

@@ -28,6 +28,8 @@ use Pluf\Data\Schema\SQLiteSchema;
 use Pluf\Db\Connection;
 use Pluf\Tests\NoteBook\Book;
 use Pluf\Options;
+use Pluf\Db\Connection\Dumper;
+use Pluf\Data\Schema\MySQLSchema;
 
 class RepositoryTest extends TestCase
 {
@@ -43,12 +45,16 @@ class RepositoryTest extends TestCase
     public function installApplication()
     {
         $this->connection = Connection::connect($GLOBALS['DB_DSN'], $GLOBALS['DB_USER'], $GLOBALS['DB_PASSWD']);
+        // $this->connection = new Dumper(new Options([
+        // 'connection' => Connection::connect($GLOBALS['DB_DSN'], $GLOBALS['DB_USER'], $GLOBALS['DB_PASSWD'])
+        // ]));
+
         switch ($GLOBALS['DB_SCHEMA']) {
             case 'sqlite':
                 $this->schema = new SQLiteSchema([]);
                 break;
             case 'mysql':
-                $this->schema = new SQLiteSchema([]);
+                $this->schema = new MySQLSchema([]);
                 break;
         }
         $this->mdr = new ModelDescriptionRepository([
@@ -67,10 +73,15 @@ class RepositoryTest extends TestCase
      *
      * @after
      */
-    public static function deleteApplication()
+    public function deleteApplication()
     {
         // $m = new Pluf_Migration();
         // $m->uninstall();
+        $this->schema->dropTables(
+            // DB connection
+            $this->connection, 
+            // Model description
+            $this->mdr->getModelDescription(Book::class));
     }
 
     /**
@@ -114,6 +125,7 @@ class RepositoryTest extends TestCase
     {
         $repo = Repository::getInstance([
             'connection' => $this->connection, // Connection
+            'mdr' => $this->mdr, // storage of model descriptions (optionall)
             'model' => Book::class
         ]);
         $this->assertNotNull($repo);
@@ -211,6 +223,7 @@ class RepositoryTest extends TestCase
 
         $book = new Book();
         $book->title = 'Hi';
+        $book->description = 'A simple text book';
         $repo->create($book);
         $this->assertTrue(isset($book->id));
 
