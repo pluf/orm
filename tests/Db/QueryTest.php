@@ -602,6 +602,7 @@ class QueryTest extends PlufTestCase
         $q = $this->q()
             ->field('date,debit,credit')
             ->table($u, 'derrivedTable');
+        $this->assertNotNull($q);
         /*
          * @see https://github.com/atk4/dsql/issues/33
          * @see https://github.com/atk4/dsql/issues/34

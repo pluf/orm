@@ -153,14 +153,14 @@ class MySQLSchema extends \Pluf\Data\Schema
         $table = $this->getTableName($smd);
         $constraints = array();
         $alter_tbl = 'ALTER TABLE ' . $table;
-        $manytomany = array();
+//         $manytomany = array();
 
         foreach ($smd as $col => $val) {
             // remember these for later
             $type = $val['type'];
-            if ($type == self::MANY_TO_MANY) {
-                $manytomany[] = $col;
-            }
+//             if ($type == self::MANY_TO_MANY) {
+//                 $manytomany[] = $col;
+//             }
             if ($type == self::FOREIGNKEY) {
                 // Add the foreignkey constraints
                 // $referto = new $val['model']();
@@ -169,13 +169,13 @@ class MySQLSchema extends \Pluf\Data\Schema
         }
 
         // Now for the many to many
-        foreach ($manytomany as $many) {
+//         foreach ($manytomany as $many) {
             // $omodel = new $cols[$many]['model']();
             // $table = ModelUtils::getAssocTable($model, $omodel);
             // $alter_tbl = 'ALTER TABLE ' . $table;
             // $constraints[] = $alter_tbl . ' DROP CONSTRAINT ' . $this->getShortenedFKeyName($table . '_fkey1');
-            // $constraints[] = $alter_tbl . ' DROP CONSTRAINT ' . $this->getShortenedFKeyName($table . '_fkey2');
-        }
+//             $constraints[] = $alter_tbl . ' DROP CONSTRAINT ' . $this->getShortenedFKeyName($table . '_fkey2');
+//         }
         return $constraints;
     }
 
@@ -232,15 +232,15 @@ class MySQLSchema extends \Pluf\Data\Schema
     public function createTableQueries(ModelDescription $smd): array
     {
         $tables = array();
-        $manytomany = array();
+//         $manytomany = array();
         $sql = 'CREATE TABLE `' . $this->getTableName($smd) . '` (';
 
         foreach ($smd as $col) {
             // $field = new $val['type']();
-            if ($col->type == self::MANY_TO_MANY) {
-                $manytomany[] = $col;
-                continue;
-            }
+//             if ($col->type == self::MANY_TO_MANY) {
+//                 $manytomany[] = $col;
+//                 continue;
+//             }
             $sql .= $this->qn($col->name) . ' ';
             $_tmp = $this->mappings[$col->type];
 
@@ -280,7 +280,7 @@ class MySQLSchema extends \Pluf\Data\Schema
         $tables[$this->prefix . $this->getTableName($smd)] = $sql;
 
         // Now for the many to many
-        foreach ($manytomany as $many) {
+//         foreach ($manytomany as $many) {
             // $omodel = new $cols[$many]['model']();
             // $table = ModelUtils::getAssocTable($model, $omodel);
 
@@ -294,7 +294,7 @@ class MySQLSchema extends \Pluf\Data\Schema
             // $sql .= ') ENGINE=InnoDB';
             // $sql .= ' DEFAULT CHARSET=utf8;';
             // $tables[$table] = $sql;
-        }
+//         }
         return $tables;
     }
 

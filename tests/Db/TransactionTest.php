@@ -1,5 +1,5 @@
 <?php
-// namespace Pluf\Test\Db\db;
+namespace Pluf\Tests\Db;
 
 // use Pluf\Db\Connection;
 // use Pluf\Db\Expression;

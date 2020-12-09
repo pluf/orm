@@ -3,7 +3,6 @@ namespace Pluf\Tests\Db;
 
 use PHPUnit\Framework\TestCase;
 use Pluf\Db\Connection;
-use Pluf\Db\Expression;
 
 class SelectTest extends TestCase
 {

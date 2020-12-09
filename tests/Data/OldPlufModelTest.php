@@ -1,5 +1,5 @@
 <?php
-// namespace Pluf\Tests\Data;
+namespace Pluf\Tests\Data;
 
 // use PHPUnit\Framework\TestCase;
 // use Pluf\Data\ModelDescription;

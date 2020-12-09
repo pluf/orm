@@ -28,7 +28,6 @@ use Pluf\Data\Schema\SQLiteSchema;
 use Pluf\Db\Connection;
 use Pluf\Tests\NoteBook\Book;
 use Pluf\Options;
-use Pluf\Db\Connection\Dumper;
 use Pluf\Data\Schema\MySQLSchema;
 
 class RepositoryTest extends TestCase
