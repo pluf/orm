@@ -14,7 +14,7 @@ class OracleTest extends PlufTestCase
     {
         try {
             $c = Connection::connect('oci:dbname=mydb');
-            $this->assertEquals('select "baz" from "foo" where "bar" = :a', $c->dsql()
+            $this->assertEquals('select "baz" from "foo" where "bar" = :a', $c->query()
                 ->table('foo')
                 ->where('bar', 1)
                 ->field('baz')
@@ -40,13 +40,13 @@ class OracleTest extends PlufTestCase
     public function testOracleClass()
     {
         $c = $this->connect();
-        $this->assertEquals('select "baz" from "foo" where "bar" = :a', $c->dsql()
+        $this->assertEquals('select "baz" from "foo" where "bar" = :a', $c->query()
             ->table('foo')
             ->where('bar', 1)
             ->field('baz')
             ->render());
 
-        $this->assertEquals('select "baz" "ali" from "foo" where "bar" = :a', $c->dsql()
+        $this->assertEquals('select "baz" "ali" from "foo" where "bar" = :a', $c->query()
             ->table('foo')
             ->where('bar', 1)
             ->field('baz', 'ali')
@@ -56,14 +56,14 @@ class OracleTest extends PlufTestCase
     public function testClassicOracleLimit()
     {
         $c = $this->connect();
-        $this->assertEquals('select * from (select rownum "__dsql_rownum","__t".* from (select "baz" from "foo" where "bar" = :a) "__t") where "__dsql_rownum">0 and "__dsql_rownum"<=10', $c->dsql()
+        $this->assertEquals('select * from (select rownum "__dsql_rownum","__t".* from (select "baz" from "foo" where "bar" = :a) "__t") where "__dsql_rownum">0 and "__dsql_rownum"<=10', $c->query()
             ->table('foo')
             ->where('bar', 1)
             ->field('baz')
             ->limit(10)
             ->render());
 
-        $this->assertEquals('select * from (select rownum "__dsql_rownum","__t".* from (select "baz" "baz_alias" from "foo" where "bar" = :a) "__t") where "__dsql_rownum">0 and "__dsql_rownum"<=10', $c->dsql()
+        $this->assertEquals('select * from (select rownum "__dsql_rownum","__t".* from (select "baz" "baz_alias" from "foo" where "bar" = :a) "__t") where "__dsql_rownum">0 and "__dsql_rownum"<=10', $c->query()
             ->table('foo')
             ->where('bar', 1)
             ->field('baz', 'baz_alias')
@@ -74,7 +74,7 @@ class OracleTest extends PlufTestCase
     public function test12cOracleLimit()
     {
         $c = $this->connect('12c');
-        $this->assertEquals('select "baz" from "foo" where "bar" = :a FETCH NEXT 10 ROWS ONLY', $c->dsql()
+        $this->assertEquals('select "baz" from "foo" where "bar" = :a FETCH NEXT 10 ROWS ONLY', $c->query()
             ->table('foo')
             ->where('bar', 1)
             ->field('baz')
@@ -85,7 +85,7 @@ class OracleTest extends PlufTestCase
     public function testClassicOracleSkip()
     {
         $c = $this->connect();
-        $this->assertEquals('select * from (select rownum "__dsql_rownum","__t".* from (select "baz" from "foo" where "bar" = :a) "__t") where "__dsql_rownum">10', $c->dsql()
+        $this->assertEquals('select * from (select rownum "__dsql_rownum","__t".* from (select "baz" from "foo" where "bar" = :a) "__t") where "__dsql_rownum">10', $c->query()
             ->table('foo')
             ->where('bar', 1)
             ->field('baz')
@@ -96,7 +96,7 @@ class OracleTest extends PlufTestCase
     public function test12cOracleSkip()
     {
         $c = $this->connect('12c');
-        $this->assertEquals('select "baz" from "foo" where "bar" = :a OFFSET 10 ROWS', $c->dsql()
+        $this->assertEquals('select "baz" from "foo" where "bar" = :a OFFSET 10 ROWS', $c->query()
             ->table('foo')
             ->where('bar', 1)
             ->field('baz')
@@ -107,7 +107,7 @@ class OracleTest extends PlufTestCase
     public function testClassicOracleLimitSkip()
     {
         $c = $this->connect();
-        $this->assertEquals('select * from (select rownum "__dsql_rownum","__t".* from (select "baz" from "foo" where "bar" = :a) "__t") where "__dsql_rownum">99 and "__dsql_rownum"<=109', $c->dsql()
+        $this->assertEquals('select * from (select rownum "__dsql_rownum","__t".* from (select "baz" from "foo" where "bar" = :a) "__t") where "__dsql_rownum">99 and "__dsql_rownum"<=109', $c->query()
             ->table('foo')
             ->where('bar', 1)
             ->field('baz')
@@ -118,7 +118,7 @@ class OracleTest extends PlufTestCase
     public function test12cOracleLimitSkip()
     {
         $c = $this->connect('12c');
-        $this->assertEquals('select "baz" from "foo" where "bar" = :a OFFSET 99 ROWS FETCH NEXT 10 ROWS ONLY', $c->dsql()
+        $this->assertEquals('select "baz" from "foo" where "bar" = :a OFFSET 99 ROWS FETCH NEXT 10 ROWS ONLY', $c->query()
             ->table('foo')
             ->where('bar', 1)
             ->field('baz')

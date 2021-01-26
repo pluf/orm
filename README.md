@@ -23,8 +23,8 @@ Obviously because existing ones are not good enough. Pluf DB tries to do things 
 For more information about Pluf DB see:
 
 - [overview     ](doc/db/overview.db)
-- [quickstart   ](doc/db/)
-- [connection   ](doc/db/)
+- [quickstart   ](doc/db/quickstart.md)
+- [connection   ](doc/db/connection.md)
 - [expressions  ](doc/db/)
 - [queries      ](doc/db/)
 - [results      ](doc/db/)

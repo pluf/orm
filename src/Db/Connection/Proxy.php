@@ -34,7 +34,7 @@ class Proxy extends \Pluf\Db\Connection
 
     public function dsql($properties = [])
     {
-        $dsql = $this->connection->dsql($properties);
+        $dsql = $this->connection->query($properties);
         $dsql->connection = $this;
 
         return $dsql;

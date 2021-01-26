@@ -240,19 +240,6 @@ class Connection
     }
 
     /**
-     *
-     * @deprecated use query
-     * @param array $properties
-     * @return \Pluf\Db\Query
-     *
-     * @deprecated use query
-     */
-    public function dsql($properties = [])
-    {
-        return $this->query($properties);
-    }
-
-    /**
      * Returns Expression object with connection already set.
      *
      * @param array $properties
