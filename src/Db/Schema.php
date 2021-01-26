@@ -42,11 +42,9 @@ abstract class Schema
      * quoted column names.
      * This is good for index creation.
      *
-     * @param
-     *            string Column
-     * @param
-     *            Pluf_DB DB handler
-     * @return string Quoted for the DB column(s)
+     * @param string $col
+     * @param \Pluf\Db\Schema $schema
+     * @return string
      */
     public static function quoteColumn(string $col, \Pluf\Db\Schema $schema): string
     {
@@ -77,7 +75,7 @@ abstract class Schema
      *
      * @param string $prefix
      */
-    public function setPrefix($prefix)
+    public function setPrefix($prefix): string
     {
         $this->prefix = $prefix;
     }
