@@ -30,6 +30,6 @@ For more information about Pluf DB see:
 - [results      ](doc/db/results.md)
 - [transactions ](doc/db/transactions.md)
 - [advanced     ](doc/db/advanced.md)
-- [extensions   ](doc/db/)
+- [extensions   ](doc/db/extensions.md)
 
 
