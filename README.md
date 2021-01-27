@@ -25,7 +25,7 @@ For more information about Pluf DB see:
 - [overview     ](doc/db/overview.db)
 - [quickstart   ](doc/db/quickstart.md)
 - [connection   ](doc/db/connection.md)
-- [expressions  ](doc/db/)
+- [expressions  ](doc/db/expressions.md)
 - [queries      ](doc/db/)
 - [results      ](doc/db/)
 - [transactions ](doc/db/)
