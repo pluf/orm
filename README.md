@@ -29,7 +29,7 @@ For more information about Pluf DB see:
 - [queries      ](doc/db/queries.md)
 - [results      ](doc/db/results.md)
 - [transactions ](doc/db/transactions.md)
-- [advanced     ](doc/db/)
+- [advanced     ](doc/db/advanced.md)
 - [extensions   ](doc/db/)
 
 
