@@ -16,32 +16,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-namespace Pluf\Data;
+namespace Pluf\Data\Exception;
 
-class ModelDescriptionRepository
+use Pluf\Exception;
+
+/**
+ * Invalid Relation Key
+ *
+ * If you try to get a related object with wrong key/name, then this exception
+ * will be thrown.
+ *
+ * @author maso
+ *        
+ */
+class InvalidRelationKeyException extends Exception
 {
 
-    private array $loaders = [];
-
-    public function __construct(array $loaders = [])
+    // TODO: add error code
+    public function __construct($from, $to, $relationName)
     {
-        $this->loaders = $loaders;
-    }
-
-    public function getModelDescription(string $class): ModelDescription
-    {
-        // TODO: Check if it exist in cache
-        foreach ($this->loaders as $loader) {
-            $md = $loader->loadModelDescription($class);
-            if (isset($md)) {
-                break;
-            }
-        }
-        if(!isset($md)){
-            throw new \Exception('Model description not found');
-        }
-        // TODO: maso, 2020: put in cache
-        return $md;
+        parent::__construct('Invalid relation name from:' . $from . ', to:' . $to . ', relation:' . $relationName);
+        $this->from = $from;
+        $this->to = $to;
+        $this->relation = $relationName;
     }
 }
 

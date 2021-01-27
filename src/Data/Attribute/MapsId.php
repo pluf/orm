@@ -16,29 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-namespace Pluf\Data;
+namespace Pluf\Data\Attribute;
 
-use Pluf\Exception;
-
-/**
- * Invalid Relation Key
- *
- * If you try to get a related object with wrong key/name, then this exception
- * will be thrown.
- *
- * @author maso
- *        
- */
-class InvalidRelationKeyException extends Exception
+#[Attribute]
+class MapsId
 {
-
-    // TODO: add error code
-    public function __construct($from, $to, $relationName)
-    {
-        parent::__construct('Invalid relation name from:' . $from . ', to:' . $to . ', relation:' . $relationName);
-        $this->from = $from;
-        $this->to = $to;
-        $this->relation = $relationName;
-    }
 }
 

@@ -16,32 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-namespace Pluf\Data;
+namespace Pluf\Data\Attribute;
 
-class ModelDescriptionRepository
+#[Attribute]
+class Temporal
 {
-
-    private array $loaders = [];
-
-    public function __construct(array $loaders = [])
-    {
-        $this->loaders = $loaders;
-    }
-
-    public function getModelDescription(string $class): ModelDescription
-    {
-        // TODO: Check if it exist in cache
-        foreach ($this->loaders as $loader) {
-            $md = $loader->loadModelDescription($class);
-            if (isset($md)) {
-                break;
-            }
-        }
-        if(!isset($md)){
-            throw new \Exception('Model description not found');
-        }
-        // TODO: maso, 2020: put in cache
-        return $md;
-    }
 }
 
