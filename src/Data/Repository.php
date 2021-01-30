@@ -94,14 +94,14 @@ abstract class Repository
 
         // model repository
         $model = $options->model;
-        if (isset($model)) {
+        if (!empty($model)) {
             $repo = new ModelRepository($options);
             return $repo;
         }
 
         // realtion repository
         $relation = $options->relation;
-        if (isset($relation)) {
+        if (!empty($relation)) {
             $repo = new RelationRepository($options);
         }
 
