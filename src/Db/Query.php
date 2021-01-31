@@ -85,6 +85,20 @@ class Query extends Expression
      * @var string
      */
     protected $template_truncate = 'truncate table [table_noalias]';
+    
+    /**
+     * DROP template.
+     *
+     * @var string
+     */
+    protected $template_drop = "drop table if exists [table_noalias]";
+    
+    /**
+     * DROP template.
+     *
+     * @var string
+     */
+    protected $template_create = "create table if not exists [table_noalias]";
 
     /**
      * Name or alias of base table to use when using default join().

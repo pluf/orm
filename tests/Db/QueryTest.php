@@ -1628,4 +1628,15 @@ class QueryTest extends PlufTestCase
         ]);
         $this->assertEquals('with ' . '"q" ("emp","quoted") as (select "emp_id",sum(:a) from "quotes" group by "emp_id"),' . '"i" ("emp","invoiced") as (select "emp_id",sum(:b) from "invoices" group by "emp_id") ' . 'select "name","salary","q"."quoted","i"."invoiced" ' . 'from "employees" ' . 'left join "q" on "q"."emp" = "employees"."id" ' . 'left join "i" on "i"."emp" = "employees"."id"', $q->render());
     }
+
+    /**
+     * Test WITH.
+     */
+    public function testDrop()
+    {
+        $q = $this->q()
+            ->mode('drop')
+            ->table('foo');
+        $this->assertEquals('drop table if exists "foo"', $q->render());
+    }
 }
