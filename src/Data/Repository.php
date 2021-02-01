@@ -21,8 +21,6 @@ namespace Pluf\Data;
 use Pluf\Options;
 use Pluf\Data\Repository\ModelRepository;
 use Pluf\Data\Repository\RelationRepository;
-use Pluf\Data\Schema\MySQLSchema;
-use Pluf\Data\Schema\SQLiteSchema;
 use Pluf\Db\Connection;
 use PDOStatement;
 
@@ -52,6 +50,7 @@ use PDOStatement;
  * @see https://martinfowler.com/eaaCatalog/repository.html
  * @see https://docs.microsoft.com/en-us/previous-versions/msp-n-p/ff649690(v=pandp.10)
  *
+ * @deprecated use removed from pluf/orm
  */
 abstract class Repository
 {
@@ -94,20 +93,18 @@ abstract class Repository
 
         // model repository
         $model = $options->model;
-        if (!empty($model)) {
+        if (! empty($model)) {
             $repo = new ModelRepository($options);
             return $repo;
         }
 
         // realtion repository
         $relation = $options->relation;
-        if (!empty($relation)) {
+        if (! empty($relation)) {
             $repo = new RelationRepository($options);
         }
 
-        throw new Exception([
-            'message' => 'Unsupported repository type.'
-        ]);
+        throw new Exception('Unsupported repository type.');
     }
 
     /**
@@ -121,23 +118,11 @@ abstract class Repository
         if (! isset($this->connection)) {
             throw new Exception('DB connection is required');
         }
-        if (! isset($this->mdr)) {
-            $this->mdr = new ModelDescriptionRepository([
-                // TODO: maso, 2020: load some automated repo
-            ]);
-        }
         if (! isset($this->schema)) {
-            //create an default schema
-            switch ($this->connection->driver) {
-                case 'mysql':
-                    $this->schema = new MySQLSchema();
-                    break;
-                case 'sqlite':
-                    $this->schema = new SQLiteSchema();
-                    break;
-                default:
-                    throw new Exception('Data Model Schema is required');
-            }
+            throw new Exception('DB Schema is required');
+        }
+        if (! isset($this->mdr)) {
+            throw new Exception('Model descriptions repository is required');
         }
         $this->clean();
     }

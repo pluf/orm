@@ -211,33 +211,6 @@ class SQLiteSchema extends \Pluf\Data\Schema
     }
 
     /**
-     * Get the SQL to drop the tables corresponding to the model.
-     *
-     * @param
-     *            Object Model
-     * @return string SQL string ready to execute.
-     */
-    public function dropTableQueries(ModelDescription $model): array
-    {
-        $manytomany = array();
-        $sql = array();
-        $sql[] = 'DROP TABLE IF EXISTS ' . $this->getTableName($model);
-        foreach ($model as $property) {
-            if ($property->type == self::MANY_TO_MANY) {
-                $manytomany[] = $property;
-            }
-        }
-
-        // Now for the many to many
-        foreach ($manytomany as $many) {
-            $omodel = ModelDescription::getInstance($many->inverseJoinModel);
-            $table = $this->getRelationTable($model, $omodel, $many);
-            $sql[] = 'DROP TABLE IF EXISTS ' . $table;
-        }
-        return $sql;
-    }
-
-    /**
      * Quote the column name.
      *
      * @param

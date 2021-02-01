@@ -18,17 +18,16 @@
  */
 namespace Pluf\Tests\Data;
 
-use function Composer\Autoload\includeFile;
 use PHPUnit\Framework\TestCase;
+use Pluf\Exception;
+use Pluf\Options;
 use Pluf\Data\ModelDescriptionRepository;
 use Pluf\Data\Query;
 use Pluf\Data\Repository;
+use Pluf\Data\Schema;
 use Pluf\Data\Loader\MapModelDescriptionLoader;
-use Pluf\Data\Schema\SQLiteSchema;
 use Pluf\Db\Connection;
 use Pluf\Tests\NoteBook\Book;
-use Pluf\Options;
-use Pluf\Data\Schema\MySQLSchema;
 
 class RepositoryTest extends TestCase
 {
@@ -44,22 +43,13 @@ class RepositoryTest extends TestCase
     public function installApplication()
     {
         $this->connection = Connection::connect($GLOBALS['DB_DSN'], $GLOBALS['DB_USER'], $GLOBALS['DB_PASSWD']);
-        // $this->connection = new Dumper(new Options([
-        // 'connection' => Connection::connect($GLOBALS['DB_DSN'], $GLOBALS['DB_USER'], $GLOBALS['DB_PASSWD'])
-        // ]));
-
-        switch ($GLOBALS['DB_SCHEMA']) {
-            case 'sqlite':
-                $this->schema = new SQLiteSchema([]);
-                break;
-            case 'mysql':
-                $this->schema = new MySQLSchema([]);
-                break;
-        }
         $this->mdr = new ModelDescriptionRepository([
             new MapModelDescriptionLoader([
                 Book::class => require __DIR__ . '/../NoteBook/BookMD.php'
             ])
+        ]);
+        $this->schema = Schema::getInstance([
+            'engine' => $GLOBALS['DB_SCHEMA']
         ]);
         $this->schema->createTables(
             // DB connection
@@ -125,6 +115,7 @@ class RepositoryTest extends TestCase
         $repo = Repository::getInstance([
             'connection' => $this->connection, // Connection
             'mdr' => $this->mdr, // storage of model descriptions (optionall)
+            'schema' => $this->schema,
             'model' => Book::class
         ]);
         $this->assertNotNull($repo);
@@ -240,6 +231,109 @@ class RepositoryTest extends TestCase
         $book3 = $repo->getById($book->id);
         $this->assertTrue(isset($book3->id));
         $this->assertEquals($book2->title, $book3->title);
+    }
+
+    /**
+     *
+     * @test
+     */
+    public function getResouces()
+    {
+        $repo = Repository::getInstance([
+            'connection' => $this->connection,
+            'schema' => $this->schema,
+            'mdr' => $this->mdr,
+            'model' => Book::class
+        ]);
+        $this->assertNotNull($repo);
+        $this->assertEquals($this->schema, $repo->getSchema());
+        $this->assertEquals($this->connection, $repo->getConnection());
+    }
+
+    /**
+     *
+     * @test
+     */
+    public function setResources()
+    {
+        $repo = Repository::getInstance([
+            'connection' => $this->connection,
+            'schema' => $this->schema,
+            'mdr' => $this->mdr,
+            'model' => Book::class
+        ]);
+        $this->assertNotNull($repo);
+        $this->assertEquals($this->schema, $repo->getSchema());
+        $this->assertEquals($this->connection, $repo->getConnection());
+
+        $this->assertEquals($repo->setConnection($this->connection), $repo);
+        $this->assertEquals($repo->setSchema($this->schema), $repo);
+        $this->assertEquals($this->schema, $repo->getSchema());
+        $this->assertEquals($this->connection, $repo->getConnection());
+    }
+
+    /**
+     *
+     * @test
+     */
+    public function schemaIsRequired()
+    {
+        $this->expectException(Exception::class);
+        $repo = Repository::getInstance([
+            'connection' => $this->connection,
+            // 'schema' => $this->schema,
+            'mdr' => $this->mdr,
+            'model' => Book::class
+        ]);
+        $this->assertNotNull($repo);
+    }
+
+    /**
+     *
+     * @test
+     */
+    public function connectionIsRequired()
+    {
+        $this->expectException(Exception::class);
+        $repo = Repository::getInstance([
+            // 'connection' => $this->connection, // Connection
+            'schema' => $this->schema, // Schema builder (optionall)
+            'mdr' => $this->mdr, // storage of model descriptions (optionall)
+            'model' => Book::class
+        ]);
+        $this->assertNotNull($repo);
+    }
+
+    /**
+     *
+     * @test
+     */
+    public function modelDescriptionRepoIsRequired()
+    {
+        $this->expectException(Exception::class);
+        $repo = Repository::getInstance([
+            'connection' => $this->connection,
+            'schema' => $this->schema,
+            // 'mdr' => $this->mdr,
+            'model' => Book::class
+        ]);
+        $this->assertNotNull($repo);
+    }
+
+    /**
+     *
+     * @test
+     */
+    public function getUnknownRepostioryTypeInsance()
+    {
+        $this->expectException(Exception::class);
+        $repo = Repository::getInstance([
+            'connection' => $this->connection,
+            'schema' => $this->schema,
+            'mdr' => $this->mdr,
+            // 'model' => Book::class
+        ]);
+        $this->assertNotNull($repo);
     }
 }
 

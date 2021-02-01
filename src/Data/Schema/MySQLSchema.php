@@ -196,33 +196,6 @@ class MySQLSchema extends \Pluf\Data\Schema
         return implode(',', $colsArray);
     }
 
-    /**
-     *
-     * {@inheritdoc}
-     * @see \Pluf\Data\Schema::dropTableQueries()
-     */
-    public function dropTableQueries(ModelDescription $smd): array
-    {
-        $modelTable = $this->getTableName($smd);
-//         $manytomany = array();
-        $sql = 'DROP TABLE IF EXISTS `' . $modelTable . '`';
-
-//         foreach ($smd as $col => $val) {
-//             if ($val['type'] == self::MANY_TO_MANY) {
-//                 $manytomany[] = $col;
-//             }
-//         }
-
-//         // Now for the many to many
-//         foreach ($manytomany as $many) {
-//             $omodel = new $cols[$many]['model']();
-//             $table = $this->getRelationTable($model, $omodel);
-//             $sql .= ', `' . $table . '`';
-//         }
-        return array(
-            $sql
-        );
-    }
 
     /**
      *

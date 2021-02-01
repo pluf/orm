@@ -46,7 +46,7 @@ namespace Pluf\Data;
  * ```
  *
  * @author maso
- *        
+ * @deprecated use EntityQueryInterface
  */
 class Query
 {
