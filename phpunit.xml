@@ -25,6 +25,9 @@
 		<var name="DB_SCHEMA" value="sqlite" />
 	</php>
 	<testsuites>
+		<testsuite name="Object Mapper">
+			<directory>tests/Mapper</directory>
+		</testsuite>
 		<testsuite name="DB">
 			<directory>tests/Db</directory>
 		</testsuite>

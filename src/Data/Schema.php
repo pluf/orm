@@ -5,6 +5,7 @@ use Pluf\Options;
 use Pluf\Utils;
 use Pluf\Db\Connection;
 use Pluf\Db\Expression;
+use Pluf\Exception;
 
 /**
  * Create the schema of a given Pluf_Model for a given database.
@@ -220,7 +221,7 @@ abstract class Schema
                 $engine = new Schema\SQLiteSchema($options->startsWith('sqlite_', true));
                 break;
             default:
-                throw new Exception('Engine type "{{type}}" is not supported with Pluf Data Schema.', 0, null, );
+                throw new Exception('Engine type "{{type}}" is not supported with Pluf Data Schema.', params:["type" => $type]);
         }
         return $engine;
     }

@@ -7,13 +7,23 @@ use Pluf\Tests\PlufTestCase;
 class ConnectionTest extends PlufTestCase
 {
 
+    /**
+     *
+     * @test
+     */
     public function testSQLite()
     {
         $c = Connection::connect($GLOBALS['DB_DSN'], $GLOBALS['DB_USER'], $GLOBALS['DB_PASSWD']);
 
-        return (string) $c->expr("SELECT date('now')")->getOne();
+        $str = (string) $c->expr("SELECT date('now')")->getOne();
+        $this->assertNotNull($str);
+        return $str;
     }
 
+    /**
+     *
+     * @test
+     */
     public function testGenerator()
     {
         $c = new HelloWorldConnection();

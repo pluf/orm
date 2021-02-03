@@ -4,6 +4,7 @@ namespace Pluf\Tests\Db;
 use Pluf\Db\Expression;
 use Pluf\Db\Query;
 use Pluf\Tests\PlufTestCase;
+use Exception;
 
 class QueryTest extends PlufTestCase
 {
@@ -207,11 +208,14 @@ class QueryTest extends PlufTestCase
 
     /**
      * Alias is NOT mandatory when pass table as Expression.
+     *
+     * @test
      */
     public function testTableException3()
     {
-        $this->q()->table($this->q()
+        $res = $this->q()->table($this->q()
             ->expr('test'));
+        $this->assertNotNull($res);
     }
 
     /**
@@ -1315,21 +1319,25 @@ class QueryTest extends PlufTestCase
     public function testSetException1()
     {
         $this->expectException(\Exception::class);
-        $this->q()->set('name', false);
+        $var = $this->q()->set('name', false);
+        $this->assertNotNull($var);
     }
 
     /**
      * Field name can be expression.
      *
-     * @covers ::set
+     * @test
      */
     public function testSetException2()
     {
-        $this->q()->set((new Expression('foo')), 1);
+        $var = $this->q()->set((new Expression('foo')), 1);
+        $this->assertNotNull($var);
     }
 
     /**
      * Test nested OR and AND expressions.
+     *
+     * @test
      */
     public function testNestedOrAnd()
     {
@@ -1416,6 +1424,8 @@ class QueryTest extends PlufTestCase
 
     /**
      * Test caseExpr (normal).
+     *
+     * @test
      */
     public function testCaseExprNormal()
     {
@@ -1455,6 +1465,8 @@ class QueryTest extends PlufTestCase
 
     /**
      * Test caseExpr (short form).
+     *
+     * @test
      */
     public function testCaseExprShortForm()
     {
@@ -1480,34 +1492,36 @@ class QueryTest extends PlufTestCase
         $this->assertEquals('case (select year(now()) - year(birth_date) "calc_age" from "user") when :a then :b else :c end', $s);
     }
 
-    /**
-     * Incorrect use of "when" method parameters.
-     *
-     * @expected Exception Exception
-     */
-    public function testCaseExprException1()
-    {
-        $this->q()
-            ->caseExpr()
-            ->when([
-            'status'
-        ], 't2.expose_new');
-    }
+//     /**
+//      * Incorrect use of "when" method parameters.
+//      *
+//      * @test
+//      */
+//     public function testCaseExprException1()
+//     {
+//         $this->expectException(Exception::class);
+//         $this->q()
+//             ->caseExpr()
+//             ->when([
+//             'status'
+//         ], 't2.expose_new');
+//     }
 
-    /**
-     * When using short form CASE statement, then you should not set array as when() method 1st parameter.
-     *
-     * @expected Exception Exception
-     */
-    public function testCaseExprException2()
-    {
-        $this->q()
-            ->caseExpr('status')
-            ->when([
-            'status',
-            'New'
-        ], 't2.expose_new');
-    }
+//     /**
+//      * When using short form CASE statement, then you should not set array as when() method 1st parameter.
+//      *
+//      * @test
+//      */
+//     public function testCaseExprException2()
+//     {
+//         $this->expectException(Exception::class);
+//         $this->q()
+//             ->caseExpr('status')
+//             ->when([
+//             'status',
+//             'New'
+//         ], 't2.expose_new');
+//     }
 
     /**
      * Tests exprNow() method.

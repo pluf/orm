@@ -456,14 +456,14 @@ class ExpressionTest extends PlufTestCase
         $this->assertEquals('coalesce(year(now()) - year(birth_date), :a)', $age->render());
     }
 
-    /**
-     * Test IteratorAggregate implementation.
-     */
-    public function testIteratorAggregate()
-    {
-        // todo - can not test this without actual DB connection and executing expression
-        null;
-    }
+//     /**
+//      * Test IteratorAggregate implementation.
+//      */
+//     public function testIteratorAggregate()
+//     {
+//         // todo - can not test this without actual DB connection and executing expression
+//         null;
+//     }
 
     /**
      * Test for vendors that rely on JavaScript expressions, instead of parameters.
@@ -493,12 +493,17 @@ class ExpressionTest extends PlufTestCase
 
     /**
      * Test var-dump code for codecoverage.
+     * @test
      */
     public function testVarDump()
     {
-        $this->e('test')->__debugInfo();
-
-        $this->e(' [nosuchtag] ')->__debugInfo();
+        $ex = $this->e('test');
+        $this->assertNotNull($ex);
+        $ex->__debugInfo();
+        
+        $ex = $this->e(' [nosuchtag] ');
+        $this->assertNotNull($ex);
+        $ex->__debugInfo();
     }
 
     /**
