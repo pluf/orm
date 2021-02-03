@@ -28,6 +28,9 @@
 		<testsuite name="Object Mapper">
 			<directory>tests/Mapper</directory>
 		</testsuite>
+		<testsuite name="Object Validator">
+			<directory>tests/Validator</directory>
+		</testsuite>
 		<testsuite name="DB">
 			<directory>tests/Db</directory>
 		</testsuite>
