@@ -25,20 +25,20 @@
 		<var name="DB_SCHEMA" value="sqlite" />
 	</php>
 	<testsuites>
+		<testsuite name="Core">
+			<directory>tests/Core</directory>
+		</testsuite>
 		<testsuite name="Object Mapper">
 			<directory>tests/Mapper</directory>
 		</testsuite>
 		<testsuite name="Object Validator">
 			<directory>tests/Validator</directory>
 		</testsuite>
+		<testsuite name="Entity Manager">
+			<directory>tests/EntityManager</directory>
+		</testsuite>
 		<testsuite name="DB">
 			<directory>tests/Db</directory>
-		</testsuite>
-		<testsuite name="Data">
-			<directory>tests/Data</directory>
-		</testsuite>
-		<testsuite name="Core">
-			<directory>tests/Core</directory>
 		</testsuite>
 	</testsuites>
 	<!-- Code coverage -->

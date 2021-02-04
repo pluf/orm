@@ -23,7 +23,6 @@ class OracleTest extends PlufTestCase
             if (! extension_loaded('oci8')) {
                 $this->markTestSkipped('The oci8 extension is not available.');
             }
-
             throw $e;
         }
     }

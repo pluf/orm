@@ -1,5 +1,5 @@
 <?php
-namespace Pluf\Tests\Data;
+namespace Pluf\Tests\EntityManager;
 
 use PHPUnit\Framework\TestCase;
 use Pluf\Data\EntityManagerSchema;

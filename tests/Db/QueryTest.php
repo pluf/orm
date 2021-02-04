@@ -1492,36 +1492,36 @@ class QueryTest extends PlufTestCase
         $this->assertEquals('case (select year(now()) - year(birth_date) "calc_age" from "user") when :a then :b else :c end', $s);
     }
 
-//     /**
-//      * Incorrect use of "when" method parameters.
-//      *
-//      * @test
-//      */
-//     public function testCaseExprException1()
-//     {
-//         $this->expectException(Exception::class);
-//         $this->q()
-//             ->caseExpr()
-//             ->when([
-//             'status'
-//         ], 't2.expose_new');
-//     }
+    // /**
+    // * Incorrect use of "when" method parameters.
+    // *
+    // * @test
+    // */
+    // public function testCaseExprException1()
+    // {
+    // $this->expectException(Exception::class);
+    // $this->q()
+    // ->caseExpr()
+    // ->when([
+    // 'status'
+    // ], 't2.expose_new');
+    // }
 
-//     /**
-//      * When using short form CASE statement, then you should not set array as when() method 1st parameter.
-//      *
-//      * @test
-//      */
-//     public function testCaseExprException2()
-//     {
-//         $this->expectException(Exception::class);
-//         $this->q()
-//             ->caseExpr('status')
-//             ->when([
-//             'status',
-//             'New'
-//         ], 't2.expose_new');
-//     }
+    // /**
+    // * When using short form CASE statement, then you should not set array as when() method 1st parameter.
+    // *
+    // * @test
+    // */
+    // public function testCaseExprException2()
+    // {
+    // $this->expectException(Exception::class);
+    // $this->q()
+    // ->caseExpr('status')
+    // ->when([
+    // 'status',
+    // 'New'
+    // ], 't2.expose_new');
+    // }
 
     /**
      * Tests exprNow() method.
@@ -1643,14 +1643,4 @@ class QueryTest extends PlufTestCase
         $this->assertEquals('with ' . '"q" ("emp","quoted") as (select "emp_id",sum(:a) from "quotes" group by "emp_id"),' . '"i" ("emp","invoiced") as (select "emp_id",sum(:b) from "invoices" group by "emp_id") ' . 'select "name","salary","q"."quoted","i"."invoiced" ' . 'from "employees" ' . 'left join "q" on "q"."emp" = "employees"."id" ' . 'left join "i" on "i"."emp" = "employees"."id"', $q->render());
     }
 
-    /**
-     * Test WITH.
-     */
-    public function testDrop()
-    {
-        $q = $this->q()
-            ->mode('drop')
-            ->table('foo');
-        $this->assertEquals('drop table if exists "foo"', $q->render());
-    }
 }
