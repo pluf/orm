@@ -1,7 +1,8 @@
 <?php
-namespace Pluf\Data\Schema;
+namespace Pluf\Data\EntityManager;
 
 use Pluf\Options;
+use Pluf\Data\EntityManagerSchema;
 use Pluf\Data\ModelDescription;
 
 /**
@@ -13,7 +14,7 @@ use Pluf\Data\ModelDescription;
  * @author maso
  *        
  */
-class SQLiteSchema extends \Pluf\Data\Schema
+class EntityManagerSchemaSQLite extends EntityManagerSchema
 {
 
     /**
@@ -70,15 +71,11 @@ class SQLiteSchema extends \Pluf\Data\Schema
      *
      * @param Options $options
      */
-    function __construct($options = null)
+    function __construct(string $prefix = '')
     {
-        if (is_array($options)) {
-            $options = new Options($options);
-        }
-        parent::__construct($options);
+        parent::__construct($prefix);
 
         // TODO: maso, 2020: load options
-
         $this->type_cast[self::COMPRESSED] = $this->type_cast['Compressed'] = array(
             '\Pluf\Db\SQLiteself::compressedFromDb',
             '\Pluf\Db\SQLiteself::compressedToDb'

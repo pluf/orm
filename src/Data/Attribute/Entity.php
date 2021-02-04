@@ -18,8 +18,47 @@
  */
 namespace Pluf\Data\Attribute;
 
-#[Attribute]
+use Attribute;
+
+/**
+ * Specifies that the class is an entity.
+ *
+ * This annotation is applied to the entity class.
+ */
+#[Attribute(Attribute::TARGET_CLASS)]
 class Entity
 {
+
+    /**
+     * The entity name.
+     *
+     * Defaults to the unqualified name of the entity class. This name is used to refer to the
+     * entity in queries. The name must not be a reserved literal in the query language.
+     *
+     * @var string
+     */
+    public ?string $name;
+
+    /**
+     * Creates new instance of this class
+     *
+     * @param string $name
+     *            The name of entity
+     */
+    public function __construct(?string $name = "")
+    {
+        $this->name = $name;
+    }
+    
+    /**
+     * Gets name
+     * 
+     * @return string
+     */
+    public function getName(): string
+    {
+        return $this->name;
+    }
+    
 }
 

@@ -41,7 +41,7 @@ class QueryTest extends PlufTestCase
         $q = $this->q([
             'connection' => new \stdClass()
         ]);
-        $this->assertEquals(true, $q->dsql()->connection instanceof \stdClass);
+        $this->assertEquals(true, $q->clone()->connection instanceof \stdClass);
     }
 
     /**

@@ -1,9 +1,11 @@
 <?php
-namespace Pluf\Tests\Data;
+namespace Pluf\Tests\EntityManager;
 
 use PHPUnit\Framework\TestCase;
 
 class EntityManagerTest extends TestCase
 {
+    
+    
 }
 

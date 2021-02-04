@@ -18,8 +18,27 @@
  */
 namespace Pluf\Data\Attribute;
 
-#[Attribute]
+/**
+ * Specifies the primary key of an entity. 
+ * 
+ * The field or property to which the Id annotation is applied should be one of the following 
+ * types: any primitive type; any primitive wrapper type; string; Date; BigDecimal; BigInteger.
+ * 
+ * The mapped column for the primary key of the entity is assumed to be the primary key of 
+ * the primary table. If no Column annotation is specified, the primary key column name is 
+ * assumed to be the name of the primary key property or field.
+ * 
+ * ```php
+ * #[Id]
+ * public function getId() { 
+ *  return $this->id; 
+ * }
+ * ```
+ * 
+ */
+#[Attribute(Attribute::TARGET_METHOD|Attribute::TARGET_PROPERTY)]
 class Id
 {
+    // No attributes
 }
 

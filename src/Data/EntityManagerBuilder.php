@@ -9,7 +9,7 @@ use Pluf\Data\EntityManager\EntityManagerimp;
  * @author maso
  *        
  */
-class EntityManagerFactory
+class EntityManagerBuilder
 {
 
     /**

@@ -18,6 +18,7 @@
  */
 namespace Pluf\Data;
 
+use Pluf\Exception;
 use ArrayObject;
 
 class ModelDescription extends ArrayObject

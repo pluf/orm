@@ -1372,12 +1372,12 @@ class Query extends Expression
     {
         $arr = [
             'R' => false,
-            'mode' => $this->mode
-            // 'template' => $this->template,
-            // 'params' => $this->params,
-            // 'connection' => $this->connection,
-            // 'main_table' => $this->main_table,
-            // 'args' => $this->args,
+            'mode' => $this->mode,
+            'template' => $this->template,
+            'params' => $this->params,
+            'connection' => $this->connection,
+            'main_table' => $this->main_table,
+            'args' => $this->args,
         ];
 
         try {
@@ -1442,7 +1442,7 @@ class Query extends Expression
      *
      * @return Query
      */
-    public function dsql($properties = [])
+    public function clone($properties = [])
     {
         $q = new static($properties);
         $q->connection = $this->connection;
@@ -1497,7 +1497,7 @@ class Query extends Expression
      */
     public function orExpr()
     {
-        return $this->dsql([
+        return $this->clone([
             'template' => '[orwhere]'
         ]);
     }
@@ -1509,7 +1509,7 @@ class Query extends Expression
      */
     public function andExpr()
     {
-        return $this->dsql([
+        return $this->clone([
             'template' => '[andwhere]'
         ]);
     }
@@ -1524,7 +1524,7 @@ class Query extends Expression
      */
     public function caseExpr($operand = null)
     {
-        $q = $this->dsql([
+        $q = $this->clone([
             'template' => '[case]'
         ]);
 

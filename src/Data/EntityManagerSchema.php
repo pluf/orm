@@ -1,22 +1,22 @@
 <?php
 namespace Pluf\Data;
 
-use Pluf\Options;
+use Pluf\Exception;
 use Pluf\Utils;
 use Pluf\Db\Connection;
 use Pluf\Db\Expression;
-use Pluf\Exception;
+use Pluf\Db\Query;
+use ReflectionClass;
+use ReflectionProperty;
+use Pluf\Data\Attribute\Table;
 
 /**
  * Create the schema of a given Pluf_Model for a given database.
  *
  * @author maso
- * @deprecated removed from pluf/orm
  */
-abstract class Schema
+abstract class EntityManagerSchema
 {
-
-    use \Pluf\DiContainerTrait;
 
     public const LEFT_JOIN = 'left';
 
@@ -97,80 +97,80 @@ abstract class Schema
          * Old model
          */
         self::BOOLEAN => array(
-            '\Pluf\Data\Schema::booleanFromDb',
-            '\Pluf\Data\Schema::booleanToDb'
+            '\Pluf\Data\EntityManagerSchema::booleanFromDb',
+            '\Pluf\Data\EntityManagerSchema::booleanToDb'
         ),
         self::DATE => array(
-            '\Pluf\Data\Schema::identityFromDb',
-            '\Pluf\Data\Schema::identityToDb'
+            '\Pluf\Data\EntityManagerSchema::identityFromDb',
+            '\Pluf\Data\EntityManagerSchema::identityToDb'
         ),
         self::DATETIME => array(
-            '\Pluf\Data\Schema::identityFromDb',
-            '\Pluf\Data\Schema::identityToDb'
+            '\Pluf\Data\EntityManagerSchema::identityFromDb',
+            '\Pluf\Data\EntityManagerSchema::identityToDb'
         ),
         self::EMAIL => array(
-            '\Pluf\Data\Schema::identityFromDb',
-            '\Pluf\Data\Schema::identityToDb'
+            '\Pluf\Data\EntityManagerSchema::identityFromDb',
+            '\Pluf\Data\EntityManagerSchema::identityToDb'
         ),
         self::FILE => array(
-            '\Pluf\Data\Schema::identityFromDb',
-            '\Pluf\Data\Schema::identityToDb'
+            '\Pluf\Data\EntityManagerSchema::identityFromDb',
+            '\Pluf\Data\EntityManagerSchema::identityToDb'
         ),
         self::FLOAT => array(
-            '\Pluf\Data\Schema::floatFromDb',
-            '\Pluf\Data\Schema::floatToDb'
+            '\Pluf\Data\EntityManagerSchema::floatFromDb',
+            '\Pluf\Data\EntityManagerSchema::floatToDb'
         ),
         self::MANY_TO_ONE => array(
-            '\Pluf\Data\Schema::sequenceFromDb',
-            '\Pluf\Data\Schema::sequenceToDb'
+            '\Pluf\Data\EntityManagerSchema::sequenceFromDb',
+            '\Pluf\Data\EntityManagerSchema::sequenceToDb'
         ),
         self::FOREIGNKEY => array(
-            '\Pluf\Data\Schema::sequenceFromDb',
-            '\Pluf\Data\Schema::sequenceToDb'
+            '\Pluf\Data\EntityManagerSchema::sequenceFromDb',
+            '\Pluf\Data\EntityManagerSchema::sequenceToDb'
         ),
         self::INTEGER => array(
-            '\Pluf\Data\Schema::integerFromDb',
-            '\Pluf\Data\Schema::integerToDb'
+            '\Pluf\Data\EntityManagerSchema::integerFromDb',
+            '\Pluf\Data\EntityManagerSchema::integerToDb'
         ),
         self::PASSWORD => array(
-            '\Pluf\Data\Schema::identityFromDb',
-            '\Pluf\Data\Schema::passwordToDb'
+            '\Pluf\Data\EntityManagerSchema::identityFromDb',
+            '\Pluf\Data\EntityManagerSchema::passwordToDb'
         ),
         self::SEQUENCE => array(
-            '\Pluf\Data\Schema::sequenceFromDb',
-            '\Pluf\Data\Schema::sequenceToDb'
+            '\Pluf\Data\EntityManagerSchema::sequenceFromDb',
+            '\Pluf\Data\EntityManagerSchema::sequenceToDb'
         ),
         self::SLUG => array(
-            '\Pluf\Data\Schema::identityFromDb',
-            '\Pluf\Data\Schema::slugToDb'
+            '\Pluf\Data\EntityManagerSchema::identityFromDb',
+            '\Pluf\Data\EntityManagerSchema::slugToDb'
         ),
         self::TEXT => array(
-            '\Pluf\Data\Schema::identityFromDb',
-            '\Pluf\Data\Schema::identityToDb'
+            '\Pluf\Data\EntityManagerSchema::identityFromDb',
+            '\Pluf\Data\EntityManagerSchema::identityToDb'
         ),
         self::VARCHAR => array(
-            '\Pluf\Data\Schema::identityFromDb',
-            '\Pluf\Data\Schema::identityToDb'
+            '\Pluf\Data\EntityManagerSchema::identityFromDb',
+            '\Pluf\Data\EntityManagerSchema::identityToDb'
         ),
         self::SERIALIZED => array(
-            '\Pluf\Data\Schema::serializedFromDb',
-            '\Pluf\Data\Schema::serializedToDb'
+            '\Pluf\Data\EntityManagerSchema::serializedFromDb',
+            '\Pluf\Data\EntityManagerSchema::serializedToDb'
         ),
         self::COMPRESSED => array(
-            '\Pluf\Data\Schema::compressedFromDb',
-            '\Pluf\Data\Schema::compressedToDb'
+            '\Pluf\Data\EntityManagerSchema::compressedFromDb',
+            '\Pluf\Data\EntityManagerSchema::compressedToDb'
         ),
         self::GEOMETRY => array(
-            '\Pluf\Data\Schema::geometryFromDb',
-            '\Pluf\Data\Schema::geometryToDb'
+            '\Pluf\Data\EntityManagerSchema::geometryFromDb',
+            '\Pluf\Data\EntityManagerSchema::geometryToDb'
         )
     );
 
-    protected string $prefix = '';
+    public string $prefix = '';
 
-    function __construct(?Options $options = null)
+    function __construct(string $prefix = '')
     {
-        $this->setDefaults($options);
+        $this->prefix = $prefix;
     }
 
     /**
@@ -182,116 +182,109 @@ abstract class Schema
         return $this->prefix;
     }
 
-    /**
-     *
-     * @param string $prefix
-     */
-    public function setPrefix($prefix)
-    {
-        $this->prefix = $prefix;
-    }
-    
-    
-    //---------------------------------------------------------------------------------------------
-    // Builder
-    //---------------------------------------------------------------------------------------------
-    
-    /**
-     * Creates new instance of the schema
-     *
-     * @param Options $options
-     * @throws Exception
-     * @return Schema
-     */
-    public static function getInstance($options = []): Schema
-    {
-        if (is_array($options)) {
-            $options = new Options($options);
-        }
-        
-        $type = $options->engine;
-        if (! isset($type)) {
-            $type = 'sqlite';
-        }
-        switch ($type) {
-            case 'mysql':
-                $engine = new Schema\MySQLSchema($options->startsWith('mysql_', true));
-                break;
-            case 'sqlite':
-                $engine = new Schema\SQLiteSchema($options->startsWith('sqlite_', true));
-                break;
-            default:
-                throw new Exception('Engine type "{{type}}" is not supported with Pluf Data Schema.', params:["type" => $type]);
-        }
-        return $engine;
-    }
-    /*
-     * -----------------------------------------------------------------
-     * Depricated
-     * -----------------------------------------------------------------
-     */
-    public abstract function qn(string $name): string;
-    
-    
     // XXX: maso, 2020: check if this is usefull anymoer
-    public function skipeName(String $name): String
+    protected function skipeName(String $name): String
     {
         $name = str_replace('\\', '_', $name);
         return $name;
     }
-    
-    //---------------------------------------------------------------------------------------------
-    // Data validation
-    // Object Mapper
-    //---------------------------------------------------------------------------------------------
+
     /**
-     * Creates new model and fill with data
+     * Converts a data value into valid DB value
      *
-     * @param ModelDescription $md
-     * @param mixed $data
+     * @param ModelProperty $property
+     * @param mixed $value
      * @return mixed
      */
-    public function newInstance(ModelDescription $md, $data)
+    public function toDb(ReflectionProperty $property, $value)
     {
-        $model = $md->newInstance();
-        return $this->fillModel($md, $model, $data);
+        $map = $this->type_cast[$property->type];
+        return call_user_func_array($map[1], [
+            $value,
+            $property
+        ]);
     }
-    
+
     /**
-     * Fills the model with data from DB
+     * Converts a DB value into a valid data value
      *
-     * @param ModelDescription $md
-     * @param mixed $model
+     * @param ModelProperty $property
+     * @param mixed $value
+     * @return mixed
      */
-    public function fillModel(ModelDescription $md, $model, $data)
+    public function fromDb(ReflectionProperty $property, $value)
     {
-        foreach ($md as $property) {
-            if ($property->type == self::MANY_TO_MANY) {
-                continue;
-            }
-            if ($property->type == self::ONE_TO_MANY) {
-                continue;
-            }
-            $name = $property->name;
-            if (isset($data[$name])) {
-                $model->$name = $this->fromDb($property, $data[$name]);
-            }
-        }
-        return $model;
+        $map = $this->type_cast[$property->type];
+        return call_user_func_array($map[0], [
+            $value,
+            $property
+        ]);
     }
-    //---------------------------------------------------------------------------------------------
-    //  Database
-    //---------------------------------------------------------------------------------------------
-    public abstract function createTableQueries(ModelDescription $model): array;
-    
-    public abstract function createIndexQueries(ModelDescription $model): array;
-    
-    public abstract function createConstraintQueries(ModelDescription $model): array;
-    
-    public abstract function dropConstraintQueries(ModelDescription $model): array;
-    
-    
-    
+
+    /**
+     * Generate real table name for model
+     *
+     * @param ModelDescription $modelDescription
+     *            to fetch table name for
+     * @return string real table name
+     */
+    public function getTableName(ReflectionClass $reflection): string
+    {
+        $attributeRef = $reflection->getAttributes(Table::class);
+        if (sizeof($attributeRef) > 0) {
+            // TODO: maso, 2021: support category, or profile
+            $attribute = $attributeRef[0]->newInstance();
+            $table = $attribute->getName();
+        } else {
+            $table = "notset";
+        }
+        if (! empty($this->prefix)) {
+            $table = $this->prefix . $table;
+        }
+        return $table;
+    }
+
+    /**
+     * Fetchs joine table for Many To Many relations
+     *
+     * @param ModelDescription $smd
+     * @param ModelDescription $tmd
+     * @param ModelProperty $relation
+     * @throws Exception
+     * @return string
+     */
+    public function getRelationTableName(ReflectionProperty $property): string
+    {
+        if ($relation->type != self::MANY_TO_MANY) {
+            throw new Exception([
+                'message' => 'The relation {name} from {srouce} is not assigned to a table.',
+                'source' => $smd->type,
+                'name' => $relation->name
+            ]);
+        }
+
+        // // joineModel
+        // $joineModel = $relation->inverseJoinModel;
+        // if (isset($joineModel)) {
+        // $joineModelDescription = ModelDescription::getInstance($joineModel);
+        // return $this->getTableName($joineModelDescription);
+        // }
+
+        // joineTable
+        $joineTable = $relation->joinTable;
+        if (isset($joineTable)) {
+            return $this->prefix . $joineTable;
+        }
+
+        // crate default table name
+        $hay = array(
+            strtolower($smd->type),
+            strtolower($tmd->type)
+        );
+        sort($hay);
+        return self::skipeName($this->prefix . $hay[0] . '_' . $hay[1] . '_assoc');
+    }
+
     /**
      * Create the tables and indexes for the current model.
      *
@@ -305,7 +298,7 @@ abstract class Schema
      *
      * @return mixed True if success or database error.
      */
-    public function createTables(Connection $connection, ModelDescription $model): bool
+    public function createTables(Connection $connection, string $type): bool
     {
         $sql = $this->createTableQueries($model);
         // Note: hadi, 2019: If model is a mapped model, its table is created or will be created by a none mapped model.
@@ -316,11 +309,11 @@ abstract class Schema
                 $modelTableName => ''
             ));
         }
-        
+
         foreach ($sql as $query) {
             $connection->expr($query)->execute();
         }
-        
+
         if (! $model->isMapped()) {
             $sql = $this->createIndexQueries($model);
             foreach ($sql as $query) {
@@ -362,48 +355,18 @@ abstract class Schema
             ->execute();
         return true;
     }
-    
-    /**
-     * Fetchs joine table for Many To Many relations
-     *
-     * @param ModelDescription $smd
-     * @param ModelDescription $tmd
-     * @param ModelProperty $relation
-     * @throws Exception
-     * @return string
-     */
-    public function getRelationTable(ModelDescription $smd, ModelDescription $tmd, ModelProperty $relation): string
-    {
-        if ($relation->type != self::MANY_TO_MANY) {
-            throw new Exception([
-                'message' => 'The relation {name} from {srouce} is not assigned to a table.',
-                'source' => $smd->type,
-                'name' => $relation->name
-            ]);
-        }
-        
-        // // joineModel
-        // $joineModel = $relation->inverseJoinModel;
-        // if (isset($joineModel)) {
-        // $joineModelDescription = ModelDescription::getInstance($joineModel);
-        // return $this->getTableName($joineModelDescription);
-        // }
-        
-        // joineTable
-        $joineTable = $relation->joinTable;
-        if (isset($joineTable)) {
-            return $this->prefix . $joineTable;
-        }
-        
-        // crate default table name
-        $hay = array(
-            strtolower($smd->type),
-            strtolower($tmd->type)
-        );
-        sort($hay);
-        return self::skipeName($this->prefix . $hay[0] . '_' . $hay[1] . '_assoc');
-    }
-    
+
+    // ---------------------------------------------------------------------------------------------
+    // Database
+    // ---------------------------------------------------------------------------------------------
+    public abstract function createTableQueries(ModelDescription $model): array;
+
+    public abstract function createIndexQueries(ModelDescription $model): array;
+
+    public abstract function createConstraintQueries(ModelDescription $model): array;
+
+    public abstract function dropConstraintQueries(ModelDescription $model): array;
+
     /**
      * Gets source relation columne name
      *
@@ -426,7 +389,7 @@ abstract class Schema
         }
         return $name;
     }
-    
+
     /**
      * Gets target relation columne name
      *
@@ -449,26 +412,14 @@ abstract class Schema
         }
         return $name;
     }
-    
+
     public function getAssocField(ModelDescription $model, ?string $relationName = null): String
     {
         $name = self::skipeName(strtolower($model->model) . '_id');
         $name = $this->qn($name);
         return $name;
     }
-    
-    /**
-     * Generate real table name for model
-     *
-     * @param ModelDescription $modelDescription
-     *            to fetch table name for
-     * @return string real table name
-     */
-    public function getTableName(ModelDescription $modelDescription): string
-    {
-        return str_replace('\\', '_', $this->prefix . $modelDescription->table);
-    }
-    
+
     /**
      * Gets attributes to put into the DB
      *
@@ -493,7 +444,7 @@ abstract class Schema
         }
         return $field;
     }
-    
+
     /**
      * Get db field name for the $name attribute of the model
      *
@@ -513,7 +464,7 @@ abstract class Schema
         $name = $names[1];
         return $names[0] . '.' . $this->getFieldName($md, $md->$name, false);
     }
-    
+
     /**
      * Convert property name to DB name
      *
@@ -533,7 +484,7 @@ abstract class Schema
         }
         return $name;
     }
-    
+
     /**
      * Converts $view fields into valid DB fields
      *
@@ -553,10 +504,10 @@ abstract class Schema
                 $fields[$name] = $field;
                 continue;
             }
-            
+
             // extract alias
             $names = explode('.', $field);
-            
+
             // get model description
             $cmd = $md;
             if (count($names) > 1) {
@@ -580,7 +531,7 @@ abstract class Schema
         }
         return $fields;
     }
-    
+
     /**
      * Converts data join in $view to DB join
      *
@@ -605,7 +556,7 @@ abstract class Schema
             if (isset($join['alias'])) {
                 $alias = $join['alias'];
             }
-            
+
             /*
              * Native joing
              *
@@ -623,7 +574,7 @@ abstract class Schema
                 ];
                 continue;
             }
-            
+
             /*
              * Data Join
              */
@@ -637,7 +588,7 @@ abstract class Schema
             $joinProperty = $joinModel->$jproName;
             $inverseJoinModel = null;
             $inverseJoinProperty = null;
-            
+
             /*
              * Fetch data from model
              */
@@ -662,97 +613,97 @@ abstract class Schema
                     $inverseJoinProperty = $inverseJoinModel->$inverseJoinPropertyName;
                     break;
             }
-            
+
             $dbJoins = $this->createDbJoin($joinModel, $joinProperty, $inverseJoinModel, $inverseJoinProperty, $type, $alias);
             $joins = array_merge($joins, $dbJoins);
         }
         return $joins;
     }
-    
+
     private function createDbJoin(ModelDescription $joinModel, ModelProperty $joinProperty, //
-        ModelDescription $inverseJoinModel, ModelProperty $inverseJoinProperty, //
-        string $type, ?string $alias = ''): array
-        {
-            $joins = [];
-            
-            /*
-             * Fetch data from model
-             */
-            switch ($joinProperty->type) {
-                case self::MANY_TO_MANY:
-                    // First
-                    $rtable = $this->getRelationTable($joinModel, $inverseJoinModel, $joinProperty);
-                    
-                    $propertyName = $joinProperty->joinProperty;
+    ModelDescription $inverseJoinModel, ModelProperty $inverseJoinProperty, //
+    string $type, ?string $alias = ''): array
+    {
+        $joins = [];
+
+        /*
+         * Fetch data from model
+         */
+        switch ($joinProperty->type) {
+            case self::MANY_TO_MANY:
+                // First
+                $rtable = $this->getRelationTable($joinModel, $inverseJoinModel, $joinProperty);
+
+                $propertyName = $joinProperty->joinProperty;
+                if (! isset($propertyName)) {
+                    $propertyName = 'id';
+                }
+                $joinProperty = $joinModel->$propertyName;
+
+                $joins[] = [
+                    $rtable . '.' . $this->getRelationSourceField($joinModel, $inverseJoinModel, $joinProperty),
+                    $this->getFieldName($joinModel, $joinProperty, true),
+                    $type
+                ];
+
+                // second
+                $ttableField = $this->getRelationTargetField($joinModel, $inverseJoinModel, $joinProperty);
+                $joins[] = [
+                    $rtable . '.' . $ttableField . ' ' . $alias,
+                    $this->getFieldName($inverseJoinModel, $inverseJoinProperty, true),
+                    $type
+                ];
+                break;
+            case self::ONE_TO_MANY:
+                $ftable = $this->getFieldName($inverseJoinModel, $inverseJoinProperty, true);
+                if (isset($alias)) {
+                    $ftable .= ' ' . $alias;
+                }
+                // get real property
+                $propertyName = $joinProperty->joinProperty;
+                if (! isset($propertyName)) {
+                    $propertyName = 'id';
+                }
+                $rjp = $joinModel->$propertyName;
+                $joins[] = [
+                    $ftable,
+                    $this->getFieldName($joinModel, $rjp),
+                    $type
+                ];
+                break;
+            case self::MANY_TO_ONE:
+                if ($inverseJoinProperty->type == self::ONE_TO_MANY) {
+                    $propertyName = $inverseJoinModel->joinProperty;
                     if (! isset($propertyName)) {
                         $propertyName = 'id';
                     }
-                    $joinProperty = $joinModel->$propertyName;
-                    
-                    $joins[] = [
-                        $rtable . '.' . $this->getRelationSourceField($joinModel, $inverseJoinModel, $joinProperty),
-                        $this->getFieldName($joinModel, $joinProperty, true),
-                        $type
-                    ];
-                    
-                    // second
-                    $ttableField = $this->getRelationTargetField($joinModel, $inverseJoinModel, $joinProperty);
-                    $joins[] = [
-                        $rtable . '.' . $ttableField . ' ' . $alias,
-                        $this->getFieldName($inverseJoinModel, $inverseJoinProperty, true),
-                        $type
-                    ];
-                    break;
-                case self::ONE_TO_MANY:
-                    $ftable = $this->getFieldName($inverseJoinModel, $inverseJoinProperty, true);
-                    if (isset($alias)) {
-                        $ftable .= ' ' . $alias;
-                    }
-                    // get real property
-                    $propertyName = $joinProperty->joinProperty;
-                    if (! isset($propertyName)) {
-                        $propertyName = 'id';
-                    }
-                    $rjp = $joinModel->$propertyName;
-                    $joins[] = [
-                        $ftable,
-                        $this->getFieldName($joinModel, $rjp),
-                        $type
-                    ];
-                    break;
-                case self::MANY_TO_ONE:
-                    if ($inverseJoinProperty->type == self::ONE_TO_MANY) {
-                        $propertyName = $inverseJoinModel->joinProperty;
-                        if (! isset($propertyName)) {
-                            $propertyName = 'id';
-                        }
-                        $inverseJoinProperty = $inverseJoinModel->$propertyName;
-                    }
-                    $ftable = $this->getFieldName($inverseJoinModel, $inverseJoinProperty, true);
-                    if (isset($alias)) {
-                        $ftable .= ' ' . $alias;
-                    }
-                    $joins[] = [
-                        $ftable,
-                        $this->getFieldName($joinModel, $joinProperty),
-                        $type
-                    ];
-                    break;
-                default:
-                    $ftable = $this->getFieldName($inverseJoinModel, $inverseJoinProperty, true);
-                    if (isset($alias)) {
-                        $ftable .= ' ' . $alias;
-                    }
-                    $joins[] = [
-                        $ftable,
-                        $this->getFieldName($joinModel, $joinProperty),
-                        $type
-                    ];
-                    break;
-            }
-            return $joins;
+                    $inverseJoinProperty = $inverseJoinModel->$propertyName;
+                }
+                $ftable = $this->getFieldName($inverseJoinModel, $inverseJoinProperty, true);
+                if (isset($alias)) {
+                    $ftable .= ' ' . $alias;
+                }
+                $joins[] = [
+                    $ftable,
+                    $this->getFieldName($joinModel, $joinProperty),
+                    $type
+                ];
+                break;
+            default:
+                $ftable = $this->getFieldName($inverseJoinModel, $inverseJoinProperty, true);
+                if (isset($alias)) {
+                    $ftable .= ' ' . $alias;
+                }
+                $joins[] = [
+                    $ftable,
+                    $this->getFieldName($joinModel, $joinProperty),
+                    $type
+                ];
+                break;
+        }
+        return $joins;
     }
-    
+
     /**
      * Converts filters form Data view into DB filter
      *
@@ -767,7 +718,7 @@ abstract class Schema
         }
         return $this->convertViewDataFilters($md, $view, $view['filter']);
     }
-    
+
     public function getViewHaving(ModelDescription $md, $view)
     {
         if (! isset($view['having'])) {
@@ -775,7 +726,7 @@ abstract class Schema
         }
         return $this->convertViewDataFilters($md, $view, $view['having']);
     }
-    
+
     public function getViewGroupBy(ModelDescription $md, $view)
     {
         if (! isset($view['group'])) {
@@ -787,9 +738,9 @@ abstract class Schema
                 $groups[] = $group;
                 continue;
             }
-            
+
             $names = explode('.', $group);
-            
+
             // get model description
             $cmd = $md;
             if (count($names) > 1) {
@@ -816,7 +767,7 @@ abstract class Schema
         }
         return $groups;
     }
-    
+
     /**
      * Gets model values to put into the DB
      *
@@ -842,7 +793,7 @@ abstract class Schema
         }
         return $values;
     }
-    
+
     /**
      * Converts Data filter from query into DB filter
      *
@@ -854,13 +805,13 @@ abstract class Schema
     {
         return $this->convertDataFilters($md, $query->getFilter());
     }
-    
+
     /**
      * Retrieve key relationships of a given model.
      *
      * @param string $model
      * @param string $type
-     *            Relation Schema::MANY_TO_ONE or Schema::MANY_TO_MANY
+     *            Relation EntityManagerSchema::MANY_TO_ONE or EntityManagerSchema::MANY_TO_MANY
      * @return array Key relationships.
      */
     public function getRelationKeysTo(ModelDescription $from, ModelDescription $to, $type)
@@ -873,8 +824,7 @@ abstract class Schema
         }
         return $properies;
     }
-    
-    
+
     private function convertViewDataFilters(ModelDescription $md, $view, $dataFilter)
     {
         $filters = [];
@@ -899,7 +849,7 @@ abstract class Schema
         }
         return $filters;
     }
-    
+
     /*
      * converts list of data filter
      */
@@ -927,7 +877,7 @@ abstract class Schema
         }
         return $filters;
     }
-    
+
     /*
      * converts a filter to db filter
      *
@@ -938,7 +888,7 @@ abstract class Schema
         if ($filter instanceof Expression) {
             return $filter;
         }
-        
+
         $dfilter = [];
         $names = explode('.', $filter[0]);
         if (count($names) == 1) {
@@ -950,14 +900,14 @@ abstract class Schema
             $property = $md->$name;
             $dfilter[] = $names[0] . '.' . $this->getFieldName($md, $property, false);
         }
-        
+
         if (count($filter) == 2) {
             $value = $filter[1];
         } else {
             $value = $filter[2];
             $dfilter[] = $filter[1]; // operation = > < in , ..
         }
-        
+
         if ($value instanceof Expression) {
             $dfilter[] = $value;
         } else {
@@ -965,7 +915,7 @@ abstract class Schema
         }
         return $dfilter;
     }
-    
+
     /*
      * converts a filter to db filter
      *
@@ -976,7 +926,7 @@ abstract class Schema
         if ($filter instanceof Expression) {
             return $filter;
         }
-        
+
         $dfilter = [];
         $names = explode('.', $filter[0]);
         if (count($names) == 1) {
@@ -1009,14 +959,14 @@ abstract class Schema
             $property = $cmd->$name;
             $dfilter[] = $names[0] . '.' . $this->getFieldName($cmd, $property, false);
         }
-        
+
         if (count($filter) == 2) {
             $value = $filter[1];
         } else {
             $value = $filter[2];
             $dfilter[] = $filter[1]; // operation = > < in , ..
         }
-        
+
         if ($value instanceof Expression) {
             $dfilter[] = $value;
         } else {
@@ -1024,45 +974,13 @@ abstract class Schema
         }
         return $dfilter;
     }
-    
-    
-    //---------------------------------------------------------------------------------------------
-    //  Transform
+
+    // ---------------------------------------------------------------------------------------------
+    // Transform
     //
     // A common function to convert data from to DB
-    //---------------------------------------------------------------------------------------------
-    /**
-     * Converts a data value into valid DB value
-     *
-     * @param ModelProperty $property
-     * @param mixed $value
-     * @return mixed
-     */
-    public function toDb(ModelProperty $property, $value)
-    {
-        $map = $this->type_cast[$property->type];
-        return call_user_func_array($map[1], [
-            $value,
-            $property
-        ]);
-    }
-    
-    /**
-     * Converts a DB value into a valid data value
-     *
-     * @param ModelProperty $property
-     * @param mixed $value
-     * @return mixed
-     */
-    public function fromDb(ModelProperty $property, $value)
-    {
-        $map = $this->type_cast[$property->type];
-        return call_user_func_array($map[0], [
-            $value,
-            $property
-        ]);
-    }
-    
+    // ---------------------------------------------------------------------------------------------
+
     /**
      * Identity function.
      *
@@ -1074,7 +992,7 @@ abstract class Schema
     {
         return $val;
     }
-    
+
     /**
      * Identity function.
      *
@@ -1091,7 +1009,7 @@ abstract class Schema
         }
         return $val;
     }
-    
+
     public static function serializedFromDb($val)
     {
         if ($val) {
@@ -1099,7 +1017,7 @@ abstract class Schema
         }
         return $val;
     }
-    
+
     public static function serializedToDb($val)
     {
         if (null === $val) {
@@ -1107,17 +1025,17 @@ abstract class Schema
         }
         return serialize($val);
     }
-    
+
     public static function compressedFromDb($val)
     {
         return ($val) ? gzinflate($val) : $val;
     }
-    
+
     public static function compressedToDb($val)
     {
         return (null === $val) ? null : gzdeflate($val, 9);
     }
-    
+
     public static function booleanFromDb($val)
     {
         if ($val) {
@@ -1125,7 +1043,7 @@ abstract class Schema
         }
         return false;
     }
-    
+
     public static function booleanToDb($val)
     {
         if (null === $val) {
@@ -1136,54 +1054,43 @@ abstract class Schema
         }
         return '0';
     }
-    
-    public static function sequenceFromDb($val, ModelProperty $property)
+
+    public static function sequenceFromDb($val)
     {
         return $val;
     }
-    
-    public static function sequenceToDb($val, ModelProperty $property)
+
+    public static function sequenceToDb($val)
     {
         if (! isset($val)) {
             return null;
         }
-        switch ($property->type) {
-            case self::SEQUENCE:
-            case self::MANY_TO_ONE:
-            case self::FOREIGNKEY:
-                // if ($val instanceof Model) {
-                // return $val->id;
-                // }
-                if (is_numeric($val)) {
-                    return $val;
-                }
-            default:
-                throw new Exception([
-                'message' => 'Property value is not convertable to db'
-                    ]);
+        if (is_numeric($val)) {
+            return $val;
         }
+        throw new Exception('Property value is not convertable to db');
     }
-    
+
     public static function integerFromDb($val)
     {
         return (null === $val) ? null : (int) $val;
     }
-    
+
     public static function integerToDb($val)
     {
         return (null === $val) ? null : (string) (int) $val;
     }
-    
+
     public static function floatFromDb($val)
     {
         return (null === $val) ? null : (float) $val;
     }
-    
+
     public static function floatToDb($val)
     {
         return (null === $val) ? null : (string) (float) $val;
     }
-    
+
     public static function passwordToDb($val)
     {
         $exp = explode(':', $val);
@@ -1198,12 +1105,12 @@ abstract class Schema
         $salt = Utils::getRandomString(5);
         return 'sha1:' . $salt . ':' . sha1($salt . $val);
     }
-    
+
     public static function slugFromDB($val)
     {
         return $val;
     }
-    
+
     public static function slugToDB($val)
     {
         return $val;

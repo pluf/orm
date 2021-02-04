@@ -1,13 +1,14 @@
 <?php
-namespace Pluf\Data\Schema;
+namespace Pluf\Data\EntityManager;
 
 use Pluf\Options;
+use Pluf\Data\EntityManagerSchema;
 use Pluf\Data\ModelDescription;
 use Pluf\Db\Expression;
 use WKT;
 use geoPHP;
 
-class MySQLSchema extends \Pluf\Data\Schema
+class EntityManagerSchemaMySQL extends EntityManagerSchema
 {
 
     /**
@@ -64,12 +65,9 @@ class MySQLSchema extends \Pluf\Data\Schema
      *
      * @param Options $options
      */
-    public function __construct($options = null)
+    public function __construct(string $prefix = '')
     {
-        if (is_array($options)) {
-            $options = new Options($options);
-        }
-        parent::__construct($options);
+        parent::__construct($prefix);
     }
 
     /**
