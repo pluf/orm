@@ -18,8 +18,16 @@
  */
 namespace Pluf\Data\Attribute;
 
-#[Attribute]
+use Attribute;
+
+/**
+ * Specifies that the class is a supper class of an entity.
+ *
+ * This annotation is applied to the entity class.
+ */
+#[Attribute(Attribute::TARGET_CLASS)]
 class MappedSuperclass
 {
+    // TODO: maso, 2021: to support mapped supper class
 }
 

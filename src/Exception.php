@@ -130,7 +130,7 @@ class Exception extends RuntimeException implements JsonSerializable
             'stack' => $this->getTrace()
         ];
     }
-
+    
     /**
      *
      * {@inheritdoc}

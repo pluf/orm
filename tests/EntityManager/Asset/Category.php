@@ -6,17 +6,14 @@ use Pluf\Data\Attribute\Entity;
 use Pluf\Data\Attribute\Id;
 use Pluf\Data\Attribute\Column;
 
-#[Entity]
-#[Table('test_books')]
-class Book
+#[Entity('TestCategory')]
+class Category
 {
+    
     #[Id]
-    #[Column("id")]
     public ?string $id = null;
     
-    #[Column("title")]
     public ?string $title = null;
     
-    public int $pages = 0;
 }
 

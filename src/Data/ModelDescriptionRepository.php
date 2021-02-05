@@ -18,30 +18,26 @@
  */
 namespace Pluf\Data;
 
+use Pluf\Exception;
+
 class ModelDescriptionRepository
 {
 
-    private array $loaders = [];
 
-    public function __construct(array $loaders = [])
-    {
-        $this->loaders = $loaders;
-    }
+    public function __construct(
+        private array $loaders = []
+    ){}
 
-    public function getModelDescription(string $class): ModelDescription
+    public function get(string $class): ModelDescription
     {
         // TODO: Check if it exist in cache
         foreach ($this->loaders as $loader) {
-            $md = $loader->loadModelDescription($class);
-            if (isset($md)) {
-                break;
+            $md = $loader->get($class);
+            if (! empty($md)) {
+                return $md;
             }
         }
-        if(!isset($md)){
-            throw new \Exception('Model description not found');
-        }
-        // TODO: maso, 2020: put in cache
-        return $md;
+        throw new Exception('Model description not found for {{class}}', params:['class' => $class]);
     }
 }
 

@@ -114,11 +114,12 @@ class Expression implements \ArrayAccess, \IteratorAggregate, ResultSet
                 'template' => $properties
             ];
         } elseif (! is_array($properties)) {
-            throw new Exception([
+            throw new Exception(
                 'Incorrect use of Expression constructor',
-                'properties' => $properties,
-                'arguments' => $arguments
-            ]);
+                params: [
+                    'properties' => $properties,
+                    'arguments' => $arguments
+                ]);
         }
 
         // supports passing template as property value without key 'template'
@@ -130,11 +131,12 @@ class Expression implements \ArrayAccess, \IteratorAggregate, ResultSet
         // save arguments
         if ($arguments !== null) {
             if (! is_array($arguments)) {
-                throw new Exception([
+                throw new Exception(
                     'Expression arguments must be an array',
-                    'properties' => $properties,
-                    'arguments' => $arguments
-                ]);
+                    params: [
+                        'properties' => $properties,
+                        'arguments' => $arguments
+                    ]);
             }
             $this->args['custom'] = $arguments;
         }
@@ -263,10 +265,11 @@ class Expression implements \ArrayAccess, \IteratorAggregate, ResultSet
         }
 
         if (! is_string($tag)) {
-            throw new Exception([
+            throw new Exception(
                 'Tag should be string',
-                'tag' => $tag
-            ]);
+                params: [
+                    'tag' => $tag
+                ]);
         }
 
         // unset custom/argument or argument if such exists
@@ -303,10 +306,11 @@ class Expression implements \ArrayAccess, \IteratorAggregate, ResultSet
                     return $sql_code;
             }
 
-            throw new Exception([
+            throw new Exception(
                 '$escape_mode value is incorrect',
-                'escape_mode' => $escape_mode
-            ]);
+                params: [
+                    'escape_mode' => $escape_mode
+                ]);
         }
 
         // User may add Expressionable trait to any class, then pass it's objects
@@ -315,10 +319,11 @@ class Expression implements \ArrayAccess, \IteratorAggregate, ResultSet
         }
 
         if (! $sql_code instanceof self) {
-            throw new Exception([
+            throw new Exception(
                 'Only Expressions or Expressionable objects may be used in Expression',
-                'object' => $sql_code
-            ]);
+                params: [
+                    'object' => $sql_code
+                ]);
         }
 
         // at this point $sql_code is instance of Expression
@@ -497,10 +502,11 @@ class Expression implements \ArrayAccess, \IteratorAggregate, ResultSet
                 } elseif (method_exists($this, $fx)) {
                     $value = $this->$fx();
                 } else {
-                    throw new Exception([
-                        'Expression could not render tag',
-                        'tag' => $identifier
-                    ]);
+                    throw new Exception(
+                        'Expression could not render tag: {{tag}}',
+                        params: [
+                            'tag' => $identifier
+                        ]);
                 }
 
                 return is_array($value) ? '(' . implode(',', $value) . ')' : $value;
@@ -594,11 +600,12 @@ class Expression implements \ArrayAccess, \IteratorAggregate, ResultSet
             try {
                 $statement = $connection->prepare($query);
             } catch (\Exception $e) {
-                $new = new Exception([
-                    'Pluf got Exception when preparing this {query}',
-                    'error' => $e->getMessage(),
-                    'query' => $this->getDebugQuery()
-                ]);
+                $new = new Exception(
+                    'Pluf got Exception when preparing this {{query}}. {{error}}',
+                    params: [
+                        'error' => $e->getMessage(),
+                        'query' => $this->getDebugQuery()
+                    ]);
                 $new->by_exception = $e;
                 throw $new;
             }
@@ -616,12 +623,13 @@ class Expression implements \ArrayAccess, \IteratorAggregate, ResultSet
                 } elseif (is_resource($val)) {
                     $type = \PDO::PARAM_LOB;
                 } else {
-                    throw new Exception([
+                    throw new Exception(
                         'Incorrect param type',
-                        'key' => $key,
-                        'value' => $val,
-                        'type' => gettype($val)
-                    ]);
+                        params: [
+                            'key' => $key,
+                            'value' => $val,
+                            'type' => gettype($val)
+                        ]);
                 }
 
                 // Workaround to support LOB data type. See https://github.com/doctrine/dbal/pull/2434
@@ -633,12 +641,13 @@ class Expression implements \ArrayAccess, \IteratorAggregate, ResultSet
                 }
 
                 if (! $bind) {
-                    throw new Exception([
+                    throw new Exception(
                         'Unable to bind parameter',
-                        'param' => $key,
-                        'value' => $val,
-                        'type' => $type
-                    ]);
+                        params: [
+                            'param' => $key,
+                            'value' => $val,
+                            'type' => $type
+                        ]);
                 }
             }
 
@@ -647,11 +656,12 @@ class Expression implements \ArrayAccess, \IteratorAggregate, ResultSet
             try {
                 $statement->execute();
             } catch (\Exception $e) {
-                $new = new Exception([
+                $new = new Exception(
                     'Pluf got Exception when executing this query',
-                    'error' => $e->getMessage(),
-                    'query' => $this->getDebugQuery()
-                ]);
+                    params: [
+                        'error' => $e->getMessage(),
+                        'query' => $this->getDebugQuery()
+                    ]);
                 $new->by_exception = $e;
                 throw $new;
             }
@@ -700,11 +710,12 @@ class Expression implements \ArrayAccess, \IteratorAggregate, ResultSet
     {
         $data = $this->getRow();
         if (! $data) {
-            throw new Exception([
+            throw new Exception(
                 'Unable to fetch single cell of data for getOne from this query',
-                'result' => $data,
-                'query' => $this->getDebugQuery()
-            ]);
+                params: [
+                    'result' => $data,
+                    'query' => $this->getDebugQuery()
+                ]);
         }
         $one = array_shift($data);
 

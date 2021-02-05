@@ -7,11 +7,10 @@ use Pluf\Data\Attribute\Id;
 use Pluf\Data\Attribute\Column;
 
 #[Entity]
-#[Table('test_book')]
+#[Table('test_publishers')]
 class Publisher
 {
     #[Id]
-    #[Column("id")]
     public ?string $id = null;
     
     #[Column("name")]

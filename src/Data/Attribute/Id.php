@@ -18,6 +18,8 @@
  */
 namespace Pluf\Data\Attribute;
 
+use Attribute;
+
 /**
  * Specifies the primary key of an entity. 
  * 

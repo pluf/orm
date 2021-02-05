@@ -18,105 +18,32 @@
  */
 namespace Pluf\Data;
 
-use Pluf\Options;
+use Pluf\Data\Attribute\Id;
+use Pluf\Data\Attribute\Column;
 
 class ModelProperty
 {
-    use \Pluf\DiContainerTrait;
-
-    public ?bool $mapped = false;
-
-    public $type = Schema::TEXT;
-
-    public string $name = 'noname';
-
-    public ?string $title = null;
-
-    public ?string $description = null;
-
-    // "unit" => null,
-    public $defaultValue;
-    // "required" => false,
-    // "visible" => false,
-    // "priority" => 0,
-
-    // public array $validators" => ['NotNull', 'MaxSize:20', 'MinSize:2'],
-    // public array $tags => [],
-    public bool $editable = false;
-
-    public bool $nullable = true;
-
-    public bool $readable = false;
-
-    public int $decimal_places = 8;
-
-    public int $max_digits = 32;
-
-    public ?int $size = 256;
-
-    public bool $unique = false;
-
-    public ?string $columne = null;
-
-    /**
-     * Relation properties
-     *
-     * These are used to define a relation property for a model
-     * {
-     */
-    public ?string $joinProperty = null;
-
-    /**
-     * Defines a model which is related to the current one
-     *
-     * @var string
-     */
-    public ?string $inverseJoinModel = null;
-
-    /**
-     * Defines the property of the related model.
-     *
-     * NOTE: property must be defined, and the inverse of the property must be current one.
-     *
-     * @var string
-     */
-    public ?string $inverseJoinProperty = null;
-
-    /**
-     * }
-     */
-
-    /**
-     * Relation DB field
-     * {
-     */
-    public ?string $joinTable = null;
-
-    public ?string $joinColumne = null;
-
-    public ?string $inverseJoinColumne = null;
-
-    /**
-     * }
-     */
+    public string $name;
+    public ?Id $id = null;
+    public ?Column $column = null;
+    
     /**
      * Creates new instance of model property
-     *
-     * @param array|Options $options
      */
-    public function __construct($options)
+    public function __construct(
+        string $name,
+        ?Id $id = null,
+        ?Column $column = null
+    )
     {
-        $this->setDefaults($options);
+        $this->name  = $name;
+        $this->id = $id;
+        $this->column = $column;
     }
 
-    /**
-     * Checks if the property is mapped one.
-     *
-     * @return bool true if the property is mapped.
-     */
-    public function isMapped(): bool
+    public function isId(): bool
     {
-        return isset($this->mapped) && $this->mapped;
+        return ! empty($this->id);
     }
 }
 

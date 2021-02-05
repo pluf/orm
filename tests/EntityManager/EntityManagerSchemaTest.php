@@ -18,28 +18,28 @@ class EntityManagerSchemaTest extends TestCase
                     ->setPrefix('')
                     ->build(),
                 Asset\Book::class,
-                'test_book'
+                'test_books'
             ],
             [
                 $builder->setType('sqlite')
                     ->setPrefix('myapp_')
                     ->build(),
                 Asset\Book::class,
-                'myapp_test_book'
+                'myapp_test_books'
             ],
             [
                 $builder->setType('mysql')
                     ->setPrefix('')
                     ->build(),
                 Asset\Book::class,
-                'test_book'
+                'test_books'
             ],
             [
                 $builder->setType('mysql')
                     ->setPrefix('myapp_')
                     ->build(),
                 Asset\Book::class,
-                'myapp_test_book'
+                'myapp_test_books'
             ],
             [
                 $builder->setType('mysql')
