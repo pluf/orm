@@ -1,10 +1,8 @@
 <?php
 namespace Pluf\Data\EntityManager;
 
-use Pluf\Options;
 use Pluf\Data\EntityManagerSchema;
 use Pluf\Data\ModelDescription;
-use Pluf\Db\Expression;
 use WKT;
 use geoPHP;
 
@@ -63,7 +61,6 @@ class EntityManagerSchemaMySQL extends EntityManagerSchema
     /**
      * Creates new instance of the schema
      *
-     * @param Options $options
      */
     public function __construct(string $prefix = '')
     {

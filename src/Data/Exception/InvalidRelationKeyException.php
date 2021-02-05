@@ -18,7 +18,7 @@
  */
 namespace Pluf\Data\Exception;
 
-use Pluf\Exception;
+use Pluf\Data\Exception;
 
 /**
  * Invalid Relation Key

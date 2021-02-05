@@ -1,7 +1,6 @@
 <?php
 namespace Pluf\Data\EntityManager;
 
-use Pluf\Options;
 use Pluf\Data\EntityManagerSchema;
 use Pluf\Data\ModelDescription;
 
@@ -69,7 +68,6 @@ class EntityManagerSchemaSQLite extends EntityManagerSchema
     /**
      * Creates new instance of the schema
      *
-     * @param Options $options
      */
     function __construct(string $prefix = '')
     {

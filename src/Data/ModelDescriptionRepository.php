@@ -18,7 +18,7 @@
  */
 namespace Pluf\Data;
 
-use Pluf\Exception;
+use Pluf\Data\Exception;
 
 class ModelDescriptionRepository
 {

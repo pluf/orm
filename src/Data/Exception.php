@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-namespace Pluf;
+namespace Pluf\Data;
 
 use Throwable;
 use JsonSerializable;
@@ -25,7 +25,7 @@ use RuntimeException;
 /**
  * Pluf root exception type
  *
- * All pluf application exceptions are subclass of the \Pluf\Exception. If any exeption throw
+ * All pluf application exceptions are subclass of the \Pluf\Data\Exception. If any exeption throw
  * which is not subclass of it, the framework will consider as non expected exception.
  *
  *

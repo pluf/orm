@@ -2,7 +2,7 @@
 namespace Pluf\Tests\EntityManager;
 
 use PHPUnit\Framework\TestCase;
-use Pluf\Db\Connection;
+use atk4\dsql\Connection;
 
 class EntityManagerTest extends TestCase
 {
@@ -36,13 +36,13 @@ class EntityManagerTest extends TestCase
         // ]);
         $c = self::$connection;
 
-        $res = $c->query()
+        $res = $c->dsql()
             ->table("test_authors")
             ->set('first_name', 'test')
             ->set('last_name', 'test')
             ->insert();
 
-        $res = $c->query()
+        $res = $c->dsql()
             ->table("test_authors")
             ->limit(100)
             ->select();

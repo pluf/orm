@@ -4,7 +4,7 @@ namespace Pluf\Data\ObjectValidator;
 use Pluf\Data\ObjectValidatorInterface;
 use ReflectionClass;
 use Pluf\Data\ObjectValidatorConstraint;
-use Pluf\Exception;
+use Pluf\Data\Exception;
 
 /**
  * Validate objects

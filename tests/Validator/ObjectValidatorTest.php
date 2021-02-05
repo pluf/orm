@@ -4,7 +4,7 @@ namespace Pluf\Tests\Validator;
 use PHPUnit\Framework\TestCase;
 use Pluf\Data\ObjectValidatorInterface;
 use Pluf\Data\ObjectValidatorBuilder;
-use Pluf\Exception;
+use Pluf\Data\Exception;
 
 class ObjectValidatorTest extends TestCase
 {

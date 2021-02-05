@@ -1,11 +1,10 @@
 <?php
 namespace Pluf\Data;
 
-use Pluf\Exception;
-use Pluf\Utils;
 use Pluf\Db\Connection;
 use Pluf\Db\Expression;
 use Pluf\Db\Query;
+
 use ReflectionClass;
 use ReflectionProperty;
 use Pluf\Data\Attribute\Table;

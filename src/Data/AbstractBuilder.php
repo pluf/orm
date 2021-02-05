@@ -1,8 +1,6 @@
 <?php
 namespace Pluf\Data;
 
-use Pluf\Exception;
-
 abstract class AbstractBuilder
 {
 

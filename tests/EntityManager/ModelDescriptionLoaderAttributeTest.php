@@ -4,7 +4,7 @@ namespace Pluf\Tests\EntityManager;
 use PHPUnit\Framework\TestCase;
 use Pluf\Data\Loader\ModelDescriptionLoaderAttribute;
 use Pluf\Data\Attribute\Table;
-use Pluf\Exception;
+use Pluf\Data\Exception;
 use Pluf\Data\ModelProperty;
 use Pluf\Data\Attribute\Id;
 use Pluf\Data\Attribute\Column;

@@ -37,9 +37,6 @@
 		<testsuite name="Entity Manager">
 			<directory>tests/EntityManager</directory>
 		</testsuite>
-		<testsuite name="DB">                    
-			<directory>tests/Db</directory>      
-		</testsuite>                             
 	</testsuites>
 	<!-- Code coverage -->
 	<logging />

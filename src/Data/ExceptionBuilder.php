@@ -1,5 +1,5 @@
 <?php
-namespace Pluf;
+namespace Pluf\Data;
 
 use Throwable;
 
