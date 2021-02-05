@@ -2,13 +2,13 @@
 namespace Pluf\Tests\EntityManager;
 
 use PHPUnit\Framework\TestCase;
-use Pluf\Data\Loader\ModelDescriptionLoaderAttribute;
-use Pluf\Data\Attribute\Table;
-use Pluf\Data\Exception;
-use Pluf\Data\ModelProperty;
-use Pluf\Data\Attribute\Id;
-use Pluf\Data\Attribute\Column;
-use Pluf\Data\ModelDescriptionRepository;
+use Pluf\Orm\Loader\ModelDescriptionLoaderAttribute;
+use Pluf\Orm\Attribute\Table;
+use Pluf\Orm\Exception;
+use Pluf\Orm\ModelProperty;
+use Pluf\Orm\Attribute\Id;
+use Pluf\Orm\Attribute\Column;
+use Pluf\Orm\ModelDescriptionRepository;
 
 class ModelDescriptionLoaderAttributeTest extends TestCase
 {

@@ -2,8 +2,8 @@
 namespace Pluf\Tests\Validator\Constraint;
 
 use PHPUnit\Framework\TestCase;
-use Pluf\Data\ObjectValidatorConstraint;
-use Pluf\Data\Attribute\NotEmpty;
+use Pluf\Orm\ObjectValidatorConstraint;
+use Pluf\Orm\Attribute\NotEmpty;
 
 class NotEmptyTest extends TestCase
 {

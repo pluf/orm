@@ -2,9 +2,9 @@
 namespace Pluf\Tests\Mapper;
 
 use PHPUnit\Framework\TestCase;
-use Pluf\Data\ObjectMapperBuilder;
-use Pluf\Data\ObjectMapperInterface;
-use Pluf\Data\ObjectMapper\ObjectMapperJson;
+use Pluf\Orm\ObjectMapperBuilder;
+use Pluf\Orm\ObjectMapperInterface;
+use Pluf\Orm\ObjectMapper\ObjectMapperJson;
 
 /**
  * Tests the mapper builder

@@ -2,8 +2,8 @@
 namespace Pluf\Tests\Mapper;
 
 use PHPUnit\Framework\TestCase;
-use Pluf\Data\ObjectMapperInterface;
-use Pluf\Data\ObjectMapperBuilder;
+use Pluf\Orm\ObjectMapperInterface;
+use Pluf\Orm\ObjectMapperBuilder;
 
 class ObjectMapperBasicsTest extends TestCase
 {

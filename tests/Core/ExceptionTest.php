@@ -2,8 +2,8 @@
 namespace Pluf\Tests\Core;
 
 use PHPUnit\Framework\TestCase;
-use Pluf\Data\Exception;
-use Pluf\Data\ExceptionBuilder;
+use Pluf\Orm\Exception;
+use Pluf\Orm\ExceptionBuilder;
 
 class ExceptionTest extends TestCase
 {

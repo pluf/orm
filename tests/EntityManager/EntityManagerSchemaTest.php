@@ -2,8 +2,8 @@
 namespace Pluf\Tests\EntityManager;
 
 use PHPUnit\Framework\TestCase;
-use Pluf\Data\EntityManagerSchema;
-use Pluf\Data\EntityManagerSchemaBuilder;
+use Pluf\Orm\EntityManagerSchema;
+use Pluf\Orm\EntityManagerSchemaBuilder;
 use ReflectionClass;
 
 class EntityManagerSchemaTest extends TestCase
@@ -50,13 +50,14 @@ class EntityManagerSchemaTest extends TestCase
             ]
         ];
     }
-    
+
     /**
-     * 
+     *
      * @test
      * @dataProvider getSchemaTableNameData
      */
-    public function getTableNameTest(EntityManagerSchema $shcema, $type, $tableName) {
+    public function getTableNameTest(EntityManagerSchema $shcema, $type, $tableName)
+    {
         $reflection = new ReflectionClass($type);
         $actual = $shcema->getTableName($reflection);
         $this->assertEquals($tableName, $actual);

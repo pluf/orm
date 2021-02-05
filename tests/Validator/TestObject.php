@@ -1,8 +1,8 @@
 <?php
 namespace Pluf\Tests\Validator;
 
-use Pluf\Data\Attribute\NotNull;
-use Pluf\Data\Attribute\NotEmpty;
+use Pluf\Orm\Attribute\NotNull;
+use Pluf\Orm\Attribute\NotEmpty;
 
 class TestObject
 {
