@@ -1,35 +1,40 @@
 # orm
 
-Pluf Object Relation Mapping
+Pluf Object Relation Mapping project is the combination of three parts:
 
-This is the combination of two part:
-
-- Query builder
+- Entity Manager
 - Object Mapper
+- Object Validation
 
-## Query builder
 
-Why yet another query builder?
+## Why yet another ORM?
  
-Obviously because existing ones are not good enough. Pluf DB tries to do things differently:
+Obviously because existing ones are not good enough. Pluf ORM tries to do things differently:
 
 - Composability. Unlike other libraries, we render queries recursively allowing many levels of sub-selects.
 - Small footprint. We don't duplicate query code for all vendors, instead we use clever templating system.
-- Extensibility. We have 3 different ways to extend DSQL as well as 3rd party vendor driver support.
-- Any Query - any query with any complexity can be expressed through DSQL.
-- Almost no dependencies. Use DSQL in any PHP application or framework.
-- NoSQL support. In addition to supporting PDO, DSQL can be extended to deal with SQL-compatible NoSQL servers.
+- Extensibility. We have 3 different ways to extend ORM as well as 3rd party vendor schema support.
+- Any Query - any query with any complexity can be expressed through Pluf Query.
+- NoSQL support. In addition to supporting PDO, Pluf ORM can be extended to deal with SQL-compatible NoSQL servers.
 
-For more information about Pluf DB see:
+## Entity Manager
 
-- [overview     ](doc/db/overview.db)
-- [quickstart   ](doc/db/quickstart.md)
-- [connection   ](doc/db/connection.md)
-- [expressions  ](doc/db/expressions.md)
-- [queries      ](doc/db/queries.md)
-- [results      ](doc/db/results.md)
-- [transactions ](doc/db/transactions.md)
-- [advanced     ](doc/db/advanced.md)
-- [extensions   ](doc/db/extensions.md)
+For more information about Pluf Enttity Manager see:
+
+- [overview     ](doc/entity/overview.db)
+- [quickstart   ](doc/entity/quickstart.md)
 
 
+## Object Mapping
+
+For more information about Pluf Enttity Manager see:
+
+- [overview     ](doc/mapping/overview.db)
+- [quickstart   ](doc/mapping/quickstart.md)
+
+## Object Validation
+
+For more information about Pluf Enttity Manager see:
+
+- [overview     ](doc/validation/overview.db)
+- [quickstart   ](doc/validation/quickstart.md)
