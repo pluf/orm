@@ -35,7 +35,7 @@
 			<directory>tests/Validator</directory>    
 		</testsuite>                                  
 		<testsuite name="Entity Manager">
-			<directory>tests/EntityManager</directory>
+			<directory>tests/Entity</directory>
 		</testsuite>
 	</testsuites>
 	<!-- Code coverage -->

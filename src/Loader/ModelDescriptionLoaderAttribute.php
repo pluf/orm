@@ -76,6 +76,7 @@ class ModelDescriptionLoaderAttribute implements ModelDescriptionLoaderInterface
         foreach ($rprops as $reflectionProperty) {
             $builder = new ModelPropertyBuilder();
             $properties[] = $builder->setName($this->getPropertyName($reflectionProperty))
+                ->setType($this->getPropertyType($reflectionProperty))
                 ->propertyOfEntity($isEntity)
                 ->setId($this->getPropertyId($reflectionProperty))
                 ->setColumn($this->getPropertyColumn($reflectionProperty))
@@ -110,6 +111,12 @@ class ModelDescriptionLoaderAttribute implements ModelDescriptionLoaderInterface
             $this->warn("Just an Column is allowed for property");
         }
         return $attributes[0]->newInstance();
+    }
+    
+    private function getPropertyType(ReflectionProperty $reflectionProperty): ?string
+    {
+        $type = $reflectionProperty->getType()?->getName();
+        return $type;
     }
 }
 

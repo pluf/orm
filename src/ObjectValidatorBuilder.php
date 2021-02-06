@@ -11,6 +11,7 @@ use Pluf\Orm\ObjectValidator\ObjectValidatorImp;
  */
 class ObjectValidatorBuilder
 {
+    use AssertionTrait;
 
     /**
      * Creates new object validator

@@ -24,6 +24,7 @@ use Pluf\Orm\Attribute\Column;
 class ModelProperty
 {
     public string $name;
+    public string $type;
     public ?Id $id = null;
     public ?Column $column = null;
     
@@ -32,6 +33,7 @@ class ModelProperty
      */
     public function __construct(
         string $name,
+        string $type,
         ?Id $id = null,
         ?Column $column = null
     )
@@ -39,11 +41,18 @@ class ModelProperty
         $this->name  = $name;
         $this->id = $id;
         $this->column = $column;
+        $this->type = $type;
     }
 
     public function isId(): bool
     {
         return ! empty($this->id);
+    }
+    
+    public function getValue($model)
+    {
+        $name = $this->name;
+        return $model->$name;
     }
 }
 

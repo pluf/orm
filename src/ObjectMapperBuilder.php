@@ -11,6 +11,7 @@ use Pluf\Orm\ObjectMapper\ObjectMapperJson;
  */
 class ObjectMapperBuilder
 {
+    use AssertionTrait;
 
     private string $type = 'json';
 

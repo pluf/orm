@@ -1,7 +1,7 @@
 <?php
 namespace Pluf\Orm;
 
-interface EntityQueryInterface
+interface EntityQuery
 {
     public function entity(string $entityType): self;
     public function where(): self;

@@ -1,5 +1,5 @@
 <?php
-namespace Pluf\Tests\EntityManager\Asset;
+namespace Pluf\Tests\Entity\Asset;
 
 use Pluf\Orm\Attribute\Table;
 use Pluf\Orm\Attribute\Entity;
@@ -11,7 +11,7 @@ class InvalidEntity
 {
     #[Id]
     #[Column("id")]
-    public ?string $id = null;
+    public ?int $id = null;
     
     #[Column("name")]
     public ?string $name = null;

@@ -4,6 +4,7 @@ namespace Pluf\Orm;
 use Pluf\Orm\Attribute\Table;
 use ReflectionClass;
 use ReflectionProperty;
+use DateTime;
 
 /**
  * Create the schema of a given Pluf_Model for a given database.
@@ -13,34 +14,22 @@ use ReflectionProperty;
 abstract class EntityManagerSchema
 {
 
-    public const LEFT_JOIN = 'left';
+    // public const LEFT_JOIN = 'left';
+    // public const INNER_JOIN = 'inner';
+    // public const OUTER_JOIN = 'outer';
+    // public const MANY_TO_MANY = 'Manytomany';
+    // // Others has foreing key to it
+    // public const ONE_TO_MANY = 'Onetomany';
+    // // foreignkey
+    // public const MANY_TO_ONE = 'Manytoone';
+    // public const FOREIGNKEY = 'Foreignkey';
+    public const BOOLEAN = 'bool';
 
-    public const INNER_JOIN = 'inner';
+    public const TEXT = 'string';
 
-    public const OUTER_JOIN = 'outer';
+    public const INTEGER = 'int';
 
-    /**
-     * Relations types
-     * {
-     */
-    public const MANY_TO_MANY = 'Manytomany';
-
-    // Others has foreing key to it
-    public const ONE_TO_MANY = 'Onetomany';
-
-    // foreignkey
-    public const MANY_TO_ONE = 'Manytoone';
-
-    public const FOREIGNKEY = 'Foreignkey';
-
-    /**
-     * }
-     */
-    public const BOOLEAN = 'Boolean';
-
-    public const DATE = 'Date';
-
-    public const DATETIME = 'Datetime';
+    public const DATETIME = DateTime::class;
 
     public const EMAIL = 'Email';
 
@@ -48,15 +37,11 @@ abstract class EntityManagerSchema
 
     public const FLOAT = 'Float';
 
-    public const INTEGER = 'Integer';
-
     public const PASSWORD = 'Password';
 
     public const SEQUENCE = 'Sequence';
 
     public const SLUG = 'Slug';
-
-    public const TEXT = 'Text';
 
     public const TIME = 'Time';
 
@@ -92,72 +77,72 @@ abstract class EntityManagerSchema
          * Old model
          */
         self::BOOLEAN => array(
-            '\Pluf\Data\EntityManagerSchema::booleanFromDb',
-            '\Pluf\Data\EntityManagerSchema::booleanToDb'
+            EntityManagerSchema::class . '::booleanFromDb',
+            EntityManagerSchema::class . '::booleanToDb'
         ),
-        self::DATE => array(
-            '\Pluf\Data\EntityManagerSchema::identityFromDb',
-            '\Pluf\Data\EntityManagerSchema::identityToDb'
-        ),
+        // self::DATE => array(
+        // EntityManagerSchema::class . '::identityFromDb',
+        // EntityManagerSchema::class . '::identityToDb'
+        // ),
         self::DATETIME => array(
-            '\Pluf\Data\EntityManagerSchema::identityFromDb',
-            '\Pluf\Data\EntityManagerSchema::identityToDb'
+            EntityManagerSchema::class . '::identityFromDb',
+            EntityManagerSchema::class . '::identityToDb'
         ),
         self::EMAIL => array(
-            '\Pluf\Data\EntityManagerSchema::identityFromDb',
-            '\Pluf\Data\EntityManagerSchema::identityToDb'
+            EntityManagerSchema::class . '::identityFromDb',
+            EntityManagerSchema::class . '::identityToDb'
         ),
         self::FILE => array(
-            '\Pluf\Data\EntityManagerSchema::identityFromDb',
-            '\Pluf\Data\EntityManagerSchema::identityToDb'
+            EntityManagerSchema::class . '::identityFromDb',
+            EntityManagerSchema::class . '::identityToDb'
         ),
         self::FLOAT => array(
-            '\Pluf\Data\EntityManagerSchema::floatFromDb',
-            '\Pluf\Data\EntityManagerSchema::floatToDb'
+            EntityManagerSchema::class . '::floatFromDb',
+            EntityManagerSchema::class . '::floatToDb'
         ),
-        self::MANY_TO_ONE => array(
-            '\Pluf\Data\EntityManagerSchema::sequenceFromDb',
-            '\Pluf\Data\EntityManagerSchema::sequenceToDb'
-        ),
-        self::FOREIGNKEY => array(
-            '\Pluf\Data\EntityManagerSchema::sequenceFromDb',
-            '\Pluf\Data\EntityManagerSchema::sequenceToDb'
-        ),
+        // self::MANY_TO_ONE => array(
+        // EntityManagerSchema::class . '::sequenceFromDb',
+        // EntityManagerSchema::class . '::sequenceToDb'
+        // ),
+        // self::FOREIGNKEY => array(
+        // EntityManagerSchema::class . '::sequenceFromDb',
+        // EntityManagerSchema::class . '::sequenceToDb'
+        // ),
         self::INTEGER => array(
-            '\Pluf\Data\EntityManagerSchema::integerFromDb',
-            '\Pluf\Data\EntityManagerSchema::integerToDb'
+            EntityManagerSchema::class . '::integerFromDb',
+            EntityManagerSchema::class . '::integerToDb'
         ),
         self::PASSWORD => array(
-            '\Pluf\Data\EntityManagerSchema::identityFromDb',
-            '\Pluf\Data\EntityManagerSchema::passwordToDb'
+            EntityManagerSchema::class . '::identityFromDb',
+            EntityManagerSchema::class . '::passwordToDb'
         ),
         self::SEQUENCE => array(
-            '\Pluf\Data\EntityManagerSchema::sequenceFromDb',
-            '\Pluf\Data\EntityManagerSchema::sequenceToDb'
+            EntityManagerSchema::class . '::sequenceFromDb',
+            EntityManagerSchema::class . '::sequenceToDb'
         ),
         self::SLUG => array(
-            '\Pluf\Data\EntityManagerSchema::identityFromDb',
-            '\Pluf\Data\EntityManagerSchema::slugToDb'
+            EntityManagerSchema::class . '::identityFromDb',
+            EntityManagerSchema::class . '::slugToDb'
         ),
         self::TEXT => array(
-            '\Pluf\Data\EntityManagerSchema::identityFromDb',
-            '\Pluf\Data\EntityManagerSchema::identityToDb'
+            EntityManagerSchema::class . '::identityFromDb',
+            EntityManagerSchema::class . '::identityToDb'
         ),
         self::VARCHAR => array(
-            '\Pluf\Data\EntityManagerSchema::identityFromDb',
-            '\Pluf\Data\EntityManagerSchema::identityToDb'
+            EntityManagerSchema::class . '::identityFromDb',
+            EntityManagerSchema::class . '::identityToDb'
         ),
         self::SERIALIZED => array(
-            '\Pluf\Data\EntityManagerSchema::serializedFromDb',
-            '\Pluf\Data\EntityManagerSchema::serializedToDb'
+            EntityManagerSchema::class . '::serializedFromDb',
+            EntityManagerSchema::class . '::serializedToDb'
         ),
         self::COMPRESSED => array(
-            '\Pluf\Data\EntityManagerSchema::compressedFromDb',
-            '\Pluf\Data\EntityManagerSchema::compressedToDb'
+            EntityManagerSchema::class . '::compressedFromDb',
+            EntityManagerSchema::class . '::compressedToDb'
         ),
         self::GEOMETRY => array(
-            '\Pluf\Data\EntityManagerSchema::geometryFromDb',
-            '\Pluf\Data\EntityManagerSchema::geometryToDb'
+            EntityManagerSchema::class . '::geometryFromDb',
+            EntityManagerSchema::class . '::geometryToDb'
         )
     );
 
@@ -191,7 +176,7 @@ abstract class EntityManagerSchema
      * @param mixed $value
      * @return mixed
      */
-    public function toDb(ReflectionProperty $property, $value)
+    public function toDb(ModelProperty $property, $value)
     {
         $map = $this->type_cast[$property->type];
         return call_user_func_array($map[1], [
@@ -216,174 +201,174 @@ abstract class EntityManagerSchema
         ]);
     }
 
-    /**
-     * Generate real table name for model
-     *
-     * @param ModelDescription $modelDescription
-     *            to fetch table name for
-     * @return string real table name
-     */
-    public function getTableName(ReflectionClass $reflection): string
-    {
-        $attributeRef = $reflection->getAttributes(Table::class);
-        if (sizeof($attributeRef) > 0) {
-            // TODO: maso, 2021: support category, or profile
-            $attribute = $attributeRef[0]->newInstance();
-            $table = $attribute->getName();
-        } else {
-            $table = "notset";
-        }
-        if (! empty($this->prefix)) {
-            $table = $this->prefix . $table;
-        }
-        return $table;
-    }
+    // /**
+    // * Generate real table name for model
+    // *
+    // * @param ModelDescription $modelDescription
+    // * to fetch table name for
+    // * @return string real table name
+    // */
+    // public function getTableName(ReflectionClass $reflection): string
+    // {
+    // $attributeRef = $reflection->getAttributes(Table::class);
+    // if (sizeof($attributeRef) > 0) {
+    // // TODO: maso, 2021: support category, or profile
+    // $attribute = $attributeRef[0]->newInstance();
+    // $table = $attribute->getName();
+    // } else {
+    // $table = "notset";
+    // }
+    // if (! empty($this->prefix)) {
+    // $table = $this->prefix . $table;
+    // }
+    // return $table;
+    // }
 
-    /**
-     * Fetchs joine table for Many To Many relations
-     *
-     * @param ModelDescription $smd
-     * @param ModelDescription $tmd
-     * @param ModelProperty $relation
-     * @throws Exception
-     * @return string
-     */
-    public function getRelationTableName(ReflectionProperty $property): string
-    {
-        if ($relation->type != self::MANY_TO_MANY) {
-            throw new Exception([
-                'message' => 'The relation {name} from {srouce} is not assigned to a table.',
-                'source' => $smd->type,
-                'name' => $relation->name
-            ]);
-        }
+    // /**
+    // * Fetchs joine table for Many To Many relations
+    // *
+    // * @param ModelDescription $smd
+    // * @param ModelDescription $tmd
+    // * @param ModelProperty $relation
+    // * @throws Exception
+    // * @return string
+    // */
+    // public function getRelationTableName(ReflectionProperty $property): string
+    // {
+    // if ($relation->type != self::MANY_TO_MANY) {
+    // throw new Exception([
+    // 'message' => 'The relation {name} from {srouce} is not assigned to a table.',
+    // 'source' => $smd->type,
+    // 'name' => $relation->name
+    // ]);
+    // }
 
-        // // joineModel
-        // $joineModel = $relation->inverseJoinModel;
-        // if (isset($joineModel)) {
-        // $joineModelDescription = ModelDescription::getInstance($joineModel);
-        // return $this->getTableName($joineModelDescription);
-        // }
+    // // // joineModel
+    // // $joineModel = $relation->inverseJoinModel;
+    // // if (isset($joineModel)) {
+    // // $joineModelDescription = ModelDescription::getInstance($joineModel);
+    // // return $this->getTableName($joineModelDescription);
+    // // }
 
-        // joineTable
-        $joineTable = $relation->joinTable;
-        if (isset($joineTable)) {
-            return $this->prefix . $joineTable;
-        }
+    // // joineTable
+    // $joineTable = $relation->joinTable;
+    // if (isset($joineTable)) {
+    // return $this->prefix . $joineTable;
+    // }
 
-        // crate default table name
-        $hay = array(
-            strtolower($smd->type),
-            strtolower($tmd->type)
-        );
-        sort($hay);
-        return self::skipeName($this->prefix . $hay[0] . '_' . $hay[1] . '_assoc');
-    }
+    // // crate default table name
+    // $hay = array(
+    // strtolower($smd->type),
+    // strtolower($tmd->type)
+    // );
+    // sort($hay);
+    // return self::skipeName($this->prefix . $hay[0] . '_' . $hay[1] . '_assoc');
+    // }
 
-    /**
-     * Create the tables and indexes for the current model.
-     *
-     * If the model is a mapped model ($model->_a['mapped'] == true) then only tables for its
-     * many to many relations will be created and table for the model will not be created.
-     *
-     * A mapped model is a model which have not a separate table. In other word, a mapped model is
-     * a specific view to another model and is not a real model.
-     *
-     * A mapped model may defines some new many to many relations which was not defined in the main model.
-     *
-     * @return mixed True if success or database error.
-     */
-    public function createTables(Connection $connection, string $type): bool
-    {
-        $sql = $this->createTableQueries($model);
-        // Note: hadi, 2019: If model is a mapped model, its table is created or will be created by a none mapped model.
-        if ($model->isMapped()) {
-            $modelTableName = $this->getTableName($model);
-            // remove sql to create main table
-            $sql = array_diff_key($sql, array(
-                $modelTableName => ''
-            ));
-        }
+    // /**
+    // * Create the tables and indexes for the current model.
+    // *
+    // * If the model is a mapped model ($model->_a['mapped'] == true) then only tables for its
+    // * many to many relations will be created and table for the model will not be created.
+    // *
+    // * A mapped model is a model which have not a separate table. In other word, a mapped model is
+    // * a specific view to another model and is not a real model.
+    // *
+    // * A mapped model may defines some new many to many relations which was not defined in the main model.
+    // *
+    // * @return mixed True if success or database error.
+    // */
+    // public function createTables(Connection $connection, string $type): bool
+    // {
+    // $sql = $this->createTableQueries($model);
+    // // Note: hadi, 2019: If model is a mapped model, its table is created or will be created by a none mapped model.
+    // if ($model->isMapped()) {
+    // $modelTableName = $this->getTableName($model);
+    // // remove sql to create main table
+    // $sql = array_diff_key($sql, array(
+    // $modelTableName => ''
+    // ));
+    // }
 
-        foreach ($sql as $query) {
-            $connection->expr($query)->execute();
-        }
+    // foreach ($sql as $query) {
+    // $connection->expr($query)->execute();
+    // }
 
-        if (! $model->isMapped()) {
-            $sql = $this->createIndexQueries($model);
-            foreach ($sql as $query) {
-                $connection->expr($query)->execute();
-            }
-        }
-        return true;
-    }
+    // if (! $model->isMapped()) {
+    // $sql = $this->createIndexQueries($model);
+    // foreach ($sql as $query) {
+    // $connection->expr($query)->execute();
+    // }
+    // }
+    // return true;
+    // }
 
-    /**
-     * Drop the tables and indexes for the current model.
-     *
-     * @return mixed True if success or database error.
-     */
-    public function dropTables(Connection $connection, ModelDescription $model): bool
-    {
-        $manytomany = [];
-        // Drop relation tables if exist
-        foreach ($model as $property) {
-            if ($property->type == self::MANY_TO_MANY) {
-                $manytomany[] = $property;
-            }
-        }
+    // /**
+    // * Drop the tables and indexes for the current model.
+    // *
+    // * @return mixed True if success or database error.
+    // */
+    // public function dropTables(Connection $connection, ModelDescription $model): bool
+    // {
+    // $manytomany = [];
+    // // Drop relation tables if exist
+    // foreach ($model as $property) {
+    // if ($property->type == self::MANY_TO_MANY) {
+    // $manytomany[] = $property;
+    // }
+    // }
 
-        // Now for the many to many
-        foreach ($manytomany as $many) {
-            $omodel = ModelDescription::getInstance($many->inverseJoinModel);
-            $table = $this->getRelationTable($model, $omodel, $many);
-            $query = $connection->query();
-            $query->table($table)
-                ->mode('drop')
-                ->execute();
-        }
+    // // Now for the many to many
+    // foreach ($manytomany as $many) {
+    // $omodel = ModelDescription::getInstance($many->inverseJoinModel);
+    // $table = $this->getRelationTable($model, $omodel, $many);
+    // $query = $connection->query();
+    // $query->table($table)
+    // ->mode('drop')
+    // ->execute();
+    // }
 
-        // Drop the table
-        $query = $connection->query();
-        $query->table($this->getTableName($model))
-            ->mode('drop')
-            ->execute();
-        return true;
-    }
+    // // Drop the table
+    // $query = $connection->query();
+    // $query->table($this->getTableName($model))
+    // ->mode('drop')
+    // ->execute();
+    // return true;
+    // }
 
-    // ---------------------------------------------------------------------------------------------
-    // Database
-    // ---------------------------------------------------------------------------------------------
-    public abstract function createTableQueries(ModelDescription $model): array;
+    // // ---------------------------------------------------------------------------------------------
+    // // Database
+    // // ---------------------------------------------------------------------------------------------
+    // public abstract function createTableQueries(ModelDescription $model): array;
 
-    public abstract function createIndexQueries(ModelDescription $model): array;
+    // public abstract function createIndexQueries(ModelDescription $model): array;
 
-    public abstract function createConstraintQueries(ModelDescription $model): array;
+    // public abstract function createConstraintQueries(ModelDescription $model): array;
 
-    public abstract function dropConstraintQueries(ModelDescription $model): array;
+    // public abstract function dropConstraintQueries(ModelDescription $model): array;
 
-    /**
-     * Gets source relation columne name
-     *
-     * @param ModelDescription $smd
-     *            Source model in relation
-     * @param ModelDescription $tmd
-     *            Target model in relation
-     * @param ModelProperty $relation
-     *            The relation description
-     * @return string name of the columne in the relation
-     */
-    public function getRelationSourceField(ModelDescription $smd, ModelDescription $tmd, ModelProperty $relation, ?bool $qn = true): string
-    {
-        $name = $relation->joinColumne;
-        if (! isset($name)) {
-            $name = self::skipeName(strtolower($smd->type) . '_id');
-        }
-        if ($qn) {
-            $name = $this->qn($name);
-        }
-        return $name;
-    }
+    // /**
+    // * Gets source relation columne name
+    // *
+    // * @param ModelDescription $smd
+    // * Source model in relation
+    // * @param ModelDescription $tmd
+    // * Target model in relation
+    // * @param ModelProperty $relation
+    // * The relation description
+    // * @return string name of the columne in the relation
+    // */
+    // public function getRelationSourceField(ModelDescription $smd, ModelDescription $tmd, ModelProperty $relation, ?bool $qn = true): string
+    // {
+    // $name = $relation->joinColumne;
+    // if (! isset($name)) {
+    // $name = self::skipeName(strtolower($smd->type) . '_id');
+    // }
+    // if ($qn) {
+    // $name = $this->qn($name);
+    // }
+    // return $name;
+    // }
 
     /**
      * Gets target relation columne name

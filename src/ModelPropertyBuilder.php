@@ -4,8 +4,9 @@ namespace Pluf\Orm;
 use Pluf\Orm\Attribute\Column;
 use Pluf\Orm\Attribute\Id;
 
-class ModelPropertyBuilder extends AbstractBuilder
+class ModelPropertyBuilder
 {
+    use AssertionTrait;
 
     /*
      * Controll attributes
@@ -17,6 +18,7 @@ class ModelPropertyBuilder extends AbstractBuilder
      * Direct attributes
      */
     private string $name;
+    private ?string $type;
     private ?Id $id = null;
     private ?Column $column = null;
     
@@ -24,6 +26,18 @@ class ModelPropertyBuilder extends AbstractBuilder
     {
         $this->isEntity = $isEntity;
         return $this;
+    }
+    
+    public function setType(string $type): self
+    {
+        $this->type = $type;
+        return $this;
+    }
+
+    private function getType(): string
+    {
+        $this->assertNotEmpty($this->type, "Type is required for the property");
+        return $this->type;
     }
 
     public function setName(string $name): self
@@ -82,6 +96,7 @@ class ModelPropertyBuilder extends AbstractBuilder
         
         return new ModelProperty(
             name: $this->getName(),
+            type: $this->getType(),
             id: $this->getId(),
             column: $this->getColumn()
         );

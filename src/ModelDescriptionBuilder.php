@@ -4,8 +4,9 @@ namespace Pluf\Orm;
 use Pluf\Orm\Attribute\Table;
 use Pluf\Orm\Attribute\Entity;
 
-class ModelDescriptionBuilder extends AbstractBuilder
+class ModelDescriptionBuilder
 {
+    use AssertionTrait;
 
     private ?string $class = null;
     private ?Table $table = null;

@@ -1,5 +1,5 @@
 <?php
-namespace Pluf\Tests\EntityManager;
+namespace Pluf\Tests\Entity;
 
 use PHPUnit\Framework\TestCase;
 use Pluf\Orm\Loader\ModelDescriptionLoaderAttribute;
@@ -20,34 +20,34 @@ class ModelDescriptionLoaderAttributeTest extends TestCase
                 Asset\Author::class,
                 new Table('test_authors', 'test_schema', 'test_catalog'),
                 [
-                    new ModelProperty("id", new Id(), new Column("id")),
-                    new ModelProperty("firstName", null, new Column("first_name")),
-                    new ModelProperty("lastName", null, new Column("last_name"))
+                    new ModelProperty("id", "int", new Id(), new Column("id")),
+                    new ModelProperty("firstName", "string", null, new Column("first_name")),
+                    new ModelProperty("lastName", "string", null, new Column("last_name"))
                 ]
             ],
             [
                 Asset\Book::class,
                 new Table('test_books'),
                 [
-                    new ModelProperty("id", new Id(), new Column("id")),
-                    new ModelProperty("title", null, new Column("title")),
-                    new ModelProperty("pages", null, new Column("pages"))
+                    new ModelProperty("id", "int", new Id(), new Column("id")),
+                    new ModelProperty("title", "string", null, new Column("title")),
+                    new ModelProperty("pages", "int", null, new Column("pages"))
                 ]
             ],
             [
                 Asset\Publisher::class,
                 new Table('test_publishers'),
                 [
-                    new ModelProperty("id", new Id(), new Column("id")),
-                    new ModelProperty("name", null, new Column("name"))
+                    new ModelProperty("id", "int", new Id(), new Column("id")),
+                    new ModelProperty("name", "string", null, new Column("name"))
                 ]
             ],
             [
                 Asset\Category::class,
-                new Table('Pluf_Tests_EntityManager_Asset_Category'),
+                new Table('Pluf_Tests_Entity_Asset_Category'),
                 [
-                    new ModelProperty("id", new Id(), new Column("id")),
-                    new ModelProperty("title", null, new Column("title"))
+                    new ModelProperty("id", "int", new Id(), new Column("id")),
+                    new ModelProperty("title", "string", null, new Column("title"))
                 ]
             ]
         ];

@@ -1,19 +1,22 @@
 <?php
-namespace Pluf\Tests\EntityManager\Asset;
+namespace Pluf\Tests\Entity\Asset;
 
 use Pluf\Orm\Attribute\Table;
 use Pluf\Orm\Attribute\Entity;
 use Pluf\Orm\Attribute\Id;
 use Pluf\Orm\Attribute\Column;
 
-#[Entity('TestCategory')]
-class Category
+#[Entity]
+#[Table('test_books')]
+class Book
 {
-    
     #[Id]
-    public ?string $id = null;
+    #[Column("id")]
+    public ?int $id = null;
     
+    #[Column("title")]
     public ?string $title = null;
     
+    public int $pages = 0;
 }
 

@@ -15,7 +15,7 @@ CREATE TABLE `test_publishers`(
    	name TEXT NOT NULL
 );
 
-CREATE TABLE `Pluf_Tests_EntityManager_Asset_Category`(
+CREATE TABLE `Pluf_Tests_Entity_Asset_Category`(
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
    	title TEXT NOT NULL
 );

@@ -4,20 +4,20 @@ namespace Pluf\Orm;
 /**
  * Interface used to interact with the persistence context.
  *
- * An EntityManagerInterface instance is associated with a persistence context. A persistence context is a set of entity
+ * An EntityManager instance is associated with a persistence context. A persistence context is a set of entity
  * instances in which for any persistent entity identity there is a unique entity instance. Within the
- * persistence context, the entity instances and their lifecycle are managed. The EntityManagerInterface API
+ * persistence context, the entity instances and their lifecycle are managed. The EntityManager API
  * is used to create and remove persistent entity instances, to find entities by their primary key,
  * and to query over entities.
  *
- * The set of entities that can be managed by a given EntityManagerInterface instance is defined by a persistence unit.
+ * The set of entities that can be managed by a given EntityManager instance is defined by a persistence unit.
  * A persistence unit defines the set of all classes that are related or grouped by the application, and which must
  * be colocated in their mapping to a single database.
  *
  * @author maso
  *        
  */
-interface EntityManagerInterface
+interface EntityManager
 {
 
     /**
@@ -57,23 +57,51 @@ interface EntityManagerInterface
     public function close();
 
     /**
-     * Determine whether the entity manager is open.
+     * Check if the instance is a managed entity instance belonging to the current persistence context.
      *
-     * @return bool the state of the entity manager
+     * @param mixed $entity
      */
-    public function isOpen(): bool;
+    public function contains​($entity);
+
+    /**
+     * Remove the given entity from the persistence context, causing a managed entity to become detached.
+     *
+     * Unflushed changes made to the entity if any (including removal of the entity), will not be
+     * synchronized to the database. Entities which previously referenced the detached entity will
+     * continue to reference it.
+     *
+     * @param mixed $entity
+     */
+    public function detach​($entity);
+
+    /**
+     * Find by primary key.
+     * Search for an entity of the specified class and primary key. If the entity instance is contained in the persistence context, it is returned from there.
+     *
+     * @param string $entityType
+     * @param mixed $primaryKey
+     */
+    public function find($entityType, $primaryKey);
 
     /**
      * Synchronize the persistence context to the underlying database.
      */
     public function flush();
 
+    public function getDelegate();
+
+    public function getEntityManagerFactory(): EntityManagerFactory;
+
+    public function getFlushMode(): string;
+
+    public function getTransaction(): EntityTransaction;
+
     /**
-     * Check if the instance is a managed entity instance belonging to the current persistence context.
+     * Determine whether the entity manager is open.
      *
-     * @param mixed $entity
+     * @return bool the state of the entity manager
      */
-    public function contains​($entity);
+    public function isOpen(): bool;
 
     /**
      * Merge the state of the given entity into the current persistence context.
@@ -84,28 +112,11 @@ interface EntityManagerInterface
     public function merge​($entity);
 
     /**
-     * Remove the given entity from the persistence context, causing a managed entity to become detached.
-     * Unflushed changes made to the entity if any (including removal of the entity), will not be synchronized to the database. Entities which previously referenced the detached entity will continue to reference it.
-     *
-     * @param mixed $entity
-     */
-    public function detach​($entity);
-
-    /**
      * Make an instance managed and persistent.
      *
      * @param mixed $entity
      */
     public function persist​($entity);
-
-    /**
-     * Find by primary key.
-     * Search for an entity of the specified class and primary key. If the entity instance is contained in the persistence context, it is returned from there.
-     *
-     * @param string $entityType
-     * @param mixed $primaryKey
-     */
-    public function find($entityType, $primaryKey);
 
     /**
      * Refresh the state of the instance from the database, overwriting changes made to the entity, if any.
@@ -121,11 +132,15 @@ interface EntityManagerInterface
      */
     public function remove($entity);
 
+    public function setFlushMode(string $flushMode): void;
+
+    public function setProperty(string $propertyName, $value): void;
+
     /**
      * Create an instance of Query for executing a Java Persistence query language statement.
      *
-     * @return EntityQueryInterface instance to create and execute a query.
+     * @return EntityQuery instance to create and execute a query.
      */
-    public function createQuery(): EntityQueryInterface;
+    public function createQuery(): EntityQuery;
 }
 

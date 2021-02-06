@@ -1,9 +1,9 @@
 <?php
 namespace Pluf\Orm;
 
-abstract class AbstractBuilder
+trait AssertionTrait
 {
-
+    
     /**
      * Asserts if the actual value is null
      *
@@ -19,7 +19,7 @@ abstract class AbstractBuilder
             throw new Exception($message, params: $params);
         }
     }
-
+    
     /**
      * Asserts that a variable is null.
      *
@@ -35,14 +35,14 @@ abstract class AbstractBuilder
             throw new Exception($message, params: $params);
         }
     }
-
+    
     protected function assertNotEmpty($actual, string $message = '', array $params = [])
     {
         if (empty($actual)) {
             throw new Exception($message, params: $params);
         }
     }
-
+    
     protected function assertEmpty($actual, string $message = '', array $params = [])
     {
         if (! empty($actual)) {
