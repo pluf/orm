@@ -91,11 +91,11 @@ class EntityManagerTest extends TestCase
         $entityManager = self::$entityManagerFactory->createEntityManager();
 
         $this->assertTrue($entityManager->isOpen());
-        $entityManager->persist​($entity);
+        $entity = $entityManager->persist​($entity);
         $entityManager->detach​($entity);
 
-//         $newEntity = $entityManager->find(Asset\Author::class, $entity->id);
-//         $this->assertEquals($entity, $newEntity);
+        $newEntity = $entityManager->find(Asset\Author::class, $entity->id);
+        $this->assertEquals($entity, $newEntity);
         $entityManager->close();
         $this->assertFalse($entityManager->isOpen());
     }
