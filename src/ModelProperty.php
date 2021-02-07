@@ -54,5 +54,11 @@ class ModelProperty
         $name = $this->name;
         return $model->$name;
     }
+    
+    public function setValue($model, $value)
+    {
+        $name = $this->name;
+        return $model->$name = $value;
+    }
 }
 

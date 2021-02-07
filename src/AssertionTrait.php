@@ -25,27 +25,34 @@ trait AssertionTrait
      *
      * @throws Exception
      *
-     * @param mixed $actual
+     * @param mixed $value
      * @param string $message
      * @param array $params
      */
-    protected function assertNull($actual, string $message = '', array $params = []): void
+    protected function assertNull($value, string $message = '', array $params = []): void
     {
-        if ($actual !== null) {
+        if ($value !== null) {
             throw new Exception($message, params: $params);
         }
     }
     
-    protected function assertNotEmpty($actual, string $message = '', array $params = [])
+    protected function assertNotEmpty($value, string $message = '', array $params = [])
     {
-        if (empty($actual)) {
+        if (empty($value)) {
             throw new Exception($message, params: $params);
         }
     }
     
-    protected function assertEmpty($actual, string $message = '', array $params = [])
+    protected function assertEmpty($value, string $message = '', array $params = [])
     {
-        if (! empty($actual)) {
+        if (! empty($value)) {
+            throw new Exception($message, params: $params);
+        }
+    }
+    
+    protected function assertTrue($flag, string $message = '', array $params = [])
+    {
+        if (!$flag) {
             throw new Exception($message, params: $params);
         }
     }

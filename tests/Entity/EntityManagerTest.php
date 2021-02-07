@@ -34,6 +34,9 @@ class EntityManagerTest extends TestCase
         }
 
         self::$connection = $c;
+//         $c = new \atk4\dsql\Debug\Stopwatch\Connection([
+//             'connection' => self::$connection
+//         ]);
 
         // model repository
         $repo = new ModelDescriptionRepository([
@@ -60,9 +63,6 @@ class EntityManagerTest extends TestCase
      */
     public function testDb()
     {
-        // $c = new Pluf\Db\Connection\Dumper([
-        // 'connection' => self::$connection
-        // ]);
         $c = self::$connection;
 
         $res = $c->dsql()

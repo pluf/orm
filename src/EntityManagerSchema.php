@@ -162,13 +162,6 @@ abstract class EntityManagerSchema
         return $this->prefix;
     }
 
-    // XXX: maso, 2020: check if this is usefull anymoer
-    protected function skipeName(String $name): String
-    {
-        $name = str_replace('\\', '_', $name);
-        return $name;
-    }
-
     /**
      * Converts a data value into valid DB value
      *
@@ -192,7 +185,7 @@ abstract class EntityManagerSchema
      * @param mixed $value
      * @return mixed
      */
-    public function fromDb(ReflectionProperty $property, $value)
+    public function fromDb(ModelProperty $property, $value)
     {
         $map = $this->type_cast[$property->type];
         return call_user_func_array($map[0], [
@@ -201,28 +194,21 @@ abstract class EntityManagerSchema
         ]);
     }
 
-    // /**
-    // * Generate real table name for model
-    // *
-    // * @param ModelDescription $modelDescription
-    // * to fetch table name for
-    // * @return string real table name
-    // */
-    // public function getTableName(ReflectionClass $reflection): string
-    // {
-    // $attributeRef = $reflection->getAttributes(Table::class);
-    // if (sizeof($attributeRef) > 0) {
-    // // TODO: maso, 2021: support category, or profile
-    // $attribute = $attributeRef[0]->newInstance();
-    // $table = $attribute->getName();
-    // } else {
-    // $table = "notset";
-    // }
-    // if (! empty($this->prefix)) {
-    // $table = $this->prefix . $table;
-    // }
-    // return $table;
-    // }
+    /**
+     * Generate real table name for model
+     *
+     * @param ModelDescription $modelDescription
+     *            to fetch table name for
+     * @return string real table name
+     */
+    public function getTableName(ModelDescription $md): string
+    {
+        $table = $md->table->name;
+        if (! empty($this->prefix)) {
+            $table = $this->prefix . $table;
+        }
+        return $table;
+    }
 
     // /**
     // * Fetchs joine table for Many To Many relations
@@ -370,590 +356,590 @@ abstract class EntityManagerSchema
     // return $name;
     // }
 
-    /**
-     * Gets target relation columne name
-     *
-     * @param ModelDescription $smd
-     *            Source model in relation
-     * @param ModelDescription $tmd
-     *            Target model in relation
-     * @param ModelProperty $relation
-     *            The relation description
-     * @return string name of the columne in the relation
-     */
-    public function getRelationTargetField(ModelDescription $smd, ModelDescription $tmd, ModelProperty $relation, ?bool $qut = true): string
-    {
-        $name = $relation->inverseJoinColumne;
-        if (! isset($name)) {
-            $name = self::skipeName(strtolower($tmd->type) . '_id');
-        }
-        if ($qut) {
-            $name = $this->qn($name);
-        }
-        return $name;
-    }
+//     /**
+//      * Gets target relation columne name
+//      *
+//      * @param ModelDescription $smd
+//      *            Source model in relation
+//      * @param ModelDescription $tmd
+//      *            Target model in relation
+//      * @param ModelProperty $relation
+//      *            The relation description
+//      * @return string name of the columne in the relation
+//      */
+//     public function getRelationTargetField(ModelDescription $smd, ModelDescription $tmd, ModelProperty $relation, ?bool $qut = true): string
+//     {
+//         $name = $relation->inverseJoinColumne;
+//         if (! isset($name)) {
+//             $name = self::skipeName(strtolower($tmd->type) . '_id');
+//         }
+//         if ($qut) {
+//             $name = $this->qn($name);
+//         }
+//         return $name;
+//     }
 
-    public function getAssocField(ModelDescription $model, ?string $relationName = null): String
-    {
-        $name = self::skipeName(strtolower($model->model) . '_id');
-        $name = $this->qn($name);
-        return $name;
-    }
+//     public function getAssocField(ModelDescription $model, ?string $relationName = null): String
+//     {
+//         $name = self::skipeName(strtolower($model->model) . '_id');
+//         $name = $this->qn($name);
+//         return $name;
+//     }
 
-    /**
-     * Gets attributes to put into the DB
-     *
-     * @param ModelDescription $md
-     * @param mixed $alias
-     *            to be used for all properties
-     */
-    public function getFields(ModelDescription $md, ?string $alias = null)
-    {
-        $field = [];
-        $autoPrefix = ! isset($alias);
-        if ($autoPrefix) {
-            $alias = '';
-        } else {
-            $alias = $alias . '.';
-        }
-        foreach ($md as $name => $property) {
-            if ($property->type == self::MANY_TO_MANY || $property->type == self::MANY_TO_ONE || $property->type == self::ONE_TO_MANY) {
-                continue;
-            }
-            $field[$name] = $alias . $this->getFieldName($md, $property, $autoPrefix);
-        }
-        return $field;
-    }
+//     /**
+//      * Gets attributes to put into the DB
+//      *
+//      * @param ModelDescription $md
+//      * @param mixed $alias
+//      *            to be used for all properties
+//      */
+//     public function getFields(ModelDescription $md, ?string $alias = null)
+//     {
+//         $field = [];
+//         $autoPrefix = ! isset($alias);
+//         if ($autoPrefix) {
+//             $alias = '';
+//         } else {
+//             $alias = $alias . '.';
+//         }
+//         foreach ($md as $name => $property) {
+//             if ($property->type == self::MANY_TO_MANY || $property->type == self::MANY_TO_ONE || $property->type == self::ONE_TO_MANY) {
+//                 continue;
+//             }
+//             $field[$name] = $alias . $this->getFieldName($md, $property, $autoPrefix);
+//         }
+//         return $field;
+//     }
 
-    /**
-     * Get db field name for the $name attribute of the model
-     *
-     * The name may contains the alias (e.g. account.login) or a property name.
-     * The result is a valid DB name contians the alias.
-     *
-     * @param ModelDescription $md
-     * @param string $name
-     * @return string
-     */
-    public function getField(ModelDescription $md, string $name): string
-    {
-        $names = explode('.', $name);
-        if (count($names) == 1) {
-            return $this->getFieldName($md, $md->$name, true);
-        }
-        $name = $names[1];
-        return $names[0] . '.' . $this->getFieldName($md, $md->$name, false);
-    }
+//     /**
+//      * Get db field name for the $name attribute of the model
+//      *
+//      * The name may contains the alias (e.g. account.login) or a property name.
+//      * The result is a valid DB name contians the alias.
+//      *
+//      * @param ModelDescription $md
+//      * @param string $name
+//      * @return string
+//      */
+//     public function getField(ModelDescription $md, string $name): string
+//     {
+//         $names = explode('.', $name);
+//         if (count($names) == 1) {
+//             return $this->getFieldName($md, $md->$name, true);
+//         }
+//         $name = $names[1];
+//         return $names[0] . '.' . $this->getFieldName($md, $md->$name, false);
+//     }
 
-    /**
-     * Convert property name to DB name
-     *
-     * @param ModelDescription $md
-     * @param ModelProperty $property
-     * @param bool $joinTable
-     *            The table name is added to property if it is ture otherwise the porperty name will be returned
-     */
-    public function getFieldName(ModelDescription $md, ModelProperty $property, ?bool $joinTable = true): string
-    {
-        $name = $property->columne;
-        if (! isset($name)) {
-            $name = $property->name;
-        }
-        if ($joinTable) {
-            return $this->getTableName($md) . '.' . $name;
-        }
-        return $name;
-    }
+//     /**
+//      * Convert property name to DB name
+//      *
+//      * @param ModelDescription $md
+//      * @param ModelProperty $property
+//      * @param bool $joinTable
+//      *            The table name is added to property if it is ture otherwise the porperty name will be returned
+//      */
+//     public function getFieldName(ModelDescription $md, ModelProperty $property, ?bool $joinTable = true): string
+//     {
+//         $name = $property->columne;
+//         if (! isset($name)) {
+//             $name = $property->name;
+//         }
+//         if ($joinTable) {
+//             return $this->getTableName($md) . '.' . $name;
+//         }
+//         return $name;
+//     }
 
-    /**
-     * Converts $view fields into valid DB fields
-     *
-     * @param ModelDescription $md
-     *            Reference data model description
-     * @param array $view
-     *            A view based on Pluf/Data specification
-     */
-    public function getViewFields(ModelDescription $md, array $view): array
-    {
-        if (! isset($view['field'])) {
-            return [];
-        }
-        $fields = [];
-        foreach ($view['field'] as $name => $field) {
-            if ($field instanceof Expression) {
-                $fields[$name] = $field;
-                continue;
-            }
+//     /**
+//      * Converts $view fields into valid DB fields
+//      *
+//      * @param ModelDescription $md
+//      *            Reference data model description
+//      * @param array $view
+//      *            A view based on Pluf/Data specification
+//      */
+//     public function getViewFields(ModelDescription $md, array $view): array
+//     {
+//         if (! isset($view['field'])) {
+//             return [];
+//         }
+//         $fields = [];
+//         foreach ($view['field'] as $name => $field) {
+//             if ($field instanceof Expression) {
+//                 $fields[$name] = $field;
+//                 continue;
+//             }
 
-            // extract alias
-            $names = explode('.', $field);
+//             // extract alias
+//             $names = explode('.', $field);
 
-            // get model description
-            $cmd = $md;
-            if (count($names) > 1) {
-                // find model in joins
-                foreach ($view['join'] as $join) {
-                    if (isset($join['alias']) && $join['alias'] == $names[0]) {
-                        if (isset($join['inverseJoinModel'])) {
-                            $cmd = ModelDescription::getInstance($join['inverseJoinModel']);
-                            break;
-                        }
-                        $jproname = $join['joinProperty'];
-                        $joinProperty = $md->$jproname;
-                        $cmd = ModelDescription::getInstance($joinProperty->inverseJoinModel);
-                        break;
-                    }
-                }
-                $fields[$name] = $names[0] . '.' . $this->getField($cmd, $field, false);
-            } else {
-                $fields[$name] = $this->getField($md, $field, true);
-            }
-        }
-        return $fields;
-    }
+//             // get model description
+//             $cmd = $md;
+//             if (count($names) > 1) {
+//                 // find model in joins
+//                 foreach ($view['join'] as $join) {
+//                     if (isset($join['alias']) && $join['alias'] == $names[0]) {
+//                         if (isset($join['inverseJoinModel'])) {
+//                             $cmd = ModelDescription::getInstance($join['inverseJoinModel']);
+//                             break;
+//                         }
+//                         $jproname = $join['joinProperty'];
+//                         $joinProperty = $md->$jproname;
+//                         $cmd = ModelDescription::getInstance($joinProperty->inverseJoinModel);
+//                         break;
+//                     }
+//                 }
+//                 $fields[$name] = $names[0] . '.' . $this->getField($cmd, $field, false);
+//             } else {
+//                 $fields[$name] = $this->getField($md, $field, true);
+//             }
+//         }
+//         return $fields;
+//     }
 
-    /**
-     * Converts data join in $view to DB join
-     *
-     * @param ModelDescription $ref
-     *            The reference data model description
-     * @param array $view
-     *            Data view to convert
-     * @return array an array of db views
-     */
-    public function getViewJoins(ModelDescription $joinModel, array $view): array
-    {
-        $joins = [];
-        if (! isset($view['join'])) {
-            return $joins;
-        }
-        foreach ($view['join'] as $join) {
-            $type = self::LEFT_JOIN;
-            $alias = null;
-            if (isset($join['type'])) {
-                $type = $join['type'];
-            }
-            if (isset($join['alias'])) {
-                $alias = $join['alias'];
-            }
+//     /**
+//      * Converts data join in $view to DB join
+//      *
+//      * @param ModelDescription $ref
+//      *            The reference data model description
+//      * @param array $view
+//      *            Data view to convert
+//      * @return array an array of db views
+//      */
+//     public function getViewJoins(ModelDescription $joinModel, array $view): array
+//     {
+//         $joins = [];
+//         if (! isset($view['join'])) {
+//             return $joins;
+//         }
+//         foreach ($view['join'] as $join) {
+//             $type = self::LEFT_JOIN;
+//             $alias = null;
+//             if (isset($join['type'])) {
+//                 $type = $join['type'];
+//             }
+//             if (isset($join['alias'])) {
+//                 $alias = $join['alias'];
+//             }
 
-            /*
-             * Native joing
-             *
-             * TODO: maso, 2020: support joinProperty
-             */
-            if (isset($join['joinTable'])) {
-                $ftable = $join['joinTable'] . '.' . $join['inverseJoinColumne'];
-                if (isset($alias)) {
-                    $ftable = $ftable . ' ' . $alias;
-                }
-                $joins[] = [
-                    $ftable,
-                    $join['joinColumne'],
-                    $type
-                ];
-                continue;
-            }
+//             /*
+//              * Native joing
+//              *
+//              * TODO: maso, 2020: support joinProperty
+//              */
+//             if (isset($join['joinTable'])) {
+//                 $ftable = $join['joinTable'] . '.' . $join['inverseJoinColumne'];
+//                 if (isset($alias)) {
+//                     $ftable = $ftable . ' ' . $alias;
+//                 }
+//                 $joins[] = [
+//                     $ftable,
+//                     $join['joinColumne'],
+//                     $type
+//                 ];
+//                 continue;
+//             }
 
-            /*
-             * Data Join
-             */
-            $jproName = $join['joinProperty'];
-            if (! isset($jproName)) {
-                $jproName = 'id';
-            }
-            /*
-             * required data
-             */
-            $joinProperty = $joinModel->$jproName;
-            $inverseJoinModel = null;
-            $inverseJoinProperty = null;
+//             /*
+//              * Data Join
+//              */
+//             $jproName = $join['joinProperty'];
+//             if (! isset($jproName)) {
+//                 $jproName = 'id';
+//             }
+//             /*
+//              * required data
+//              */
+//             $joinProperty = $joinModel->$jproName;
+//             $inverseJoinModel = null;
+//             $inverseJoinProperty = null;
 
-            /*
-             * Fetch data from model
-             */
-            switch ($joinProperty->type) {
-                case self::ONE_TO_MANY:
-                case self::MANY_TO_ONE:
-                case self::MANY_TO_MANY:
-                    // Forign key
-                    $inverseJoinModel = ModelDescription::getInstance($joinProperty->inverseJoinModel);
-                    $inverseJoinPropertyName = $joinProperty->inverseJoinProperty;
-                    if (! isset($inverseJoinPropertyName)) {
-                        $inverseJoinPropertyName = 'id';
-                    }
-                    $inverseJoinProperty = $inverseJoinModel->$inverseJoinPropertyName;
-                    break;
-                default:
-                    $inverseJoinModel = ModelDescription::getInstance($join['inverseJoinModel']);
-                    $inverseJoinPropertyName = $join['inverseJoinProperty'];
-                    if (! isset($inverseJoinPropertyName)) {
-                        $inverseJoinPropertyName = 'id';
-                    }
-                    $inverseJoinProperty = $inverseJoinModel->$inverseJoinPropertyName;
-                    break;
-            }
+//             /*
+//              * Fetch data from model
+//              */
+//             switch ($joinProperty->type) {
+//                 case self::ONE_TO_MANY:
+//                 case self::MANY_TO_ONE:
+//                 case self::MANY_TO_MANY:
+//                     // Forign key
+//                     $inverseJoinModel = ModelDescription::getInstance($joinProperty->inverseJoinModel);
+//                     $inverseJoinPropertyName = $joinProperty->inverseJoinProperty;
+//                     if (! isset($inverseJoinPropertyName)) {
+//                         $inverseJoinPropertyName = 'id';
+//                     }
+//                     $inverseJoinProperty = $inverseJoinModel->$inverseJoinPropertyName;
+//                     break;
+//                 default:
+//                     $inverseJoinModel = ModelDescription::getInstance($join['inverseJoinModel']);
+//                     $inverseJoinPropertyName = $join['inverseJoinProperty'];
+//                     if (! isset($inverseJoinPropertyName)) {
+//                         $inverseJoinPropertyName = 'id';
+//                     }
+//                     $inverseJoinProperty = $inverseJoinModel->$inverseJoinPropertyName;
+//                     break;
+//             }
 
-            $dbJoins = $this->createDbJoin($joinModel, $joinProperty, $inverseJoinModel, $inverseJoinProperty, $type, $alias);
-            $joins = array_merge($joins, $dbJoins);
-        }
-        return $joins;
-    }
+//             $dbJoins = $this->createDbJoin($joinModel, $joinProperty, $inverseJoinModel, $inverseJoinProperty, $type, $alias);
+//             $joins = array_merge($joins, $dbJoins);
+//         }
+//         return $joins;
+//     }
 
-    private function createDbJoin(ModelDescription $joinModel, ModelProperty $joinProperty, //
-    ModelDescription $inverseJoinModel, ModelProperty $inverseJoinProperty, //
-    string $type, ?string $alias = ''): array
-    {
-        $joins = [];
+//     private function createDbJoin(ModelDescription $joinModel, ModelProperty $joinProperty, //
+//     ModelDescription $inverseJoinModel, ModelProperty $inverseJoinProperty, //
+//     string $type, ?string $alias = ''): array
+//     {
+//         $joins = [];
 
-        /*
-         * Fetch data from model
-         */
-        switch ($joinProperty->type) {
-            case self::MANY_TO_MANY:
-                // First
-                $rtable = $this->getRelationTable($joinModel, $inverseJoinModel, $joinProperty);
+//         /*
+//          * Fetch data from model
+//          */
+//         switch ($joinProperty->type) {
+//             case self::MANY_TO_MANY:
+//                 // First
+//                 $rtable = $this->getRelationTable($joinModel, $inverseJoinModel, $joinProperty);
 
-                $propertyName = $joinProperty->joinProperty;
-                if (! isset($propertyName)) {
-                    $propertyName = 'id';
-                }
-                $joinProperty = $joinModel->$propertyName;
+//                 $propertyName = $joinProperty->joinProperty;
+//                 if (! isset($propertyName)) {
+//                     $propertyName = 'id';
+//                 }
+//                 $joinProperty = $joinModel->$propertyName;
 
-                $joins[] = [
-                    $rtable . '.' . $this->getRelationSourceField($joinModel, $inverseJoinModel, $joinProperty),
-                    $this->getFieldName($joinModel, $joinProperty, true),
-                    $type
-                ];
+//                 $joins[] = [
+//                     $rtable . '.' . $this->getRelationSourceField($joinModel, $inverseJoinModel, $joinProperty),
+//                     $this->getFieldName($joinModel, $joinProperty, true),
+//                     $type
+//                 ];
 
-                // second
-                $ttableField = $this->getRelationTargetField($joinModel, $inverseJoinModel, $joinProperty);
-                $joins[] = [
-                    $rtable . '.' . $ttableField . ' ' . $alias,
-                    $this->getFieldName($inverseJoinModel, $inverseJoinProperty, true),
-                    $type
-                ];
-                break;
-            case self::ONE_TO_MANY:
-                $ftable = $this->getFieldName($inverseJoinModel, $inverseJoinProperty, true);
-                if (isset($alias)) {
-                    $ftable .= ' ' . $alias;
-                }
-                // get real property
-                $propertyName = $joinProperty->joinProperty;
-                if (! isset($propertyName)) {
-                    $propertyName = 'id';
-                }
-                $rjp = $joinModel->$propertyName;
-                $joins[] = [
-                    $ftable,
-                    $this->getFieldName($joinModel, $rjp),
-                    $type
-                ];
-                break;
-            case self::MANY_TO_ONE:
-                if ($inverseJoinProperty->type == self::ONE_TO_MANY) {
-                    $propertyName = $inverseJoinModel->joinProperty;
-                    if (! isset($propertyName)) {
-                        $propertyName = 'id';
-                    }
-                    $inverseJoinProperty = $inverseJoinModel->$propertyName;
-                }
-                $ftable = $this->getFieldName($inverseJoinModel, $inverseJoinProperty, true);
-                if (isset($alias)) {
-                    $ftable .= ' ' . $alias;
-                }
-                $joins[] = [
-                    $ftable,
-                    $this->getFieldName($joinModel, $joinProperty),
-                    $type
-                ];
-                break;
-            default:
-                $ftable = $this->getFieldName($inverseJoinModel, $inverseJoinProperty, true);
-                if (isset($alias)) {
-                    $ftable .= ' ' . $alias;
-                }
-                $joins[] = [
-                    $ftable,
-                    $this->getFieldName($joinModel, $joinProperty),
-                    $type
-                ];
-                break;
-        }
-        return $joins;
-    }
+//                 // second
+//                 $ttableField = $this->getRelationTargetField($joinModel, $inverseJoinModel, $joinProperty);
+//                 $joins[] = [
+//                     $rtable . '.' . $ttableField . ' ' . $alias,
+//                     $this->getFieldName($inverseJoinModel, $inverseJoinProperty, true),
+//                     $type
+//                 ];
+//                 break;
+//             case self::ONE_TO_MANY:
+//                 $ftable = $this->getFieldName($inverseJoinModel, $inverseJoinProperty, true);
+//                 if (isset($alias)) {
+//                     $ftable .= ' ' . $alias;
+//                 }
+//                 // get real property
+//                 $propertyName = $joinProperty->joinProperty;
+//                 if (! isset($propertyName)) {
+//                     $propertyName = 'id';
+//                 }
+//                 $rjp = $joinModel->$propertyName;
+//                 $joins[] = [
+//                     $ftable,
+//                     $this->getFieldName($joinModel, $rjp),
+//                     $type
+//                 ];
+//                 break;
+//             case self::MANY_TO_ONE:
+//                 if ($inverseJoinProperty->type == self::ONE_TO_MANY) {
+//                     $propertyName = $inverseJoinModel->joinProperty;
+//                     if (! isset($propertyName)) {
+//                         $propertyName = 'id';
+//                     }
+//                     $inverseJoinProperty = $inverseJoinModel->$propertyName;
+//                 }
+//                 $ftable = $this->getFieldName($inverseJoinModel, $inverseJoinProperty, true);
+//                 if (isset($alias)) {
+//                     $ftable .= ' ' . $alias;
+//                 }
+//                 $joins[] = [
+//                     $ftable,
+//                     $this->getFieldName($joinModel, $joinProperty),
+//                     $type
+//                 ];
+//                 break;
+//             default:
+//                 $ftable = $this->getFieldName($inverseJoinModel, $inverseJoinProperty, true);
+//                 if (isset($alias)) {
+//                     $ftable .= ' ' . $alias;
+//                 }
+//                 $joins[] = [
+//                     $ftable,
+//                     $this->getFieldName($joinModel, $joinProperty),
+//                     $type
+//                 ];
+//                 break;
+//         }
+//         return $joins;
+//     }
 
-    /**
-     * Converts filters form Data view into DB filter
-     *
-     * @param ModelDescription $md
-     * @param array $view
-     * @return array
-     */
-    public function getViewFilters(ModelDescription $md, $view)
-    {
-        if (! isset($view['filter'])) {
-            return [];
-        }
-        return $this->convertViewDataFilters($md, $view, $view['filter']);
-    }
+//     /**
+//      * Converts filters form Data view into DB filter
+//      *
+//      * @param ModelDescription $md
+//      * @param array $view
+//      * @return array
+//      */
+//     public function getViewFilters(ModelDescription $md, $view)
+//     {
+//         if (! isset($view['filter'])) {
+//             return [];
+//         }
+//         return $this->convertViewDataFilters($md, $view, $view['filter']);
+//     }
 
-    public function getViewHaving(ModelDescription $md, $view)
-    {
-        if (! isset($view['having'])) {
-            return [];
-        }
-        return $this->convertViewDataFilters($md, $view, $view['having']);
-    }
+//     public function getViewHaving(ModelDescription $md, $view)
+//     {
+//         if (! isset($view['having'])) {
+//             return [];
+//         }
+//         return $this->convertViewDataFilters($md, $view, $view['having']);
+//     }
 
-    public function getViewGroupBy(ModelDescription $md, $view)
-    {
-        if (! isset($view['group'])) {
-            return null;
-        }
-        $groups = [];
-        foreach ($view['group'] as $group) {
-            if ($group instanceof Expression) {
-                $groups[] = $group;
-                continue;
-            }
+//     public function getViewGroupBy(ModelDescription $md, $view)
+//     {
+//         if (! isset($view['group'])) {
+//             return null;
+//         }
+//         $groups = [];
+//         foreach ($view['group'] as $group) {
+//             if ($group instanceof Expression) {
+//                 $groups[] = $group;
+//                 continue;
+//             }
 
-            $names = explode('.', $group);
+//             $names = explode('.', $group);
 
-            // get model description
-            $cmd = $md;
-            if (count($names) > 1) {
-                // find model in joins
-                foreach ($view['join'] as $join) {
-                    if (isset($join['alias']) && $join['alias'] == $names[0]) {
-                        if (isset($join['inverseJoinModel'])) {
-                            $cmd = ModelDescription::getInstance($join['inverseJoinModel']);
-                            break;
-                        }
-                        $jproname = $join['joinProperty'];
-                        $joinProperty = $md->$jproname;
-                        $cmd = ModelDescription::getInstance($joinProperty->inverseJoinModel);
-                        break;
-                    }
-                }
-                $groups[] = $this->getField($cmd, $group);
-            } else {
-                $groups[] = $this->getField($md, $group);
-            }
-        }
-        if (count($groups) == 0) {
-            return null;
-        }
-        return $groups;
-    }
+//             // get model description
+//             $cmd = $md;
+//             if (count($names) > 1) {
+//                 // find model in joins
+//                 foreach ($view['join'] as $join) {
+//                     if (isset($join['alias']) && $join['alias'] == $names[0]) {
+//                         if (isset($join['inverseJoinModel'])) {
+//                             $cmd = ModelDescription::getInstance($join['inverseJoinModel']);
+//                             break;
+//                         }
+//                         $jproname = $join['joinProperty'];
+//                         $joinProperty = $md->$jproname;
+//                         $cmd = ModelDescription::getInstance($joinProperty->inverseJoinModel);
+//                         break;
+//                     }
+//                 }
+//                 $groups[] = $this->getField($cmd, $group);
+//             } else {
+//                 $groups[] = $this->getField($md, $group);
+//             }
+//         }
+//         if (count($groups) == 0) {
+//             return null;
+//         }
+//         return $groups;
+//     }
 
-    /**
-     * Gets model values to put into the DB
-     *
-     * @param ModelDescription $md
-     * @param mixed $model
-     */
-    public function getValues(ModelDescription $md, $model)
-    {
-        $values = [];
-        foreach ($md as $name => $property) {
-            if ($name == 'id') {
-                // DB is responsible for ID
-                continue;
-            }
-            if ($property->type == self::MANY_TO_MANY || $property->type == self::ONE_TO_MANY || $property->isMapped()) {
-                // Virtural attributes
-                continue;
-            }
-            if ($property->type == self::MANY_TO_ONE) {
-                // XXX: maso, 2020: check forenkey
-            }
-            $values[$name] = $this->toDb($property, $model->$name);
-        }
-        return $values;
-    }
+//     /**
+//      * Gets model values to put into the DB
+//      *
+//      * @param ModelDescription $md
+//      * @param mixed $model
+//      */
+//     public function getValues(ModelDescription $md, $model)
+//     {
+//         $values = [];
+//         foreach ($md as $name => $property) {
+//             if ($name == 'id') {
+//                 // DB is responsible for ID
+//                 continue;
+//             }
+//             if ($property->type == self::MANY_TO_MANY || $property->type == self::ONE_TO_MANY || $property->isMapped()) {
+//                 // Virtural attributes
+//                 continue;
+//             }
+//             if ($property->type == self::MANY_TO_ONE) {
+//                 // XXX: maso, 2020: check forenkey
+//             }
+//             $values[$name] = $this->toDb($property, $model->$name);
+//         }
+//         return $values;
+//     }
 
-    /**
-     * Converts Data filter from query into DB filter
-     *
-     * @param ModelDescription $md
-     * @param Query $query
-     * @return array
-     */
-    public function getQueryFilters(ModelDescription $md, Query $query)
-    {
-        return $this->convertDataFilters($md, $query->getFilter());
-    }
+//     /**
+//      * Converts Data filter from query into DB filter
+//      *
+//      * @param ModelDescription $md
+//      * @param Query $query
+//      * @return array
+//      */
+//     public function getQueryFilters(ModelDescription $md, Query $query)
+//     {
+//         return $this->convertDataFilters($md, $query->getFilter());
+//     }
 
-    /**
-     * Retrieve key relationships of a given model.
-     *
-     * @param string $model
-     * @param string $type
-     *            Relation EntityManagerSchema::MANY_TO_ONE or EntityManagerSchema::MANY_TO_MANY
-     * @return array Key relationships.
-     */
-    public function getRelationKeysTo(ModelDescription $from, ModelDescription $to, $type)
-    {
-        $properies = [];
-        foreach ($from as $name => $property) {
-            if ($property->type === $type && $property->model === $to->type) {
-                $properies[] = $name;
-            }
-        }
-        return $properies;
-    }
+//     /**
+//      * Retrieve key relationships of a given model.
+//      *
+//      * @param string $model
+//      * @param string $type
+//      *            Relation EntityManagerSchema::MANY_TO_ONE or EntityManagerSchema::MANY_TO_MANY
+//      * @return array Key relationships.
+//      */
+//     public function getRelationKeysTo(ModelDescription $from, ModelDescription $to, $type)
+//     {
+//         $properies = [];
+//         foreach ($from as $name => $property) {
+//             if ($property->type === $type && $property->model === $to->type) {
+//                 $properies[] = $name;
+//             }
+//         }
+//         return $properies;
+//     }
 
-    private function convertViewDataFilters(ModelDescription $md, $view, $dataFilter)
-    {
-        $filters = [];
-        if (! isset($dataFilter) || count($dataFilter) == 0) {
-            return $filters;
-        }
-        foreach ($dataFilter as $filter) {
-            if ($filter instanceof Expression) {
-                $filters[] = $filter;
-                continue;
-            }
-            // or expression
-            if (is_array($filter[0])) {
-                $orFilters = [];
-                foreach ($filter as $orFilter) {
-                    $orFilters[] = $this->convertViewDataWhereToDb($md, $view, $orFilter);
-                }
-                $filters[] = $orFilters;
-                continue;
-            }
-            $filters[] = $this->convertViewDataWhereToDb($md, $view, $filter);
-        }
-        return $filters;
-    }
+//     private function convertViewDataFilters(ModelDescription $md, $view, $dataFilter)
+//     {
+//         $filters = [];
+//         if (! isset($dataFilter) || count($dataFilter) == 0) {
+//             return $filters;
+//         }
+//         foreach ($dataFilter as $filter) {
+//             if ($filter instanceof Expression) {
+//                 $filters[] = $filter;
+//                 continue;
+//             }
+//             // or expression
+//             if (is_array($filter[0])) {
+//                 $orFilters = [];
+//                 foreach ($filter as $orFilter) {
+//                     $orFilters[] = $this->convertViewDataWhereToDb($md, $view, $orFilter);
+//                 }
+//                 $filters[] = $orFilters;
+//                 continue;
+//             }
+//             $filters[] = $this->convertViewDataWhereToDb($md, $view, $filter);
+//         }
+//         return $filters;
+//     }
 
-    /*
-     * converts list of data filter
-     */
-    private function convertDataFilters(ModelDescription $md, $dataFilter)
-    {
-        $filters = [];
-        if (! isset($dataFilter) || count($dataFilter) == 0) {
-            return $filters;
-        }
-        foreach ($dataFilter as $filter) {
-            if ($filter instanceof Expression) {
-                $filters[] = $filter;
-                continue;
-            }
-            // or expression
-            if (is_array($filter[0])) {
-                $orFilters = [];
-                foreach ($filter as $orFilter) {
-                    $orFilters[] = $this->convertDataWhereToDb($md, $orFilter);
-                }
-                $filters[] = $orFilters;
-                continue;
-            }
-            $filters[] = $this->convertDataWhereToDb($md, $filter);
-        }
-        return $filters;
-    }
+//     /*
+//      * converts list of data filter
+//      */
+//     private function convertDataFilters(ModelDescription $md, $dataFilter)
+//     {
+//         $filters = [];
+//         if (! isset($dataFilter) || count($dataFilter) == 0) {
+//             return $filters;
+//         }
+//         foreach ($dataFilter as $filter) {
+//             if ($filter instanceof Expression) {
+//                 $filters[] = $filter;
+//                 continue;
+//             }
+//             // or expression
+//             if (is_array($filter[0])) {
+//                 $orFilters = [];
+//                 foreach ($filter as $orFilter) {
+//                     $orFilters[] = $this->convertDataWhereToDb($md, $orFilter);
+//                 }
+//                 $filters[] = $orFilters;
+//                 continue;
+//             }
+//             $filters[] = $this->convertDataWhereToDb($md, $filter);
+//         }
+//         return $filters;
+//     }
 
-    /*
-     * converts a filter to db filter
-     *
-     * NOTE: all attribute are considerd to be from $md
-     */
-    private function convertDataWhereToDb(ModelDescription $md, $filter)
-    {
-        if ($filter instanceof Expression) {
-            return $filter;
-        }
+//     /*
+//      * converts a filter to db filter
+//      *
+//      * NOTE: all attribute are considerd to be from $md
+//      */
+//     private function convertDataWhereToDb(ModelDescription $md, $filter)
+//     {
+//         if ($filter instanceof Expression) {
+//             return $filter;
+//         }
 
-        $dfilter = [];
-        $names = explode('.', $filter[0]);
-        if (count($names) == 1) {
-            $name = $filter[0];
-            $property = $md->$name;
-            $dfilter[] = $this->getFieldName($md, $property);
-        } else {
-            $name = $names[1];
-            $property = $md->$name;
-            $dfilter[] = $names[0] . '.' . $this->getFieldName($md, $property, false);
-        }
+//         $dfilter = [];
+//         $names = explode('.', $filter[0]);
+//         if (count($names) == 1) {
+//             $name = $filter[0];
+//             $property = $md->$name;
+//             $dfilter[] = $this->getFieldName($md, $property);
+//         } else {
+//             $name = $names[1];
+//             $property = $md->$name;
+//             $dfilter[] = $names[0] . '.' . $this->getFieldName($md, $property, false);
+//         }
 
-        if (count($filter) == 2) {
-            $value = $filter[1];
-        } else {
-            $value = $filter[2];
-            $dfilter[] = $filter[1]; // operation = > < in , ..
-        }
+//         if (count($filter) == 2) {
+//             $value = $filter[1];
+//         } else {
+//             $value = $filter[2];
+//             $dfilter[] = $filter[1]; // operation = > < in , ..
+//         }
 
-        if ($value instanceof Expression) {
-            $dfilter[] = $value;
-        } else {
-            $dfilter[] = $this->toDb($property, $value);
-        }
-        return $dfilter;
-    }
+//         if ($value instanceof Expression) {
+//             $dfilter[] = $value;
+//         } else {
+//             $dfilter[] = $this->toDb($property, $value);
+//         }
+//         return $dfilter;
+//     }
 
-    /*
-     * converts a filter to db filter
-     *
-     * Note: search alias in view joins
-     */
-    private function convertViewDataWhereToDb(ModelDescription $md, $view, $filter)
-    {
-        if ($filter instanceof Expression) {
-            return $filter;
-        }
+//     /*
+//      * converts a filter to db filter
+//      *
+//      * Note: search alias in view joins
+//      */
+//     private function convertViewDataWhereToDb(ModelDescription $md, $view, $filter)
+//     {
+//         if ($filter instanceof Expression) {
+//             return $filter;
+//         }
 
-        $dfilter = [];
-        $names = explode('.', $filter[0]);
-        if (count($names) == 1) {
-            $name = $names[0];
-            $property = $md->$name;
-            $dfilter[] = $this->getFieldName($md, $property);
-        } else {
-            $name = $names[1];
-            foreach ($view['join'] as $join) {
-                if (isset($join['alias']) && $join['alias'] == $names[0]) {
-                    /*
-                     * Native Join
-                     */
-                    if (isset($join['joinTable'])) {
-                        return $filter;
-                    }
-                    /*
-                     * Data Join
-                     */
-                    if (isset($join['inverseJoinModel'])) {
-                        $cmd = ModelDescription::getInstance($join['inverseJoinModel']);
-                        break;
-                    }
-                    $jproname = $join['joinProperty'];
-                    $joinProperty = $md->$jproname;
-                    $cmd = ModelDescription::getInstance($joinProperty->inverseJoinModel);
-                    break;
-                }
-            }
-            $property = $cmd->$name;
-            $dfilter[] = $names[0] . '.' . $this->getFieldName($cmd, $property, false);
-        }
+//         $dfilter = [];
+//         $names = explode('.', $filter[0]);
+//         if (count($names) == 1) {
+//             $name = $names[0];
+//             $property = $md->$name;
+//             $dfilter[] = $this->getFieldName($md, $property);
+//         } else {
+//             $name = $names[1];
+//             foreach ($view['join'] as $join) {
+//                 if (isset($join['alias']) && $join['alias'] == $names[0]) {
+//                     /*
+//                      * Native Join
+//                      */
+//                     if (isset($join['joinTable'])) {
+//                         return $filter;
+//                     }
+//                     /*
+//                      * Data Join
+//                      */
+//                     if (isset($join['inverseJoinModel'])) {
+//                         $cmd = ModelDescription::getInstance($join['inverseJoinModel']);
+//                         break;
+//                     }
+//                     $jproname = $join['joinProperty'];
+//                     $joinProperty = $md->$jproname;
+//                     $cmd = ModelDescription::getInstance($joinProperty->inverseJoinModel);
+//                     break;
+//                 }
+//             }
+//             $property = $cmd->$name;
+//             $dfilter[] = $names[0] . '.' . $this->getFieldName($cmd, $property, false);
+//         }
 
-        if (count($filter) == 2) {
-            $value = $filter[1];
-        } else {
-            $value = $filter[2];
-            $dfilter[] = $filter[1]; // operation = > < in , ..
-        }
+//         if (count($filter) == 2) {
+//             $value = $filter[1];
+//         } else {
+//             $value = $filter[2];
+//             $dfilter[] = $filter[1]; // operation = > < in , ..
+//         }
 
-        if ($value instanceof Expression) {
-            $dfilter[] = $value;
-        } else {
-            $dfilter[] = $this->toDb($property, $value);
-        }
-        return $dfilter;
-    }
+//         if ($value instanceof Expression) {
+//             $dfilter[] = $value;
+//         } else {
+//             $dfilter[] = $this->toDb($property, $value);
+//         }
+//         return $dfilter;
+//     }
 
     // ---------------------------------------------------------------------------------------------
     // Transform

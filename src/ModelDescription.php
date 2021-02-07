@@ -28,6 +28,7 @@ class ModelDescription
     public ?Table $table = null;
     public ?Entity $entity = null;
     public bool $multitinant = false;
+    public ?string $primaryKey = null;
     
     public array $properties = [];
     
@@ -35,13 +36,13 @@ class ModelDescription
         string $name,
         ?Table $table = null,
         ?Entity $entity = null,
-        
+        ?string $primaryKey = null,
         array $properties = []
     ){
         $this->name = $name;
         $this->table = $table;
         $this->entity = $entity;
-        
+        $this->primaryKey = $primaryKey;
         
         $this->properties = $properties;
     }
@@ -50,6 +51,13 @@ class ModelDescription
     public function isEntity(): bool
     {
         return ! empty($this->entity);
+    }
+    
+    public function newInstance($constractorData = []){
+        // TODO: maso, 2021: create new instance with constractor and resolve with data.
+        // NOTE: using object mapper. mayby.
+        $class = $this->name;
+        return new $class();
     }
 }
 

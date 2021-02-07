@@ -26,11 +26,21 @@ class ModelDescriptionLoaderAttribute implements ModelDescriptionLoaderInterface
         $reflectionClass = new ReflectionClass($class);
 
         $entity = $this->getEntityOf($reflectionClass);
+        $properties = $this->getProperties($reflectionClass, ! empty($entity));
+        
+        $primaryKey = null;
+        foreach ($properties as $name => $property){
+            if($property->isId()){
+                $primaryKey = $name;
+                break;
+            }
+        }
 
         return $builder->setClass($class)
             ->setTable($this->getTableOf($reflectionClass))
             ->setEntity($entity)
-            ->setProperties($this->getProperties($reflectionClass, ! empty($entity)))
+            ->setProperties($properties)
+            ->setPrimaryKey($primaryKey)
             ->build();
     }
 
@@ -75,7 +85,8 @@ class ModelDescriptionLoaderAttribute implements ModelDescriptionLoaderInterface
         $rprops = $reflectionClass->getProperties();
         foreach ($rprops as $reflectionProperty) {
             $builder = new ModelPropertyBuilder();
-            $properties[] = $builder->setName($this->getPropertyName($reflectionProperty))
+            $name = $this->getPropertyName($reflectionProperty);
+            $properties[$name] = $builder->setName($name)
                 ->setType($this->getPropertyType($reflectionProperty))
                 ->propertyOfEntity($isEntity)
                 ->setId($this->getPropertyId($reflectionProperty))

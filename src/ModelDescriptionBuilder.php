@@ -12,6 +12,7 @@ class ModelDescriptionBuilder
     private ?Table $table = null;
     private ?Entity $entity = null;
     private bool $multitinant = false;
+    private ?string $primaryKey = null;
 
     private array $properties = [];
     
@@ -76,6 +77,21 @@ class ModelDescriptionBuilder
     {
         return $this->properties;
     }
+    
+    public function setPrimaryKey(?string $primaryKey = null): self
+    {
+        $this->primaryKey = $primaryKey;
+        return $this;
+    }
+
+    private function getPrimaryKey(): ?string
+    {
+        $properties = $this->getProperties();
+        if (!empty($this->primaryKey)) {
+            $this->assertTrue(array_key_exists($this->primaryKey, $properties), 'Primery key not founds in {{class}}', ["class" => $this->getClass()]);
+        }
+        return $this->primaryKey;
+    }
 
     public function build(): ModelDescription
     {
@@ -87,6 +103,7 @@ class ModelDescriptionBuilder
             name: $this->getClass(),
             table: $this->getTable(),
             entity: $this->getEntity(),
+            primaryKey: $this->getPrimaryKey(),
             
             properties: $this->getProperties()
         );

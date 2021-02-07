@@ -29,17 +29,6 @@ interface EntityManager
     public function getProperties(): array;
 
     /**
-     * Set an entity manager property or hint.
-     * If a vendor-specific property or hint is not recognized, it is silently ignored.
-     *
-     * @param string $name
-     *            of the property to set
-     * @param mixed $value
-     *            value of the property to set
-     */
-    public function setProperty​($name, $value);
-
-    /**
      * Clear the persistence context, causing all managed entities to become detached.
      * Changes made to entities that have not been flushed to the database will not be persisted.
      */
@@ -133,7 +122,18 @@ interface EntityManager
     public function remove($entity);
 
     public function setFlushMode(string $flushMode): void;
-
+    
+    /**
+     * Set an entity manager property or hint.
+     * 
+     * If a vendor-specific property or hint is not recognized, it is silently ignored.
+     *
+     * @param string $name
+     *            of the property to set
+     * @param mixed $value
+     *            value of the property to set
+     */
+    
     public function setProperty(string $propertyName, $value): void;
 
     /**

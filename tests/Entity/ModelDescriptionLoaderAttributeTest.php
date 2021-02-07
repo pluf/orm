@@ -20,34 +20,34 @@ class ModelDescriptionLoaderAttributeTest extends TestCase
                 Asset\Author::class,
                 new Table('test_authors', 'test_schema', 'test_catalog'),
                 [
-                    new ModelProperty("id", "int", new Id(), new Column("id")),
-                    new ModelProperty("firstName", "string", null, new Column("first_name")),
-                    new ModelProperty("lastName", "string", null, new Column("last_name"))
+                   "id" => new ModelProperty("id", "int", new Id(), new Column("id")),
+                   "firstName" => new ModelProperty("firstName", "string", null, new Column("first_name")),
+                   "lastName" => new ModelProperty("lastName", "string", null, new Column("last_name"))
                 ]
             ],
             [
                 Asset\Book::class,
                 new Table('test_books'),
                 [
-                    new ModelProperty("id", "int", new Id(), new Column("id")),
-                    new ModelProperty("title", "string", null, new Column("title")),
-                    new ModelProperty("pages", "int", null, new Column("pages"))
+                    "id" => new ModelProperty("id", "int", new Id(), new Column("id")),
+                    "title" => new ModelProperty("title", "string", null, new Column("title")),
+                    "pages" => new ModelProperty("pages", "int", null, new Column("pages"))
                 ]
             ],
             [
                 Asset\Publisher::class,
                 new Table('test_publishers'),
                 [
-                    new ModelProperty("id", "int", new Id(), new Column("id")),
-                    new ModelProperty("name", "string", null, new Column("name"))
+                    "id" => new ModelProperty("id", "int", new Id(), new Column("id")),
+                    "name" => new ModelProperty("name", "string", null, new Column("name"))
                 ]
             ],
             [
                 Asset\Category::class,
                 new Table('Pluf_Tests_Entity_Asset_Category'),
                 [
-                    new ModelProperty("id", "int", new Id(), new Column("id")),
-                    new ModelProperty("title", "string", null, new Column("title"))
+                    "id" => new ModelProperty("id", "int", new Id(), new Column("id")),
+                    "title" => new ModelProperty("title", "string", null, new Column("title"))
                 ]
             ]
         ];
@@ -114,6 +114,37 @@ class ModelDescriptionLoaderAttributeTest extends TestCase
 
         $md = $loader->get(Asset\InvalidEntity::class);
         $this->assertNotNull($md);
+    }
+    
+    public function getClassAndPrimaryKey(){
+        
+        return [
+            [
+                Asset\Author::class,
+                "id"
+            ],
+            [
+                Asset\Book::class,
+                "id"
+            ],
+            [
+                Asset\Publisher::class,
+                "id"
+            ]
+        ];
+    }
+    
+    /**
+     *
+     * @dataProvider getClassAndPrimaryKey
+     * @test
+     */
+    public function testPrimaryKeyDetection($type , $primaryKey)
+    {
+        $loader = new ModelDescriptionLoaderAttribute();
+        
+        $md = $loader->get($type);
+        $this->assertEquals($primaryKey, $md->primaryKey);
     }
 }
 
