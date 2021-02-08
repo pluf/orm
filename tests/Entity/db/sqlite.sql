@@ -1,0 +1,21 @@
+CREATE TABLE test_authors (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+   	first_name TEXT NOT NULL,
+   	last_name TEXT NOT NULL
+);
+
+CREATE TABLE 'test_books' (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+   	title TEXT NOT NULL,
+   	pages INTEGER NOT NULL
+);
+
+CREATE TABLE `test_publishers`(
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+   	name TEXT NOT NULL
+);
+
+CREATE TABLE `Pluf_Tests_Entity_Asset_Category`(
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+   	title TEXT NOT NULL
+);

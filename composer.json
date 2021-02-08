@@ -23,13 +23,13 @@
 	},
 	"autoload" : {
 		"psr-4" : {
-			"Pluf\\" : "src"
+			"Pluf\\Orm\\" : "src"
 		}
 	},
 	"autoload-dev" : {
 		"psr-4" : {
 			"Pluf\\Tests\\" : "tests",
-			"Pluf\\" : "examples"
+			"Pluf\\Examples\\" : "examples"
 		}
 	},
 	"keywords" : [
@@ -37,7 +37,9 @@
 	],
 	"require" : {
 		"phayes/geophp" : "^1.2",
-		"psr/log" : "~1.1"
+		"psr/log" : "~1.1",
+		"psr/cache" : "^3.0",
+		"atk4/dsql" : "^2.3"
 	},
 	"require-dev" : {
 		"phpunit/phpunit" : "^9"
