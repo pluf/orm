@@ -21,6 +21,11 @@ class ObjectMapperBuilder
         return $this;
     }
 
+    public function addType($param): self
+    {
+        return $this;
+    }
+
     public function build(): ObjectMapperInterface
     {
         $objectMapper = new ObjectMapperJson();
