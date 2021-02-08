@@ -9,17 +9,16 @@
 			"name" : "Maos",
 			"email" : "mostafa.barmshory@gmail.com"
 		}, {
-			"name" : "hadi",
+			"name" : "Hadi",
 			"email" : "hadi.mansouri@gmail.com"
 		}
 	],
 	"support" : {
 		"email" : "info@pluf.ir",
-		"issues" : "http://a",
-		"forum" : "http://a",
-		"wiki" : "http://a",
-		"irc" : "http://a",
-		"source" : "http://a"
+		"issues" : "https://github.com/pluf/orm/issues",
+		"forum" : "https://github.com/pluf/orm/issues",
+		"wiki" : "https://github.com/pluf/orm/wiki",
+		"source" : "https://github.com/pluf/orm"
 	},
 	"autoload" : {
 		"psr-4" : {
