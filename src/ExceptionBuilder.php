@@ -18,8 +18,6 @@ class ExceptionBuilder
 
     private array $params = [];
 
-    private ?int $status = 500;
-
     private ?int $code = 0;
 
     private ?Throwable $previous;
@@ -78,16 +76,6 @@ class ExceptionBuilder
 
     /**
      *
-     * @param number $status
-     */
-    public function setStatus($status): self
-    {
-        $this->status = $status;
-        return $this;
-    }
-
-    /**
-     *
      * @param number $code
      */
     public function setCode($code): self
@@ -113,7 +101,7 @@ class ExceptionBuilder
      */
     public function build(): Exception
     {
-        $ex = new Exception($this->message, $this->code, $this->previous, $this->status, $this->params, $this->solutions);
+        $ex = new Exception($this->message, $this->code, $this->previous, $this->params, $this->solutions);
         return $ex;
     }
 }
