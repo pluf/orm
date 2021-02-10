@@ -4,7 +4,7 @@ namespace Pluf\Orm;
 use Pluf\Orm\ObjectMapper\ObjectMapperJson;
 
 /**
- * Crates new instance of ObjectMapperInterface
+ * Crates new instance of ObjectMapper
  *
  * @author maso
  *        
@@ -26,7 +26,7 @@ class ObjectMapperBuilder
         return $this;
     }
 
-    public function build(): ObjectMapperInterface
+    public function build(): ObjectMapper
     {
         $objectMapper = new ObjectMapperJson();
         return $objectMapper;

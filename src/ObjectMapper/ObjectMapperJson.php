@@ -1,7 +1,7 @@
 <?php
 namespace Pluf\Orm\ObjectMapper;
 
-use Pluf\Orm\ObjectMapperInterface;
+use Pluf\Orm\ObjectMapper;
 use Pluf\Orm\ObjectUtils;
 
 /**
@@ -10,13 +10,13 @@ use Pluf\Orm\ObjectUtils;
  * @author maso
  *        
  */
-class ObjectMapperJson implements ObjectMapperInterface
+class ObjectMapperJson implements ObjectMapper
 {
 
     /**
      *
      * {@inheritdoc}
-     * @see ObjectMapperInterface::readValue()
+     * @see ObjectMapper::readValue()
      */
     public function readValue($input, $class, bool $isList = false)
     {
@@ -29,7 +29,7 @@ class ObjectMapperJson implements ObjectMapperInterface
     /**
      *
      * {@inheritdoc}
-     * @see ObjectMapperInterface::canDeserialize()
+     * @see ObjectMapper::canDeserialize()
      */
     public function canDeserialize(string $class): bool
     {
@@ -39,7 +39,7 @@ class ObjectMapperJson implements ObjectMapperInterface
     /**
      *
      * {@inheritdoc}
-     * @see ObjectMapperInterface::canSerialize()
+     * @see ObjectMapper::canSerialize()
      */
     public function canSerialize(string $class): bool
     {
@@ -49,7 +49,7 @@ class ObjectMapperJson implements ObjectMapperInterface
     /**
      *
      * {@inheritdoc}
-     * @see ObjectMapperInterface::writeValue()
+     * @see ObjectMapper::writeValue()
      */
     public function writeValue($output, $entity, $class): self
     {}
@@ -57,7 +57,7 @@ class ObjectMapperJson implements ObjectMapperInterface
     /**
      *
      * {@inheritdoc}
-     * @see ObjectMapperInterface::writeValueAsString()
+     * @see ObjectMapper::writeValueAsString()
      */
     public function writeValueAsString($entity, ?string $class = null): string
     {

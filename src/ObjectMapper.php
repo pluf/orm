@@ -41,7 +41,7 @@ namespace Pluf\Orm;
  * @author maso
  *        
  */
-interface ObjectMapperInterface
+interface ObjectMapper
 {
 
     /**

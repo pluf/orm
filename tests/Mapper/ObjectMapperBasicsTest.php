@@ -2,7 +2,7 @@
 namespace Pluf\Tests\Mapper;
 
 use PHPUnit\Framework\TestCase;
-use Pluf\Orm\ObjectMapperInterface;
+use Pluf\Orm\ObjectMapper;
 use Pluf\Orm\ObjectMapperBuilder;
 
 class ObjectMapperBasicsTest extends TestCase
@@ -25,7 +25,7 @@ class ObjectMapperBasicsTest extends TestCase
      * @dataProvider allObjectMappers
      * @test
      */
-    public function testWriteStringValue(ObjectMapperInterface $mapper)
+    public function testWriteStringValue(ObjectMapper $mapper)
     {
         $foo = new Foo();
         $foo->intValue = rand();
