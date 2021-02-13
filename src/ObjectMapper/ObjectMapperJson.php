@@ -140,7 +140,7 @@ class ObjectMapperJson implements ObjectMapper
             $mdp = $md->properties[$parameter->getName()];
             if (! empty($mdp) && array_key_exists($mdp->name, $rdata)) {
                 $paramsValues[] = $rdata[$mdp->name];
-                unset($rdata[$md->name]);
+                unset($rdata[$mdp->name]);
             } else {
                 $paramsValues[] = $parameter->getDefaultValue();
             }

@@ -32,6 +32,7 @@ class ObjectMapperBuilder
     public function setModelDescriptionRepository(ModelDescriptionRepository $modelDescriptionRepository): self
     {
         $this->modelDescriptionRepository = $modelDescriptionRepository;
+        return $this;
     }
 
     public function getModelDescriptionRepository()
