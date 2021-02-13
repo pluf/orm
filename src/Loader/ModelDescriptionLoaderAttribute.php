@@ -5,15 +5,19 @@ use Pluf\Orm\ModelDescription;
 use Pluf\Orm\ModelDescriptionBuilder;
 use Pluf\Orm\ModelDescriptionLoaderInterface;
 use Pluf\Orm\ModelPropertyBuilder;
-use Pluf\Orm\Attribute\Entity;
-use Pluf\Orm\Attribute\Table;
-use Pluf\Orm\Attribute\Id;
+use Pluf\Orm\StringUtil;
 use Pluf\Orm\Attribute\Column;
+use Pluf\Orm\Attribute\Entity;
+use Pluf\Orm\Attribute\Id;
+use Pluf\Orm\Attribute\Table;
 use ReflectionClass;
+use ReflectionMethod;
 use ReflectionProperty;
+use Pluf\Orm\AssertionTrait;
 
 class ModelDescriptionLoaderAttribute implements ModelDescriptionLoaderInterface
 {
+    use AssertionTrait;
 
     /**
      *
@@ -27,10 +31,10 @@ class ModelDescriptionLoaderAttribute implements ModelDescriptionLoaderInterface
 
         $entity = $this->getEntityOf($reflectionClass);
         $properties = $this->getProperties($reflectionClass, ! empty($entity));
-        
+
         $primaryKey = null;
-        foreach ($properties as $name => $property){
-            if($property->isId()){
+        foreach ($properties as $name => $property) {
+            if ($property->isId()) {
                 $primaryKey = $name;
                 break;
             }
@@ -82,15 +86,47 @@ class ModelDescriptionLoaderAttribute implements ModelDescriptionLoaderInterface
     {
         $properties = [];
 
+        // 1- check properties attributes
         $rprops = $reflectionClass->getProperties();
         foreach ($rprops as $reflectionProperty) {
             $builder = new ModelPropertyBuilder();
             $name = $this->getPropertyName($reflectionProperty);
+            $isPublic = $reflectionProperty->isPublic();
             $properties[$name] = $builder->setName($name)
                 ->setType($this->getPropertyType($reflectionProperty))
                 ->propertyOfEntity($isEntity)
                 ->setId($this->getPropertyId($reflectionProperty))
                 ->setColumn($this->getPropertyColumn($reflectionProperty))
+                ->setAccessable($isPublic)
+                ->setGetter($isPublic ? null : $this->getPropertyGetter($reflectionClass, $reflectionProperty))
+                ->setSetter($isPublic ? null : $this->getPropertySetter($reflectionClass, $reflectionProperty))
+                ->build();
+        }
+
+        // 2- check method attributes
+        $methods = $reflectionClass->getMethods();
+        foreach ($methods as $reflectionMethod) {
+            $column = $this->getMethodColumn($reflectionMethod);
+            if (empty($column)) {
+                continue;
+            }
+            $name = $column->name;
+            if (empty($name)) {
+                $name = $reflectionMethod->getName();
+                $match = [];
+                $this->assertTrue(preg_match("#^get(.*)$#", $name, $match)>0, "A get metoth can annotate with Column or explicit define name.");
+                $name = StringUtil::decapitalize($match[1]);
+            }
+
+            $builder = new ModelPropertyBuilder();
+            $properties[$name] = $builder->setName($name)
+                ->setType($this->getMethodType($reflectionMethod))
+                ->propertyOfEntity($isEntity)
+                ->setId($this->getMethodId($reflectionMethod))
+                ->setColumn($column)
+                ->setAccessable(false)
+                ->setGetter($reflectionMethod->getName())
+                ->setSetter(null)
                 ->build();
         }
 
@@ -123,11 +159,68 @@ class ModelDescriptionLoaderAttribute implements ModelDescriptionLoaderInterface
         }
         return $attributes[0]->newInstance();
     }
-    
+
     private function getPropertyType(ReflectionProperty $reflectionProperty): ?string
     {
         $type = $reflectionProperty->getType()?->getName();
         return $type;
+    }
+
+    /**
+     * Finds getter of the property
+     *
+     * @param ReflectionClass $reflectionClass
+     * @param ReflectionProperty $reflectionProperty
+     * @return string|NULL
+     */
+    private function getPropertyGetter(ReflectionClass $reflectionClass, ReflectionProperty $reflectionProperty): ?string
+    {
+        $name = 'get' . StringUtil::capatalizeFieldName($reflectionProperty->getName());
+        if (! $reflectionClass->hasMethod($name)) {
+            return null;
+        }
+        return $name;
+    }
+
+    /**
+     * Finds setter of the property
+     *
+     * @param ReflectionClass $reflectionClass
+     * @param ReflectionProperty $reflectionProperty
+     * @return string|NULL
+     */
+    private function getPropertySetter(ReflectionClass $reflectionClass, ReflectionProperty $reflectionProperty): ?string
+    {
+        $name = 'set' . StringUtil::capatalizeFieldName($reflectionProperty->getName());
+        if (! $reflectionClass->hasMethod($name)) {
+            return null;
+        }
+        return $name;
+    }
+
+    private function getMethodColumn(ReflectionMethod $reflectionMethod): ?Column
+    {
+        $attributes = $reflectionMethod->getAttributes(Column::class);
+        if (sizeof($attributes) < 1) {
+            return null;
+        }
+        return $attributes[0]->newInstance();
+    }
+
+    private function getMethodType(ReflectionMethod $reflectionMethod): ?string
+    {
+       return  $reflectionMethod->getReturnType()?->getName();
+    }
+
+    private function getMethodId(ReflectionMethod $reflectionMethod): ?Id
+    {
+        $attributes = $reflectionMethod->getAttributes(Id::class);
+        if (sizeof($attributes) == 0) {
+            return null;
+        } else if (sizeof($attributes) > 1) {
+            $this->warn("Just an ID is allowed for method");
+        }
+        return $attributes[0]->newInstance();
     }
 }
 

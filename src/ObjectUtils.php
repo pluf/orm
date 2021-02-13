@@ -39,5 +39,18 @@ class ObjectUtils
     {
         return new $class();
     }
+
+    public static function isPrimitive($var)
+    {
+        return is_string($var) || is_bool($var) || is_numeric($var) || is_array($var);
+    }
+
+    public static function isArrayassociative(array $arr): bool
+    {
+        if (array() === $arr) {
+            return false;
+        }
+        return array_keys($arr) !== range(0, count($arr) - 1);
+    }
 }
 

@@ -1,10 +1,8 @@
 <?php
 namespace Pluf\Tests\Mapper;
 
-use Pluf\Orm\Attribute\Entity;
 
-#[Entity]
-class Foo
+class NonEntityFoo
 {
 
     public int $intValue = 0;

@@ -1,6 +1,8 @@
 <?php
 namespace Pluf\Orm\ObjectMapper;
 
+use Pluf\Orm\AssertionTrait;
+use Pluf\Orm\ModelDescriptionRepository;
 use Pluf\Orm\ObjectMapper;
 use Pluf\Orm\ObjectUtils;
 
@@ -12,6 +14,13 @@ use Pluf\Orm\ObjectUtils;
  */
 class ObjectMapperJson implements ObjectMapper
 {
+
+    use AssertionTrait;
+
+    public function __construct(ModelDescriptionRepository $modelDescriptionRepository)
+    {
+        $this->modelDescriptionRepository = $modelDescriptionRepository;
+    }
 
     /**
      *
@@ -61,9 +70,43 @@ class ObjectMapperJson implements ObjectMapper
      */
     public function writeValueAsString($entity, ?string $class = null): string
     {
-        // XXX: maso, 2021 consider the class definistion
-        $str = json_encode($entity);
-        return $str;
+        return json_encode($this->convertToPrimitives($entity, $class));
+    }
+
+    private function convertToPrimitives($entity, ?string $class = null)
+    {
+        // Return the entity
+        // - array
+        // - string
+        // - bool
+        // - ...
+        if (ObjectUtils::isPrimitive($entity)) {
+            if (is_array($entity)) {
+                $result = [];
+                foreach ($entity as $key => $value) {
+                    $result[$key] = $this->convertToPrimitives($value);
+                }
+                return $result;
+            }
+            return $entity;
+        }
+
+        // find class
+        if (empty($class)) {
+            $class = get_class($entity);
+        }
+
+        $md = $this->modelDescriptionRepository->get($class);
+        $this->assertTrue($md->isEntity(), "The type of {{type}} is not entity. Impossible to encode.", [
+            "type" => $md->name
+        ]);
+
+        $result = [];
+        foreach ($md->properties as $property) {
+            $value = $property->getValue($entity);
+            $result[$property->name] = $this->convertToPrimitives($value, $property->type);
+        }
+        return $result;
     }
 }
 

@@ -4,6 +4,7 @@ namespace Pluf\Tests\Mapper;
 use PHPUnit\Framework\TestCase;
 use Pluf\Orm\ObjectMapper;
 use Pluf\Orm\ObjectMapperBuilder;
+use Pluf\Orm\Exception;
 
 class ObjectMapperBasicsTest extends TestCase
 {
@@ -41,6 +42,25 @@ class ObjectMapperBasicsTest extends TestCase
         $this->assertTrue($newFoo instanceof Foo);
 
         $this->assertEquals($foo, $newFoo);
+    }
+    
+    
+    /**
+     * @dataProvider allObjectMappers
+     * @test
+     */
+    public function testNonEntity(ObjectMapper $mapper)
+    {
+        $this->expectException(Exception::class);
+        
+        $foo = new NonEntityFoo();
+        $foo->intValue = rand();
+        $foo->floatValue = 1.123;
+        $foo->strValue = 'xxx' . rand();
+        $foo->boolValue = true;
+        
+        $output = $mapper->writeValueAsString($foo);
+        $this->assertNotNull($output);
     }
 }
 
