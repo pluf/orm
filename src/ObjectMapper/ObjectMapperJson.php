@@ -5,6 +5,8 @@ use Pluf\Orm\AssertionTrait;
 use Pluf\Orm\ModelDescriptionRepository;
 use Pluf\Orm\ObjectMapper;
 use Pluf\Orm\ObjectUtils;
+use ReflectionClass;
+use Pluf\Orm\ModelDescription;
 
 /**
  * JSON implementation of Object mapper
@@ -29,10 +31,21 @@ class ObjectMapperJson implements ObjectMapper
      */
     public function readValue($input, $class, bool $isList = false)
     {
-        $data = json_decode($input);
-        $model = ObjectUtils::newInstance($class);
-        $model = ObjectUtils::fillModel($model, $data);
-        return $model;
+        $data = json_decode($input, true);
+        $md = $this->modelDescriptionRepository->get($class);
+
+        // new instance
+        $entit = $this->newInstance($md, $data);
+        foreach ($md->properties as $property) {
+            if (array_key_exists($property->name, $data)) {
+                $property->setValue($entit, $data[$property->name]);
+                unset($data[$property->name]);
+            }
+        }
+
+        // TODO: maso, 2020: if data is not finish throw error
+
+        return $entit;
     }
 
     /**
@@ -42,7 +55,8 @@ class ObjectMapperJson implements ObjectMapper
      */
     public function canDeserialize(string $class): bool
     {
-        return true;
+        $md = $this->modelDescriptionRepository->get($class);
+        return ! empty($md);
     }
 
     /**
@@ -52,7 +66,8 @@ class ObjectMapperJson implements ObjectMapper
      */
     public function canSerialize(string $class): bool
     {
-        return true;
+        $md = $this->modelDescriptionRepository->get($class);
+        return ! empty($md);
     }
 
     /**
@@ -73,7 +88,7 @@ class ObjectMapperJson implements ObjectMapper
         return json_encode($this->convertToPrimitives($entity, $class));
     }
 
-    private function convertToPrimitives($entity, ?string $class = null)
+    protected function convertToPrimitives($entity, ?string $class = null)
     {
         // Return the entity
         // - array
@@ -107,6 +122,31 @@ class ObjectMapperJson implements ObjectMapper
             $result[$property->name] = $this->convertToPrimitives($value, $property->type);
         }
         return $result;
+    }
+
+    protected function newInstance(ModelDescription $md, &$rdata)
+    {
+        $reflectionClass = new ReflectionClass($md->name);
+
+        $constractor = $reflectionClass->getConstructor();
+        if (empty($constractor)) {
+            $class = $md->name;
+            return new $class();
+        }
+        $params = $constractor->getParameters();
+        $paramsValues = [];
+
+        foreach ($params as $parameter) {
+            $mdp = $md->properties[$parameter->getName()];
+            if (! empty($mdp) && array_key_exists($mdp->name, $rdata)) {
+                $paramsValues[] = $rdata[$mdp->name];
+                unset($rdata[$md->name]);
+            } else {
+                $paramsValues[] = $parameter->getDefaultValue();
+            }
+        }
+        $instance = $reflectionClass->newInstanceArgs($paramsValues);
+        return $instance;
     }
 }
 
