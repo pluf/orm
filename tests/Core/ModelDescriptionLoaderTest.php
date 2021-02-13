@@ -95,5 +95,54 @@ class ModelDescriptionLoaderTest extends TestCase
         $this->assertNotNull($property->getter);
         $this->assertEquals($getter, $property->getter);
     }
+    
+    
+    
+    
+    public function propertyGetterDataValue()
+    {
+        return [
+            [
+                new ModelDescriptionLoaderAttribute(),
+                new Foo(publicPropertyBool: false),
+                'publicPropertyBool',
+                false
+            ],
+            [
+                new ModelDescriptionLoaderAttribute(),
+                new Foo(publicPropertyBool: true),
+                'publicPropertyBool',
+                true
+            ],
+            [
+                new ModelDescriptionLoaderAttribute(),
+                new Foo(privatePropertyBool: true),
+                'privatePropertyBool',
+                true
+            ],
+            [
+                new ModelDescriptionLoaderAttribute(),
+                new Foo(privatePropertyBool: false),
+                'privatePropertyBool',
+                false
+            ],
+        ];
+    }
+    
+    /**
+     *
+     * @test
+     * @dataProvider propertyGetterDataValue
+     */
+    public function testPropertyGetterValue(ModelDescriptionLoaderInterface $loader, $entity, string $propertyName, $value)
+    {
+        $md = $loader->get(get_class($entity));
+        $this->assertNotNull($md, "Model description not found");
+        
+        $property = $md->properties[$propertyName];
+        $this->assertNotNull($property, "Model property not found");
+        
+        $this->assertEquals($value, $property->getValue($entity));
+    }
 }
 

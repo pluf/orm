@@ -60,8 +60,7 @@ class ModelProperty
     /**
      * Creates new instance of model property
      */
-    public function __construct(string $name, string $type, 
-        ?Id $id = null, ?Column $column = null, bool $accessable = false, ?string $getter = null, ?string $setter = null)
+    public function __construct(string $name, string $type, ?Id $id = null, ?Column $column = null, bool $accessable = false, ?string $getter = null, ?string $setter = null)
     {
         $this->name = $name;
         $this->id = $id;
@@ -79,8 +78,14 @@ class ModelProperty
 
     public function getValue($model)
     {
-        $name = $this->name;
-        return $model->$name;
+        if ($this->accessable) {
+            $name = $this->name;
+            return $model->$name;
+        } else if (! empty($this->getter)) {
+            $method = $this->getter;
+            return $model->$method();
+        }
+        throw new Exception("Property is not readable");
     }
 
     public function setValue($model, $value)
@@ -88,11 +93,13 @@ class ModelProperty
         if ($this->accessable) {
             $name = $this->name;
             $model->$name = $value;
-            // } else if(!empty($this->setter)){
-            // TODO: maso 2020: set value by setter method
-        } else {
-            throw new Exception("Property is not writable");
+            return;
+        } else if (! empty($this->setter)) {
+            $method = $this->setter;
+            $model->$method($value);
+            return;
         }
+        throw new Exception("Property is not writable");
     }
 
     public function isPrimitive($param)
