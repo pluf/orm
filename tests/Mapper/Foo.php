@@ -14,5 +14,12 @@ class Foo
     public string $strValue = '';
 
     public bool $boolValue = false;
+    
+    public function __construct(int $intValue = 0, float $floatValue = 0.0, string $strValue = '', bool $boolValue = false){
+        $this->intValue = $intValue;
+        $this->floatValue = $floatValue;
+        $this->strValue = $strValue;
+        $this->boolValue = $boolValue;
+    }
 }
 

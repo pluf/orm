@@ -119,5 +119,13 @@ class ModelProperty
                 return false;
         }
     }
+
+    public function getColumnName(): string
+    {
+        if(!empty($this->column) && !empty($this->column->name)){
+            return $this->column->name;
+        }
+        return $this->name;
+    }
 }
 

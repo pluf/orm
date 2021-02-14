@@ -21,23 +21,25 @@ namespace Pluf\Orm\Attribute;
 use Attribute;
 
 /**
- * Specifies that the property or field is not persistent. 
- * 
- * It is used to annotate a property or field of an entity class, mapped superclass, or embeddable class.
- * 
+ * Ignore Fields at the Class Level
+ *
+ * We can ignore specific fields at the class level, using the #Transients
+ * annotation and specifying the fields by name:
+ *
  * ```php
- * #[Entity]
- * class Employee {
- *  #[Id]
- *  public ?int id;
- *  
- *  #[Transient]
- *  public ?User $currentUser;
- * }
+ * #Transients([ "intValue" ])]
+ * class MyDto {}
  * ```
  */
-#[Attribute(Attribute::TARGET_METHOD|Attribute::TARGET_PROPERTY)]
-class Transient
+#[Attribute(Attribute::TARGET_CLASS)]
+class Transients
 {
+
+    public array $properties = [];
+
+    public function __construct(array $properties = [])
+    {
+        $this->properties = $properties;
+    }
 }
 

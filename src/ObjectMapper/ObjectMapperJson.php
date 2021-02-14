@@ -37,9 +37,10 @@ class ObjectMapperJson implements ObjectMapper
         // new instance
         $entit = $this->newInstance($md, $data);
         foreach ($md->properties as $property) {
-            if (array_key_exists($property->name, $data)) {
-                $property->setValue($entit, $data[$property->name]);
-                unset($data[$property->name]);
+            $key = $property->getColumnName();
+            if (array_key_exists($key, $data)) {
+                $property->setValue($entit, $data[$key]);
+                unset($data[$key]);
             }
         }
 
@@ -119,7 +120,7 @@ class ObjectMapperJson implements ObjectMapper
         $result = [];
         foreach ($md->properties as $property) {
             $value = $property->getValue($entity);
-            $result[$property->name] = $this->convertToPrimitives($value, $property->type);
+            $result[$property->getColumnName()] = $this->convertToPrimitives($value, $property->type);
         }
         return $result;
     }
@@ -127,20 +128,26 @@ class ObjectMapperJson implements ObjectMapper
     protected function newInstance(ModelDescription $md, &$rdata)
     {
         $reflectionClass = new ReflectionClass($md->name);
-
         $constractor = $reflectionClass->getConstructor();
         if (empty($constractor)) {
             $class = $md->name;
             return new $class();
         }
+        
         $params = $constractor->getParameters();
         $paramsValues = [];
 
         foreach ($params as $parameter) {
-            $mdp = $md->properties[$parameter->getName()];
-            if (! empty($mdp) && array_key_exists($mdp->name, $rdata)) {
-                $paramsValues[] = $rdata[$mdp->name];
-                unset($rdata[$mdp->name]);
+            $varName = $parameter->getName();
+            if(!array_key_exists($varName, $md->properties)){
+                $paramsValues[] = $parameter->getDefaultValue();
+                continue;
+            }
+            $property = $md->properties[$varName];
+            $key = $property->getColumnName();
+            if (array_key_exists($key, $rdata)) {
+                $paramsValues[] = $rdata[$key];
+                unset($rdata[$key]);
             } else {
                 $paramsValues[] = $parameter->getDefaultValue();
             }

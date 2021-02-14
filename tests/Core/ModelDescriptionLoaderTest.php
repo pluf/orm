@@ -32,7 +32,7 @@ class ModelDescriptionLoaderTest extends TestCase
             [
                 new ModelDescriptionLoaderAttribute(),
                 Foo::class,
-                'privatePropertyBoolJustGetter2',
+                'privatePropertyBoolJustGetterByName',
                 false
             ]
         ];
@@ -73,7 +73,7 @@ class ModelDescriptionLoaderTest extends TestCase
             [
                 new ModelDescriptionLoaderAttribute(),
                 Foo::class,
-                'privatePropertyBoolJustGetter2',
+                'privatePropertyBoolJustGetterByName',
                 'getPrivatePropertyBoolJustGetterByName'
             ]
         ];

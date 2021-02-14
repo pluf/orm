@@ -14,6 +14,7 @@ use ReflectionClass;
 use ReflectionMethod;
 use ReflectionProperty;
 use Pluf\Orm\AssertionTrait;
+use Pluf\Orm\Attribute\Transients;
 
 class ModelDescriptionLoaderAttribute implements ModelDescriptionLoaderInterface
 {
@@ -86,12 +87,21 @@ class ModelDescriptionLoaderAttribute implements ModelDescriptionLoaderInterface
     {
         $properties = [];
 
+        $ignored = $this->getClassTransients($reflectionClass);
+
         // 1- check properties attributes
         $rprops = $reflectionClass->getProperties();
         foreach ($rprops as $reflectionProperty) {
-            $builder = new ModelPropertyBuilder();
             $name = $this->getPropertyName($reflectionProperty);
+            if(in_array($name, $ignored)){
+                continue;
+            }
             $isPublic = $reflectionProperty->isPublic();
+            // non public attributes needs getter
+            if (! $isPublic && empty($this->getPropertyGetter($reflectionClass, $reflectionProperty))) {
+                continue;
+            }
+            $builder = new ModelPropertyBuilder();
             $properties[$name] = $builder->setName($name)
                 ->setType($this->getPropertyType($reflectionProperty))
                 ->propertyOfEntity($isEntity)
@@ -104,18 +114,21 @@ class ModelDescriptionLoaderAttribute implements ModelDescriptionLoaderInterface
         }
 
         // 2- check method attributes
-        $methods = $reflectionClass->getMethods();
+        $methods = $reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC);
         foreach ($methods as $reflectionMethod) {
             $column = $this->getMethodColumn($reflectionMethod);
             if (empty($column)) {
                 continue;
             }
-            $name = $column->name;
-            if (empty($name)) {
-                $name = $reflectionMethod->getName();
-                $match = [];
-                $this->assertTrue(preg_match("#^get(.*)$#", $name, $match)>0, "A get metoth can annotate with Column or explicit define name.");
-                $name = StringUtil::decapitalize($match[1]);
+            
+            $name = $reflectionMethod->getName();
+            $match = [];
+            $this->assertTrue(preg_match("#^get(.*)$#", $name, $match) > 0, "Just a getter metoth can annotate with Column or explicit define name.");
+            $name = StringUtil::decapitalize($match[1]);
+
+            
+            if(in_array($name, $ignored)){
+                continue;
             }
 
             $builder = new ModelPropertyBuilder();
@@ -131,6 +144,17 @@ class ModelDescriptionLoaderAttribute implements ModelDescriptionLoaderInterface
         }
 
         return $properties;
+    }
+
+    private function getClassTransients(ReflectionClass $reflectionClass): array
+    {
+        $attrs = $reflectionClass->getAttributes(Transients::class);
+        $ignored = [];
+        foreach ($attrs as $attribute) {
+            $inst = $attribute->newInstance();
+            $ignored = array_merge($ignored, $inst->properties);
+        }
+        return $ignored;
     }
 
     private function getPropertyName(ReflectionProperty $reflectionProperty): string
