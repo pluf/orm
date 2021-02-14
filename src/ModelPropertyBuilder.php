@@ -44,7 +44,11 @@ class ModelPropertyBuilder
 
     private function getType(): string
     {
-        $this->assertNotEmpty($this->type, "Type is required for the property {{name}}", ["name" => $this->name]);
+        // In some case we may accept any type
+        if(empty($this->type)){
+            return "mixed";
+        }
+        // $this->assertNotEmpty($this->type, "Type is required for the property {{name}} ", ["name" => $this->name]);
         return $this->type;
     }
 

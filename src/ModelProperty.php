@@ -28,7 +28,7 @@ class ModelProperty
 
     public string $name;
 
-    public string $type;
+    public ?string $type = "mixed";
 
     public ?Id $id = null;
 
@@ -60,7 +60,7 @@ class ModelProperty
     /**
      * Creates new instance of model property
      */
-    public function __construct(string $name, string $type, ?Id $id = null, ?Column $column = null, bool $accessable = false, ?string $getter = null, ?string $setter = null)
+    public function __construct(string $name, ?string $type = 'mixed', ?Id $id = null, ?Column $column = null, bool $accessable = false, ?string $getter = null, ?string $setter = null)
     {
         $this->name = $name;
         $this->id = $id;
