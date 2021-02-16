@@ -10,7 +10,7 @@ namespace Pluf\Orm;
 interface ObjectValidatorConstraint
 {
 
-    public function isValid($value): bool;
+    public function isValid($value, $target = null): bool;
 
     public function getMessage(): string;
 }

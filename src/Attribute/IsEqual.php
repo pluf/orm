@@ -1,17 +1,16 @@
 <?php
 namespace Pluf\Orm\Attribute;
 
-use Pluf\Orm\ObjectValidatorConstraint;
-use Pluf\Orm\ObjectValidator\ObjectValidatorConstraintImp;
+use Pluf\Orm\ObjectValidator\ObjectValidationConstraintActual;
 use Attribute;
 
 /**
- * Checks whether the valud is null or not
- *
+ * 
  * @author maso
+ *
  */
 #[Attribute(Attribute::TARGET_CLASS|Attribute::TARGET_PROPERTY|Attribute::TARGET_METHOD|Attribute::TARGET_PARAMETER)]
-class NotNull extends ObjectValidatorConstraintImp implements ObjectValidatorConstraint
+class IsEqual extends ObjectValidationConstraintActual
 {
 
     /**
@@ -21,7 +20,11 @@ class NotNull extends ObjectValidatorConstraintImp implements ObjectValidatorCon
      */
     public function isValid($value, $target = null): bool
     {
-        return ! is_null($this->getExpected($value, $target));
+        $actual = $this->getActual($value, $target);
+        $expected = $this->getExpected($value, $target);
+        
+        // TODO: maso, check equality
+        return $expected == $actual;
     }
 }
 

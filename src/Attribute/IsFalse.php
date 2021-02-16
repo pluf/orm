@@ -11,7 +11,7 @@ use Attribute;
  * @author maso
  */
 #[Attribute(Attribute::TARGET_CLASS|Attribute::TARGET_PROPERTY|Attribute::TARGET_METHOD|Attribute::TARGET_PARAMETER)]
-class NotNull extends ObjectValidatorConstraintImp implements ObjectValidatorConstraint
+class IsFalse extends ObjectValidatorConstraintImp implements ObjectValidatorConstraint
 {
 
     /**
@@ -21,7 +21,7 @@ class NotNull extends ObjectValidatorConstraintImp implements ObjectValidatorCon
      */
     public function isValid($value, $target = null): bool
     {
-        return ! is_null($this->getExpected($value, $target));
+        return $this->getExpected($value, $target) == false;
     }
 }
 

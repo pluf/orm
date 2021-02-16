@@ -1,7 +1,6 @@
 <?php
 namespace Pluf\Orm\Attribute;
 
-use Pluf\Orm\ObjectValidatorConstraint;
 use Pluf\Orm\ObjectValidator\ObjectValidatorConstraintImp;
 use Attribute;
 
@@ -10,8 +9,8 @@ use Attribute;
  * @author maso
  *        
  */
-#[Attribute(Attribute::TARGET_PROPERTY|Attribute::TARGET_METHOD|Attribute::TARGET_PARAMETER)]
-class NotEmpty extends ObjectValidatorConstraintImp implements ObjectValidatorConstraint
+#[Attribute(Attribute::TARGET_CLASS|Attribute::TARGET_PROPERTY|Attribute::TARGET_METHOD|Attribute::TARGET_PARAMETER)]
+class NotEmpty extends ObjectValidatorConstraintImp
 {
 
     /**
@@ -19,9 +18,9 @@ class NotEmpty extends ObjectValidatorConstraintImp implements ObjectValidatorCo
      * {@inheritdoc}
      * @see \Pluf\Data\ObjectValidatorConstraint::isValid()
      */
-    public function isValid($value): bool
+    public function isValid($value, $target = null): bool
     {
-        return ! empty($value);
+        return ! empty($this->getExpected($value, $target));
     }
 }
 

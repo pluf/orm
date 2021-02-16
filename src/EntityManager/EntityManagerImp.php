@@ -302,6 +302,8 @@ class EntityManagerImp implements EntityManager
     }
 
     public function getTransaction(): EntityTransaction
-    {}
+    {
+        return new EntityTransactionImp();
+    }
 }
 

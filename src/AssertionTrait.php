@@ -1,6 +1,14 @@
 <?php
 namespace Pluf\Orm;
 
+use Pluf\Orm\Attribute\IsEmpty;
+use Pluf\Orm\Attribute\IsFalse;
+use Pluf\Orm\Attribute\IsNull;
+use Pluf\Orm\Attribute\IsTrue;
+use Pluf\Orm\Attribute\NotEmpty;
+use Pluf\Orm\Attribute\NotNull;
+use Pluf\Orm\Attribute\IsEqual;
+
 trait AssertionTrait
 {
     
@@ -15,8 +23,9 @@ trait AssertionTrait
      */
     protected function assertNotNull($actual, string $message = '', array $params = [])
     {
-        if ($actual === null) {
-            throw new Exception($message, params: $params);
+        $constraint = new NotNull();
+        if (!$constraint->isValid($actual)) {
+            throw new \Pluf\Orm\Exception($message, params: $params);
         }
     }
     
@@ -25,35 +34,55 @@ trait AssertionTrait
      *
      * @throws Exception
      *
-     * @param mixed $value
+     * @param mixed $actual
      * @param string $message
      * @param array $params
      */
-    protected function assertNull($value, string $message = '', array $params = []): void
+    protected function assertNull($actual, string $message = '', array $params = []): void
     {
-        if ($value !== null) {
-            throw new Exception($message, params: $params);
+        $constraint = new IsNull();
+        if (!$constraint->isValid($actual)) {
+            throw new \Pluf\Orm\Exception($message, params: $params);
         }
     }
     
-    protected function assertNotEmpty($value, string $message = '', array $params = [])
+    protected function assertNotEmpty($actual, string $message = '', array $params = [])
     {
-        if (empty($value)) {
-            throw new Exception($message, params: $params);
+        $constraint = new NotEmpty();
+        if (!$constraint->isValid($actual)) {
+            throw new \Pluf\Orm\Exception($message, params: $params);
         }
     }
     
-    protected function assertEmpty($value, string $message = '', array $params = [])
+    protected function assertEmpty($actual, string $message = '', array $params = [])
     {
-        if (! empty($value)) {
-            throw new Exception($message, params: $params);
+        $constraint = new IsEmpty();
+        if (!$constraint->isValid($actual)) {
+            throw new \Pluf\Orm\Exception($message, params: $params);
         }
     }
     
-    protected function assertTrue($flag, string $message = '', array $params = [])
+    protected function assertTrue($actual, string $message = '', array $params = [])
     {
-        if (!$flag) {
-            throw new Exception($message, params: $params);
+        $constraint = new IsTrue();
+        if (!$constraint->isValid($actual)) {
+            throw new \Pluf\Orm\Exception($message, params: $params);
+        }
+    }
+    
+    protected function assertFalse($actual, string $message = '', array $params = [])
+    {
+        $constraint = new IsFalse();
+        if (!$constraint->isValid($actual)) {
+            throw new \Pluf\Orm\Exception($message, params: $params);
+        }
+    }
+    
+    protected function assertEquals($actual, $expected, string $message = '', array $params = [])
+    {
+        $constraint = new IsEqual($expected);
+        if (!$constraint->isValid($actual)) {
+            throw new \Pluf\Orm\Exception($message, params: $params);
         }
     }
 }
