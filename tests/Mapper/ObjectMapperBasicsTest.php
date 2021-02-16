@@ -20,60 +20,41 @@ class ObjectMapperBasicsTest extends TestCase
             new ModelDescriptionLoaderAttribute()
         ]);
         $builder = new ObjectMapperBuilder();
-        $jsonMapper = $builder->setType('json')
+        $mappers = [];
+        $mappers[] = $builder->setType('json')
             ->setModelDescriptionRepository($repo)
             ->build();
 
-        return [
-            [
-                $jsonMapper,
-                new Foo(intValue: rand(), floatValue: 1.3, strValue: "xxx", boolValue: false)
-            ],
-            [
-                $jsonMapper,
-                new Foo(intValue: -12, floatValue: 0.0, strValue: "yyy", boolValue: true)
-            ],
-            [
-                $jsonMapper,
-                new Foo8(intValue: -12, floatValue: 0.0, strValue: "yyy", boolValue: true)
-            ],
-            [
-                $jsonMapper,
-                new Foo8(intValue: rand(), floatValue: 448.5, strValue: "xyz", boolValue: false)
-            ],
-            [
-                $jsonMapper,
-                new FooRestInput(arrayValue: [1,2,3,4], intValue: 3)
-            ],
-            [
-                $jsonMapper,
-                new FooRestInput(arrayValue: [], intValue: 0)
-            ],
-            [
-                $jsonMapper,
-                new FooRestInput()
-            ],
-            [
-                $jsonMapper,
-                new FooRestInput(arrayValue: [1,2,3,4])
-            ],
-            [
-                $jsonMapper,
-                new FooRestInput(arrayValue: ["a", "b", "c"])
-            ],
-            [
-                $jsonMapper,
-                new FooRestInput(arrayValue: [1, "a", 2, "b", 3, "c"])
-            ],
-            [
-                $jsonMapper,
-                new FooRestInput(arrayValue: [1, "a", 2, "b", 3, "c"], intValue: 123)
-            ],
-            [
-                $jsonMapper,
-                new FooRestInput(arrayValue: [1, "a", 2, "b", 3, "c"], intValue: 123, messageString: "xxxx")
-            ]
-        ];
+        $mappers[] = $builder->setType('array')
+            ->setModelDescriptionRepository($repo)
+            ->build();
+            
+        $items = [
+                new Foo(intValue: rand(), floatValue: 1.3, strValue: "xxx", boolValue: false),
+                new Foo(intValue: -12, floatValue: 0.0, strValue: "yyy", boolValue: true),
+                new Foo8(intValue: -12, floatValue: 0.0, strValue: "yyy", boolValue: true),
+                new Foo8(intValue: rand(), floatValue: 448.5, strValue: "xyz", boolValue: false),
+                new FooRestInput(arrayValue: [1,2,3,4], intValue: 3),
+                new FooRestInput(arrayValue: [], intValue: 0),
+                new FooRestInput(),
+                new FooRestInput(arrayValue: [1,2,3,4]),
+                new FooRestInput(arrayValue: ["a", "b", "c"]),
+                new FooRestInput(arrayValue: [1, "a", 2, "b", 3, "c"]),
+                new FooRestInput(arrayValue: [1, "a", 2, "b", 3, "c"], intValue: 123),
+                new FooRestInput(arrayValue: [1, "a", 2, "b", 3, "c"], intValue: 123, messageString: "xxxx"),
+            ];
+
+        $params = [];
+        foreach ($mappers as $mapper) {
+            foreach ($items as $item) {
+                $params[] = [
+                    $mapper,
+                    $item
+                ];
+            }
+        }
+
+        return $params;
     }
 
     /**

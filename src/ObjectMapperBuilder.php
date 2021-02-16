@@ -3,6 +3,7 @@ namespace Pluf\Orm;
 
 use Pluf\Orm\ObjectMapper\ObjectMapperJson;
 use Pluf\Orm\Loader\ModelDescriptionLoaderAttribute;
+use Pluf\Orm\ObjectMapper\ObjectMapperArray;
 
 /**
  * Crates new instance of ObjectMapper
@@ -47,7 +48,22 @@ class ObjectMapperBuilder
 
     public function build(): ObjectMapper
     {
-        $objectMapper = new ObjectMapperJson($this->getModelDescriptionRepository());
+        $modelDescriptionRepository = $this->getModelDescriptionRepository();
+        switch ($this->type) {
+            case 'array':
+                $objectMapper = new ObjectMapperArray($modelDescriptionRepository);
+                break;
+
+            case 'json':
+                $objectMapper = new ObjectMapperJson($modelDescriptionRepository);
+                break;
+
+            default:
+                throw new Exception(
+                    message: "Unsupported data type `{{type}}` for object mapper", 
+                    params: ["type" => $this->type]
+                );
+        }
         return $objectMapper;
     }
 }

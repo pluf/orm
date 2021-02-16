@@ -23,6 +23,7 @@ class ObjectMapperArray implements ObjectMapper
     {
         $this->modelDescriptionRepository = $modelDescriptionRepository;
     }
+
     /**
      *
      * {@inheritdoc}
@@ -44,7 +45,7 @@ class ObjectMapperArray implements ObjectMapper
         $md = $this->modelDescriptionRepository->get($class);
         return ! empty($md);
     }
-    
+
     /**
      * Converts array data to an entity
      *
@@ -53,24 +54,33 @@ class ObjectMapperArray implements ObjectMapper
      */
     public function readValue($input, $class, bool $isList = false)
     {
-        $data = $input;
+        $data = $this->convertInputToData($input);
+        $this->assertNotEmpty($data, "Not supported input type `{{type}}` with object mapper `{{mapper}}", [
+            "type" => ObjectUtils::getTypeOf($input),
+            "mapper" => $this::class
+        ]);
+
         $md = $this->modelDescriptionRepository->get($class);
-        
+        $this->assertNotEmpty($md, "Not supported entity type `{{class}}` in `{{mapper}}`", [
+            "class" => $class,
+            "mapper" => $this::class
+        ]);
+
         // new instance
-        $entity = $this->newInstance($md, $data);
-        foreach ($md->properties as $property) {
-            $key = $property->getColumnName();
-            if (array_key_exists($key, $data)) {
-                $property->setValue($entity, $data[$key]);
-                unset($data[$key]);
+        if (ObjectUtils::isArrayassociative($data)) {
+            $entity = $this->loadInstance($md, $data);
+        } else {
+            $this->assertTrue($isList, "Imposible to load an entity from an array.");
+            $entities = [];
+            foreach ($data as $entityData) {
+                $entities[] = $this->loadInstance($md, $entityData);
             }
+            $entity = $entities;
         }
-        
-        // TODO: maso, 2020: if data is not finish throw error
-        
+
         return $entity;
     }
-    
+
     /**
      *
      * {@inheritdoc}
@@ -79,21 +89,28 @@ class ObjectMapperArray implements ObjectMapper
     public function writeValue(&$output, $entity, $class): self
     {
         $map = $this->convertToPrimitives($entity, $class);
+
+        // if output is map
         foreach ($map as $k => $v) {
             $output[$k] = $v;
         }
+
+        // TODO: if output is stream
+
         return $this;
     }
 
     /**
-     * Write data into an array 
-     * 
+     * Write data into an array string
+     *
      * {@inheritdoc}
      * @see ObjectMapper::writeValueAsString()
      */
     public function writeValueAsString($entity, ?string $class = null): string
     {
-       // TODO: maso, 
+        $output = [];
+        $this->writeValue($output, $entity, $class);
+        return serialize($output);
     }
 
     protected function convertToPrimitives($entity, ?string $class = null)
@@ -132,6 +149,21 @@ class ObjectMapperArray implements ObjectMapper
         return $result;
     }
 
+    protected function loadInstance(ModelDescription $md, $data)
+    {
+        $entity = $this->newInstance($md, $data);
+        foreach ($md->properties as $property) {
+            $key = $property->getColumnName();
+            if (array_key_exists($key, $data)) {
+                $property->setValue($entity, $data[$key]);
+                unset($data[$key]);
+            }
+        }
+
+        // TODO: maso, 2020: if data is not finish throw error
+        return $entity;
+    }
+
     protected function newInstance(ModelDescription $md, &$rdata)
     {
         $reflectionClass = new ReflectionClass($md->name);
@@ -140,13 +172,13 @@ class ObjectMapperArray implements ObjectMapper
             $class = $md->name;
             return new $class();
         }
-        
+
         $params = $constractor->getParameters();
         $paramsValues = [];
 
         foreach ($params as $parameter) {
             $varName = $parameter->getName();
-            if(!array_key_exists($varName, $md->properties)){
+            if (! array_key_exists($varName, $md->properties)) {
                 $paramsValues[] = $parameter->getDefaultValue();
                 continue;
             }
@@ -161,6 +193,17 @@ class ObjectMapperArray implements ObjectMapper
         }
         $instance = $reflectionClass->newInstanceArgs($paramsValues);
         return $instance;
+    }
+
+    protected function convertInputToData($input)
+    {
+        if (is_array($input)) {
+            $data = $input;
+        } else if (is_string($input)) {
+            $data = unserialize($input);
+        }
+
+        return $data;
     }
 }
 
