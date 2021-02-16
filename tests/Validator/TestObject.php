@@ -4,6 +4,9 @@ namespace Pluf\Tests\Validator;
 use Pluf\Orm\Attribute\NotNull;
 use Pluf\Orm\Attribute\NotEmpty;
 use Pluf\Orm\Attribute\IsEqual;
+use Pluf\Orm\Attribute\IsFalse;
+use Pluf\Orm\Attribute\IsTrue;
+use Pluf\Orm\Attribute\IsNull;
 
 class TestObject
 {
@@ -24,6 +27,15 @@ class TestObject
     
     #[IsEqual('ready')]
     public string $state = 'derty';
+    
+    #[IsFalse]
+    public bool $allwaysFalse = false;
+    
+    #[IsTrue]
+    public bool $allwaysTrue = true;
+    
+    #[IsNull]
+    public ?string $allwaysNull = null;
 
     public function __construct(?string $id = null, ?string $name = null)
     {

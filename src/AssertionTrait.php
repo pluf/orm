@@ -78,12 +78,27 @@ trait AssertionTrait
         }
     }
     
-    protected function assertEquals($actual, $expected, string $message = '', array $params = [])
+    protected function assertEquals(
+        $actual, 
+        $expected, 
+        string $message = '', 
+        array $params = [],
+        float $delta = 0.0,
+        bool $canonicalize = false,
+        bool $ignoreCase = false
+        
+        )
     {
-        $constraint = new IsEqual($expected);
-        if (!$constraint->isValid($actual)) {
+        $constraint = new IsEqual(
+            expectedValue: $expected, 
+            delta: $delta, 
+            canonicalize: $canonicalize, 
+            ignoreCase: $ignoreCase);
+        $val = $constraint->isValid($actual);
+        if (!$val) {
             throw new \Pluf\Orm\Exception($message, params: $params);
         }
+        return $val;
     }
 }
 

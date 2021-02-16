@@ -4,8 +4,8 @@ namespace Pluf\Orm\ObjectValidator;
 abstract class ObjectValidationConstraintActual extends ObjectValidatorConstraintImp
 {
     
-    private $actual = null;
-    private $actualValue = null;
+    public $actual = null;
+    public $actualValue = null;
     
     public function __construct(
         $actualValue = null,

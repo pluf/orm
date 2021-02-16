@@ -14,9 +14,9 @@ abstract class ObjectValidatorConstraintImp implements ObjectValidatorConstraint
 
     public ?string $message;
 
-    private $expected = null;
+    public $expected = null;
 
-    private $expectedValue = null;
+    public $expectedValue = null;
 
     /**
      * Creates new instance of the constraint
@@ -26,6 +26,8 @@ abstract class ObjectValidatorConstraintImp implements ObjectValidatorConstraint
     public function __construct(?string $message = "Constraint not satisfied", $expectedValue = null, $expected = null)
     {
         $this->message = $message;
+        $this->expectedValue = $expectedValue;
+        $this->expected= $expected;
     }
 
     /**
