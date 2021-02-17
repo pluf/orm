@@ -168,11 +168,7 @@ class ObjectMapperArray implements ObjectMapper
     {
         $reflectionClass = new ReflectionClass($md->name);
         $constractor = $reflectionClass->getConstructor();
-        if (empty($constractor)) {
-            $class = $md->name;
-            return new $class();
-        }
-
+        // NOTE: imposible have a class without constructro?!!
         $params = $constractor->getParameters();
         $paramsValues = [];
 

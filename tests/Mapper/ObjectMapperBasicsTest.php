@@ -8,8 +8,6 @@ use Pluf\Orm\ModelDescriptionRepository;
 use Pluf\Orm\ObjectMapper;
 use Pluf\Orm\ObjectMapperBuilder;
 use Pluf\Orm\Loader\ModelDescriptionLoaderAttribute;
-use ReflectionClass;
-use ReflectionMethod;
 
 class ObjectMapperBasicsTest extends TestCase
 {
@@ -64,6 +62,8 @@ class ObjectMapperBasicsTest extends TestCase
      */
     public function testWriteStringValue(ObjectMapper $mapper, $foo)
     {
+        $this->assertTrue($mapper->canSerialize($foo::class));
+        $this->assertTrue($mapper->canDeserialize($foo::class));
         $output = $mapper->writeValueAsString($foo);
         $this->assertNotNull($output);
 
