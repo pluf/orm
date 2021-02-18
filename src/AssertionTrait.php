@@ -25,7 +25,9 @@ trait AssertionTrait
     {
         $constraint = new NotNull();
         if (!$constraint->isValid($actual)) {
-            throw new \Pluf\Orm\Exception($message, params: $params);
+            throw new \Pluf\Orm\Exception(
+                message:$message, 
+                params: $params);
         }
     }
     

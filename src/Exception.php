@@ -62,10 +62,11 @@ class Exception extends RuntimeException implements JsonSerializable
             // message contain additional parameters
             $params = $message;
             $message = array_shift($this->params);
+        } else {
+            $this->params = $params;
+            $this->solutions = $solutions;
         }
         parent::__construct($message, $code ?? 0, $previous);
-        $this->params = $params;
-        $this->solutions = $solutions;
     }
 
     /**

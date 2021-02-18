@@ -18,6 +18,15 @@ class ObjectMapperBuilder
     private string $type = 'json';
 
     private ModelDescriptionRepository $modelDescriptionRepository;
+    
+    /**
+     * Enables list support by the object mapper by default
+     * @return self
+     */
+    public function supportList(bool $flag): self
+    {
+        return $this;
+    }
 
     public function setType(string $type): self
     {

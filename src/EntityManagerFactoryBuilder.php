@@ -18,7 +18,7 @@ class EntityManagerFactoryBuilder
 
     private $connection;
 
-    private EntityManagerSchema $schema;
+    private ?EntityManagerSchema $schema;
 
     private bool $enableMultitinancy = false;
 
@@ -50,7 +50,7 @@ class EntityManagerFactoryBuilder
                 case 'sqlite':
                     $this->schema = new EntityManagerSchemaSQLite();
                     break;
-                case 'myslq':
+                case 'mysql':
                     $this->schema = new EntityManagerSchemaMySQL();
                     break;
                 case 'pgsql':

@@ -7,6 +7,7 @@ use Pluf\Orm\ObjectMapper;
 use Pluf\Orm\ObjectUtils;
 use ReflectionClass;
 use Pluf\Orm\ModelDescription;
+use Pluf\Orm\Exception;
 
 /**
  * JSON implementation of Object mapper
@@ -24,7 +25,13 @@ class ObjectMapperJson extends ObjectMapperArray
      */
     public function readValue($input, $class, bool $isList = false)
     {
-        $data = json_decode($input, true);
+        if(is_array($input)){
+            $data = $input;
+        } else if(is_string($input)){
+            $data = json_decode($input, true);
+        } else {
+            throw new Exception("TODO: Unsupported media type");
+        }
         return parent::readValue($data, $class, $isList);
     }
 

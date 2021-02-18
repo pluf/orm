@@ -9,6 +9,7 @@ use Pluf\Orm\EntityTransaction;
 use Pluf\Orm\FlushModeType;
 use Pluf\Orm\ModelDescription;
 use Pluf\Orm\ModelDescriptionRepository;
+use Pluf\Orm\Exception;
 
 class EntityManagerImp implements EntityManager
 {
@@ -16,7 +17,8 @@ class EntityManagerImp implements EntityManager
     use AssertionTrait;
 
     private bool $open = true;
-    private EntityManagerFactoryImp $entityManagerFactory;
+    
+    public EntityManagerFactoryImp $entityManagerFactory;
     private ?ContextManager $contextManager;
     private array $properties = [];
     private string $flashMod = FlushModeType::AUTO;
@@ -43,9 +45,11 @@ class EntityManagerImp implements EntityManager
      * @param mixed $data
      * @return mixed
      */
-    protected function newInstance(ModelDescription $md, $data)
+    function newInstance(ModelDescription $md, $data)
     {
         // TODO: using object mapper. mayby.
+        // TODO: put in context
+        // TODO: update context if the object is new
         $entity = $md->newInstance($data);
         return $this->fillEntity($md, $entity, $data);
     }
@@ -69,7 +73,7 @@ class EntityManagerImp implements EntityManager
         return $entity;
     }
 
-    protected function getModelDescriptionOf($entity): ModelDescription
+    function getModelDescriptionOf($entity): ModelDescription
     {
         $class = get_class($entity);
         $md = $this->entityManagerFactory->modelDescriptionRepository->get($class);
@@ -103,7 +107,9 @@ class EntityManagerImp implements EntityManager
      * @see \Pluf\Orm\EntityManager::createQuery()
      */
     public function createQuery(): EntityQuery
-    {}
+    {
+        return new EntityQueryImp($this);
+    }
 
     /**
      *
@@ -149,7 +155,7 @@ class EntityManagerImp implements EntityManager
         // TODO: maso, 2021: co
         $md = $this->getModelDescriptionOf($entity);
         $query = $this->entityManagerFactory->connection->dsql()
-            ->table($md->table->name)
+            ->table($this->entityManagerFactory->entityManagerSchema->getTableName($md))
             ->mode("insert");
 
         foreach ($md->properties as $properyt) {
@@ -158,8 +164,7 @@ class EntityManagerImp implements EntityManager
             $query->set($properyt->column->name, $value);
         }
 
-        $query->insert()->execute();
-
+        $query->execute();
         // TODO: maso, 2021: Postgresql need sequence name
         $primaryKey = $this->entityManagerFactory->connection->lastInsertId();
         $persistEntity = $this->find($md, $primaryKey);

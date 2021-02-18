@@ -91,12 +91,12 @@ class ObjectMapperArray implements ObjectMapper
         $map = $this->convertToPrimitives($entity, $class);
 
         // if output is map
-        foreach ($map as $k => $v) {
-            $output[$k] = $v;
+        if (is_array($map)) {
+            foreach ($map as $k => $v) {
+                $output[$k] = $v;
+            }
         }
-
         // TODO: if output is stream
-
         return $this;
     }
 
@@ -168,7 +168,11 @@ class ObjectMapperArray implements ObjectMapper
     {
         $reflectionClass = new ReflectionClass($md->name);
         $constractor = $reflectionClass->getConstructor();
-        // NOTE: imposible have a class without constructro?!!
+        if (empty($constractor)) {
+            // NOTE: imposible have a class without constructro?!!
+            $name = $md->name;
+            return new $name();
+        }
         $params = $constractor->getParameters();
         $paramsValues = [];
 
