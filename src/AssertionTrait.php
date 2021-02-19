@@ -1,17 +1,23 @@
 <?php
 namespace Pluf\Orm;
 
+use Pluf\Orm\Attribute\IsArray;
+use Pluf\Orm\Attribute\IsBool;
 use Pluf\Orm\Attribute\IsEmpty;
+use Pluf\Orm\Attribute\IsEqual;
 use Pluf\Orm\Attribute\IsFalse;
+use Pluf\Orm\Attribute\IsNotArray;
 use Pluf\Orm\Attribute\IsNull;
+use Pluf\Orm\Attribute\IsString;
 use Pluf\Orm\Attribute\IsTrue;
 use Pluf\Orm\Attribute\NotEmpty;
 use Pluf\Orm\Attribute\NotNull;
-use Pluf\Orm\Attribute\IsEqual;
+use Pluf\Orm\Attribute\ArrayHasKey;
+use Pluf\Orm\Attribute\ArrayNotHasKey;
 
 trait AssertionTrait
 {
-    
+
     /**
      * Asserts if the actual value is null
      *
@@ -24,13 +30,13 @@ trait AssertionTrait
     protected function assertNotNull($actual, string $message = '', array $params = [])
     {
         $constraint = new NotNull();
-        if (!$constraint->isValid($actual)) {
+        if (! $constraint->isValid($actual)) {
             throw new \Pluf\Orm\Exception(
                 message:$message, 
                 params: $params);
         }
     }
-    
+
     /**
      * Asserts that a variable is null.
      *
@@ -43,53 +49,45 @@ trait AssertionTrait
     protected function assertNull($actual, string $message = '', array $params = []): void
     {
         $constraint = new IsNull();
-        if (!$constraint->isValid($actual)) {
+        if (! $constraint->isValid($actual)) {
             throw new \Pluf\Orm\Exception($message, params: $params);
         }
     }
-    
+
     protected function assertNotEmpty($actual, string $message = '', array $params = [])
     {
         $constraint = new NotEmpty();
-        if (!$constraint->isValid($actual)) {
+        if (! $constraint->isValid($actual)) {
             throw new \Pluf\Orm\Exception($message, params: $params);
         }
     }
-    
+
     protected function assertEmpty($actual, string $message = '', array $params = [])
     {
         $constraint = new IsEmpty();
-        if (!$constraint->isValid($actual)) {
+        if (! $constraint->isValid($actual)) {
             throw new \Pluf\Orm\Exception($message, params: $params);
         }
     }
-    
+
     protected function assertTrue($actual, string $message = '', array $params = [])
     {
         $constraint = new IsTrue();
-        if (!$constraint->isValid($actual)) {
+        if (! $constraint->isValid($actual)) {
             throw new \Pluf\Orm\Exception($message, params: $params);
         }
     }
-    
+
     protected function assertFalse($actual, string $message = '', array $params = [])
     {
         $constraint = new IsFalse();
-        if (!$constraint->isValid($actual)) {
+        if (! $constraint->isValid($actual)) {
             throw new \Pluf\Orm\Exception($message, params: $params);
         }
     }
-    
-    protected function assertEquals(
-        $actual, 
-        $expected, 
-        string $message = '', 
-        array $params = [],
-        float $delta = 0.0,
-        bool $canonicalize = false,
-        bool $ignoreCase = false
-        
-        )
+
+    protected function assertEquals($actual, $expected, string $message = '', array $params = [], float $delta = 0.0, bool $canonicalize = false, bool $ignoreCase = false)
+
     {
         $constraint = new IsEqual(
             expectedValue: $expected, 
@@ -97,10 +95,125 @@ trait AssertionTrait
             canonicalize: $canonicalize, 
             ignoreCase: $ignoreCase);
         $val = $constraint->isValid($actual);
-        if (!$val) {
+        if (! $val) {
             throw new \Pluf\Orm\Exception($message, params: $params);
         }
         return $val;
+    }
+
+    /**
+     * Asserts that a variable is of type array.
+     *
+     * @throws Exception
+     */
+    protected function assertIsArray($actual, string $message = '', array $params = [])
+    {
+        $constraint = new IsArray();
+        $val = $constraint->isValid($actual);
+        if (! $val) {
+            throw new \Pluf\Orm\Exception($message, params: $params);
+        }
+        return $val;
+    }
+
+    /**
+     * Asserts that a variable is of type array.
+     *
+     * @throws Exception
+     */
+    protected function assertIsNotArray($actual, string $message = '', array $params = [])
+    {
+        $constraint = new IsNotArray();
+        $val = $constraint->isValid($actual);
+        if (! $val) {
+            throw new \Pluf\Orm\Exception($message, params: $params);
+        }
+        return $val;
+    }
+
+    /**
+     * Asserts that a variable is of type bool.
+     *
+     * @throws Exception
+     */
+    protected function assertIsBool($actual, string $message = '', array $params = [])
+    {
+        $constraint = new IsBool();
+        $val = $constraint->isValid($actual);
+        if (! $val) {
+            throw new \Pluf\Orm\Exception($message, params: $params);
+        }
+        return $val;
+    }
+
+    /**
+     * Asserts that a variable is of type string.
+     *
+     * @throws Exception
+     */
+    protected function assertIsString($actual, string $message = '', array $params = [])
+    {
+        $constraint = new IsString();
+        $val = $constraint->isValid($actual);
+        if (! $val) {
+            throw new \Pluf\Orm\Exception($message, params: $params);
+        }
+        return $val;
+    }
+
+    // assertIsFloat
+    // assertIsInt
+    // assertIsNumeric
+    // assertIsObject
+    // assertIsResource
+    // assertIsClosedResource
+    // assertIsScalar
+    // assertIsCallable
+    // assertIsIterable
+    // assertIsNotBool
+    // assertIsNotFloat
+    // assertIsNotInt
+    // assertIsNotNumeric
+    // assertIsNotObject
+    // assertIsNotResource
+    // assertIsNotClosedResource
+    // assertIsNotString
+    // assertIsNotScalar
+    // assertIsNotCallable
+    // assertIsNotIterable
+
+    /**
+     * Asserts that an array has a specified key.
+     *
+     * @param int|string $key
+     * @param array|ArrayAccess $array
+     *
+     * @throws Exception
+     */
+    public static function assertArrayHasKey($key, $array, string $message = '', array $params = []): void
+    {
+        $constraint = new ArrayHasKey($key);
+        $val = $constraint->isValid($array);
+        if (! $val) {
+            throw new \Pluf\Orm\Exception($message, params: $params);
+        }
+    }
+
+    /**
+     * Asserts that an array does not have a specified key.
+     *
+     * @param int|string $key
+     * @param array|ArrayAccess $array
+     *
+     * @throws Exception
+     */
+    public static function assertArrayNotHasKey($key, $array, string $message = '', array $params = []): void
+    {
+        $constraint = new ArrayNotHasKey($key);
+        $val = $constraint->isValid($array);
+        if (! $val) {
+            throw new \Pluf\Orm\Exception($message, params: $params);
+        }
     }
 }
 

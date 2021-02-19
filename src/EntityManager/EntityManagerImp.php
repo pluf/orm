@@ -2,6 +2,7 @@
 namespace Pluf\Orm\EntityManager;
 
 use Pluf\Orm\AssertionTrait;
+use Pluf\Orm\EntityExpression;
 use Pluf\Orm\EntityManager;
 use Pluf\Orm\EntityManagerFactory;
 use Pluf\Orm\EntityQuery;
@@ -9,7 +10,6 @@ use Pluf\Orm\EntityTransaction;
 use Pluf\Orm\FlushModeType;
 use Pluf\Orm\ModelDescription;
 use Pluf\Orm\ModelDescriptionRepository;
-use Pluf\Orm\Exception;
 
 class EntityManagerImp implements EntityManager
 {
@@ -99,16 +99,6 @@ class EntityManagerImp implements EntityManager
     {
         // TODO: maso, 2020: remove entity from cache
         $this->contextManager->remove($entity);
-    }
-
-    /**
-     *
-     * {@inheritdoc}
-     * @see \Pluf\Orm\EntityManager::createQuery()
-     */
-    public function createQuery(): EntityQuery
-    {
-        return new EntityQueryImp($this);
     }
 
     /**
@@ -310,5 +300,26 @@ class EntityManagerImp implements EntityManager
     {
         return new EntityTransactionImp();
     }
+    
+    /**
+     * 
+     * {@inheritDoc}
+     * @see \Pluf\Orm\EntityManager::query()
+     */
+    public function query($properties = []): EntityQuery
+    {
+        return new EntityQueryImp($properties, $this);
+    }
+
+    /**
+     * 
+     * {@inheritDoc}
+     * @see \Pluf\Orm\EntityManager::expr()
+     */
+    public function expr($properties = [], $arguments = null): EntityExpression
+    {
+        return new EntityExpressionImp($properties, $arguments, $this);
+    }
+
 }
 

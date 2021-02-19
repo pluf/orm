@@ -66,5 +66,85 @@ class StringUtilTest extends TestCase
         $actual = StringUtil::capatalizeFieldName($fieldName);
         $this->assertEquals($expected, $actual);
     }
+
+    public function stringSuccessor()
+    {
+        return [
+            [
+                '',
+                'a'
+            ],
+            [
+                'a',
+                'b'
+            ],
+            [
+                'aa',
+                'ab'
+            ],
+            [
+                'z',
+                'aa'
+            ],
+            [
+                'zz',
+                'aaa'
+            ],
+            [
+                'azz',
+                'baa'
+            ],
+            [
+                '@',
+                'a'
+            ],
+            [
+                'b',
+                'c'
+            ],
+            [
+                'c',
+                'd'
+            ],
+            [
+                'd',
+                'e'
+            ],
+            [
+                'e',
+                'f'
+            ],
+            [
+                'f',
+                'g'
+            ],
+            [
+                'g',
+                'h'
+            ],
+            [
+                'h',
+                'i'
+            ],
+            [
+                'i',
+                'j'
+            ],
+            [
+                'j',
+                'k'
+            ]
+        ];
+    }
+
+    /**
+     *
+     * @dataProvider stringSuccessor
+     * @test
+     */
+    public function testStringSuccessor($a, $b)
+    {
+        $this->assertEquals(StringUtil::successor($a), $b);
+    }
 }
 

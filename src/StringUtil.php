@@ -50,5 +50,43 @@ class StringUtil
         $result = strtolower(substr($fieldName, 0, 1)) . substr($fieldName, 1);
         return $result;
     }
+    
+    public static function successor($str) {
+        $alphabet = [
+            'a', 'b', 'c', 'd', 'e', 
+            'f', 'g', 'h', 'i', 'j', 
+            'k', 'l', 'm', 'n', 'o', 
+            'p', 'q', 'r', 's', 't', 
+            'u', 'v', 'w', 'x', 'y', 
+            'z'];
+        
+        
+        if(empty($str)){
+            return $alphabet[0];
+        }
+
+        $result = str_split($str);
+        $length = sizeof($result);
+        $carry = false;
+        for ($i = $length -1; $i > -1; $i--) {
+            $idx = array_search(strtolower($result[$i]), $alphabet);
+            $idx ++;
+            if ($idx < 0) {
+                $idx = 0;
+            }
+            if ($idx >= 26) {
+                $result[$i] = $alphabet[0];
+                continue;
+            }
+            $result[$i] = $alphabet[$idx];
+            $carry = true;
+            break;
+        }
+        if (! $carry) {
+            array_unshift($result, $alphabet[0]);
+        }
+
+        return implode($result);
+    }
 }
 
