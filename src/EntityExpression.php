@@ -20,6 +20,6 @@ interface EntityExpression
 
     public function reset($tag = null): self;
     
-    public function exec();
+    public function execute(?EntityManager $entityManager = null);
 }
 

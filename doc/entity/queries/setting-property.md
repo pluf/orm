@@ -1,4 +1,43 @@
-# Setting property
+# Mapping and properties
+
+You are free to select both object and propertye as a result of a 
+query. There are two way to do that:
+
+- add property
+- add a mapper
+
+a property is responsible to extract an object property and set it into the
+results whiel the mapper are responsible to create a new object form query 
+result.
+
+Note that, if you add multi mappers or property into a query, the result is
+an array (for each raw) with result of mappers and properties. for example
+consider the following query:
+
+```php
+$result = $query->entity(User::class)
+	->property('a.login', 'login')
+	->mapper(Person::class, 'p', [
+		'a.firstName' => 'firstName',
+		'a.lastName' => 'lastname'
+	])
+	->select();
+``
+
+Then the $result[0] will be:
+
+```json
+[
+	'login': 'userling',
+	'p': {
+		'firstName': 'user first name',
+		'lastName': 'user last name'
+	}
+]
+```
+
+
+## Property
 
 The following method is used to define output property of a query:
 
@@ -41,23 +80,53 @@ such as spaces or brackets, then property() will assume that you're passing an
 expression:
 
 ```php
-$query->field('now()');
+$query->property('now()');
 
-$query->field('now()', 'timeNow');
+$query->property('now()', 'timeNow');
 ```
 
 You may also pass array as first argument. In such case array keys will be
 used as aliases (if they are specified):
 
 ```php
-$query->field(['timeNow'=>'now()', 'timeCreated']);
+$query->property(['timeNow'=>'now()', 'timeCreated']);
     // SELECT now() timeNow, timeCreated ...
 
-$query->field($query->query()
+$query->property($query->query()
 	->entity(User::class)
-	->field('max(age)'), 'maxAge');
+	->property('max(age)'), 'maxAge');
     // SELECT (SELECT max(age) from User) maxAge ...
 ```
 
 Method can be executed several times on the same Query object.
 
+
+## Mapper
+
+The following method is used to define output mapper of a query:
+
+```php
+$query->mapper($class, $alias = null, $map = null);
+```
+
+Adds additional maper that you would like to query.
+
+This method has several call options. $class can be array of class and
+also can be an alias of entities.
+
+Basic Examples:
+
+```php
+$query
+	->entity(User::class, 'a')
+	->mapper('a');
+// SELECT a FROM User a;
+
+$query
+	->entity(User::class, 'a')
+	->mapper(Person::class, 'p', [
+		'a.firstName' => 'firstName',
+		'a.lastName' => 'lastname'
+	]);
+// SELECT new Person(a.firstName, a.lastName) p FROM User a;
+```

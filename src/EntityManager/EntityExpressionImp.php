@@ -19,7 +19,7 @@ class EntityExpressionImp implements EntityExpression, \ArrayAccess, \IteratorAg
 {
     use AssertionTrait;
 
-    protected EntityManagerImp $entityManager;
+    public EntityManagerImp $entityManager;
     
     
     /**
@@ -149,7 +149,7 @@ class EntityExpressionImp implements EntityExpression, \ArrayAccess, \IteratorAg
      * {@inheritdoc}
      * @see \Pluf\Orm\EntityExpression::exec()
      */
-    public function exec(?EntityManager $entityManager = null)
+    public function execute(?EntityManager $entityManager = null)
     {
         if ($entityManager === null) {
             $entityManager = $this->entityManager;
@@ -175,7 +175,28 @@ class EntityExpressionImp implements EntityExpression, \ArrayAccess, \IteratorAg
 
 
     protected function mapToObject($resultSet)
-    {}
+    {
+        $mappers = [];
+        if(array_key_exists('property', $this->args)){
+            $mappers = $this->args['property'];
+        } else {
+            throw new Exception("XXX: Not suppoert");
+        }
+        
+        // assert length > 0
+        
+        $result = [];
+        if(sizeof($mappers) == 1){
+            $mppper = $mappers[0];
+            foreach ($resultSet as $raw){
+                $result[] = $mppper->newInstance($raw);
+            }
+            return $result;
+        }
+        
+        
+        throw new Exception("XXX: Not suppoert more than one mapper");
+    }
     
     
     /**

@@ -15,7 +15,7 @@ examples below are using `$entityManager->query()` method which generates Query 
 your underlying EntityManager.
 
 Once you have a query object you can execute modifier methods such as
-`field()` or `entity()` which will change the way how your
+`property()` or `entity()` which will change the way how your
 query will act.
 
 Once the query is defined, you can either use it inside another query or you can execute it in exchange for result set.
@@ -25,10 +25,11 @@ Quick Example:
 ```php
 $query = $entityManager->query();
 
-$query -> entity(Foo::class);
-$query -> where('id', 123);
+$query->entity(Foo::class, 'f');
+$query->where('id', 123);
+$query->mapper('f');
 
-$foo = $query -> getOne();
+$foo = $query->getOne();
 ```
 
 or in chain mode:
@@ -36,12 +37,15 @@ or in chain mode:
 
 ```php
 $query = $entityManager->query();
-$foo = $query->entity(Foo::class)
+$foo = $query->entity(Foo::class, 'f')
 	->where('id', 123)
+	->mapper('f')
 	->getOne();
 ```
 
+As you see the query class contain both genration query and mapping data at the same time.
 
+See following section for more information about the ORM.
 
 
 - [concatenate   ](queries/concatenate.md)

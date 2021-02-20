@@ -4,6 +4,7 @@ namespace Pluf\Orm\EntityManager;
 use Pluf\Orm\AssertionTrait;
 use Pluf\Orm\EntityQuery;
 use Pluf\Orm\StringUtil;
+use Pluf\Orm\EntityExpression;
 
 class EntityQueryImp extends EntityExpressionImp implements EntityQuery
 {
@@ -102,75 +103,60 @@ class EntityQueryImp extends EntityExpressionImp implements EntityQuery
     /**
      *
      * {@inheritdoc}
-     * @see \Pluf\Orm\EntityQuery::mode()
+     * @see \Pluf\Orm\EntityQuery::property()
      */
-    public function mode(string $mode): self
+    public function property($property, $alias = null): self
     {
-        $prop = 'template_' . $mode;
+        // field is passed as string, may contain commas
+        if (is_string($property) && strpos($property, ',') !== false) {
+            $property = explode(',', $property);
+        }
 
-        $this->assertNotEmpty($this->{$prop}, 'Query does not have this mode', [
-            'mode' => $mode
-        ]);
+        // recursively add array fields
+        if (is_array($property)) {
+            $this->assertEmpty($alias, 'Alias must not be specified when $property is an array');
 
-        $this->mode = $mode;
-        $this->template = $this->{$prop};
+            foreach ($property as $alias => $p) {
+                $this->property($p, is_numeric($alias) ? null : $alias);
+            }
+
+            return $this;
+        }
+
+        // save field in args
+        $this->_set_args('property', $alias, new MapperProperty($property, $this));
+
         return $this;
     }
 
     /**
      *
      * {@inheritdoc}
-     * @see \Pluf\Orm\EntityQuery::having()
+     * @see \Pluf\Orm\EntityQuery::mapper()
      */
-    public function having(): self
-    {}
-
-    /**
-     *
-     * {@inheritdoc}
-     * @see \Pluf\Orm\EntityQuery::select()
-     */
-    public function select()
+    public function mapper(string $class, $alias = null, array $map = null): self
     {
-        return $this->mode('select')->exec();
-    }
+        // field is passed as string, may contain commas
+        if (is_string($class) && strpos($class, ',') !== false) {
+            $class = explode(',', $class);
+        }
 
-    /**
-     *
-     * {@inheritdoc}
-     * @see \Pluf\Orm\EntityQuery::insert()
-     */
-    public function insert()
-    {
-        return $this->mode('insert')->exec();
-    }
+        // recursively add array fields
+        if (is_array($class)) {
+            $this->assertEmpty($alias, 'Alias must not be specified when $field is an array');
+            $this->assertEmpty($map, 'Map must not be specified when $field is an array');
 
-    /**
-     *
-     * {@inheritdoc}
-     * @see \Pluf\Orm\EntityQuery::update()
-     */
-    public function update()
-    {
-        return $this->mode('update')->exec();
-    }
+            foreach ($class as $alias => $classMapper) {
+                $this->property($classMapper, is_numeric($alias) ? null : $alias);
+            }
 
-    /**
-     *
-     * {@inheritdoc}
-     * @see \Pluf\Orm\EntityQuery::where()
-     */
-    public function where(): self
-    {}
+            return $this;
+        }
 
-    /**
-     *
-     * {@inheritdoc}
-     * @see \Pluf\Orm\EntityQuery::delete()
-     */
-    public function delete()
-    {
-        return $this->mode('delete')->exec();
+        // save field in args
+        $this->_set_args('property', $alias, new MapperEntity($this, $class, $map));
+
+        return $this;
     }
 
     /**
@@ -222,6 +208,80 @@ class EntityQueryImp extends EntityExpressionImp implements EntityQuery
         $this->_set_args('entity', $alias, $entityType);
 
         return $this;
+    }
+
+    /**
+     *
+     * {@inheritdoc}
+     * @see \Pluf\Orm\EntityQuery::mode()
+     */
+    public function mode(string $mode): self
+    {
+        $prop = 'template_' . $mode;
+
+        $this->assertNotEmpty($this->{$prop}, 'Query does not have this mode', [
+            'mode' => $mode
+        ]);
+
+        $this->mode = $mode;
+        $this->template = $this->{$prop};
+        return $this;
+    }
+
+    /**
+     *
+     * {@inheritdoc}
+     * @see \Pluf\Orm\EntityQuery::having()
+     */
+    public function having(): self
+    {}
+
+    /**
+     *
+     * {@inheritdoc}
+     * @see \Pluf\Orm\EntityQuery::select()
+     */
+    public function select()
+    {
+        return $this->mode('select')->execute();
+    }
+
+    /**
+     *
+     * {@inheritdoc}
+     * @see \Pluf\Orm\EntityQuery::insert()
+     */
+    public function insert()
+    {
+        return $this->mode('insert')->execute();
+    }
+
+    /**
+     *
+     * {@inheritdoc}
+     * @see \Pluf\Orm\EntityQuery::update()
+     */
+    public function update()
+    {
+        return $this->mode('update')->execute();
+    }
+
+    /**
+     *
+     * {@inheritdoc}
+     * @see \Pluf\Orm\EntityQuery::where()
+     */
+    public function where(): self
+    {}
+
+    /**
+     *
+     * {@inheritdoc}
+     * @see \Pluf\Orm\EntityQuery::delete()
+     */
+    public function delete()
+    {
+        return $this->mode('delete')->exec();
     }
 
     // protected function selectEntities()
@@ -324,13 +384,12 @@ class EntityQueryImp extends EntityExpressionImp implements EntityQuery
      *
      * @param bool $add_alias
      *            Should we add aliases, see _render_entity_noalias()
-     *            
-     * @return atk\dsql\Connection Parsed template chunk
+     * @return atk\dsql\Query Parsed template chunk
      */
-    protected function _render_entity($connection, $add_alias = true)
+    protected function _render_entity($query, $add_alias = true)
     {
         if (empty($this->args['entity'])) {
-            return $connection;
+            return $query;
         }
 
         $schema = $this->entityManager->entityManagerFactory->entityManagerSchema;
@@ -354,10 +413,10 @@ class EntityQueryImp extends EntityExpressionImp implements EntityQuery
                 $alias = null;
             }
 
-            $connection->table($table, $alias);
+            $query->table($table, $alias);
         }
 
-        return $connection;
+        return $query;
     }
 
     /**
@@ -367,12 +426,12 @@ class EntityQueryImp extends EntityExpressionImp implements EntityQuery
      *            to update
      * @return atk\dsql\Connection
      */
-    protected function _render_limit($connection)
+    protected function _render_limit($query)
     {
         if (isset($this->args['limit'])) {
-            return $connection->limit($this->args['limit']['count'], $this->args['limit']['start']);
+            return $query->limit($this->args['limit']['count'], $this->args['limit']['start']);
         }
-        return $connection;
+        return $query;
     }
 
     /**
@@ -382,9 +441,9 @@ class EntityQueryImp extends EntityExpressionImp implements EntityQuery
      *            to update
      * @return atk\dsql\Connection
      */
-    protected function _render_with($connection)
+    protected function _render_with($query)
     {
-        return $connection;
+        return $query;
     }
 
     /**
@@ -394,9 +453,36 @@ class EntityQueryImp extends EntityExpressionImp implements EntityQuery
      *            to update
      * @return atk\dsql\Connection
      */
-    protected function _render_option($connection)
+    protected function _render_option($query)
     {
-        return $connection;
+        return $query;
+    }
+
+    /**
+     * Renders [limit].
+     *
+     * @param atk\dsql\Query $query
+     *            The origin query to update and build result from.
+     * @return atk\dsql\Query Generated query
+     */
+    protected function _render_property($query, $add_alias = true)
+    {
+        if (! array_key_exists('property', $this->args)) {
+            return $query;
+        }
+
+        $schema = $this->entityManager->entityManagerFactory->entityManagerSchema;
+        $modelDescriptionRepository = $this->entityManager->entityManagerFactory->modelDescriptionRepository;
+
+        foreach ($this->args['property'] as $alias => $mapper) {
+            $query = $mapper->render(
+                schema: $schema,
+                modelDescriptionRepository: $modelDescriptionRepository,
+                alias: $alias,
+                query: $query
+            );
+        }
+        return $query;
     }
 
     /**
@@ -406,9 +492,9 @@ class EntityQueryImp extends EntityExpressionImp implements EntityQuery
      *            to update
      * @return atk\dsql\Connection
      */
-    protected function _render_property($connection)
+    protected function _render_join($query)
     {
-        return $connection;
+        return $query;
     }
 
     /**
@@ -418,9 +504,9 @@ class EntityQueryImp extends EntityExpressionImp implements EntityQuery
      *            to update
      * @return atk\dsql\Connection
      */
-    protected function _render_join($connection)
+    protected function _render_where($query)
     {
-        return $connection;
+        return $query;
     }
 
     /**
@@ -430,9 +516,9 @@ class EntityQueryImp extends EntityExpressionImp implements EntityQuery
      *            to update
      * @return atk\dsql\Connection
      */
-    protected function _render_where($connection)
+    protected function _render_group($query)
     {
-        return $connection;
+        return $query;
     }
 
     /**
@@ -442,9 +528,9 @@ class EntityQueryImp extends EntityExpressionImp implements EntityQuery
      *            to update
      * @return atk\dsql\Connection
      */
-    protected function _render_group($connection)
+    protected function _render_having($query)
     {
-        return $connection;
+        return $query;
     }
 
     /**
@@ -454,21 +540,9 @@ class EntityQueryImp extends EntityExpressionImp implements EntityQuery
      *            to update
      * @return atk\dsql\Connection
      */
-    protected function _render_having($connection)
+    protected function _render_order($query)
     {
-        return $connection;
-    }
-
-    /**
-     * Renders [limit].
-     *
-     * @param atk\dsql\Connection $connection
-     *            to update
-     * @return atk\dsql\Connection
-     */
-    protected function _render_order($connection)
-    {
-        return $connection;
+        return $query;
     }
 }
 

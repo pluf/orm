@@ -31,6 +31,72 @@ interface EntityQuery extends EntityExpression
      * @return self
      */
     public function entity($entityType, $alias = null): self;
+    
+    /**
+     * Adds new property to resulting select by querying $property.
+     *
+     * Examples:
+     *  $q->property('u.name');
+     *
+     * You can use a dot to prepend entity alias to the property:
+     *  $q->property('u.name');
+     *  $q->property('u.name');
+     *  $q->property('u.name')
+     *      ->property('address.line1');
+     *
+     * Array as a first argument will specify multiple properties, same as calling property() multiple times
+     *  $q->property(['u.name', 'u.surname', 'address.line1']);
+     *
+     * You can pass first argument as Expression or Query
+     *  $q->property( $q->expr('2+2'), 'alias');   // must always use alias
+     *
+     * You can use $q->query() for subqueries. Subqueries will be wrapped in
+     * brackets.
+     *  $q->property( $q->query()->entity(X::class)... , 'alias');
+     *
+     * Associative array will assume that "key" holds the property alias.
+     * Value may be property name, Expression or Query.
+     *  $q->property(['alias' => 'u.name', 'alias2' => 'mother.surname']);
+     *  $q->property(['alias' => $q->expr(..), 'alias2' => $q->query()->.. ]);
+     *
+     * If you need to use funky name for the property (e.g, one containing
+     * a dot or a space), you should wrap it into expression:
+     *  $q->property($q->expr('{}', ['fun...ky.property']), 'f');
+     *
+     * @param mixed  $property Specifies field to select
+     * @param string $alias Specify alias for this property
+     *
+     * @return $this
+     */
+    public function property($property, $alias = null): self;
+    
+    
+    
+    /**
+     * Adds new entity to resulting select.
+     *
+     * Examples:
+     * 
+     *  $q->mapper(User::class);
+     *  $q->mapper(Role::class)
+     *      ->mapper(Category::class, 'cat');
+     *
+     * Array as a first argument will specify multiple mapper, same as calling mapper() multiple times
+     * 
+     *  $q->mapper([User::class, Rol::class, Group::class]);
+     *
+     * Associative array will assume that "key" holds the mapper alias.
+     * Value may be class name.
+     * 
+     *  $q->mapper(['alias' => User::class, 'alias2' => Group::class]);
+     *
+     *
+     * @param string $class name of class to mapp
+     * @param string $alias of the mapper
+     * @param array $map to define how to mapp properties
+     * @return self
+     */
+    public function mapper(string $class, $alias = null, array $map = []): self;
 
     public function where(): self;
 

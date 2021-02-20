@@ -9,6 +9,7 @@ use Pluf\Orm\ModelDescriptionRepository;
 use Pluf\Orm\Loader\ModelDescriptionLoaderAttribute;
 use atk4\dsql\Connection;
 use Pluf\Orm\Exception;
+use Pluf\Orm\EntityManager\MapperEntity;
 
 class EntityQueryTest extends TestCase
 {
@@ -207,6 +208,23 @@ class EntityQueryTest extends TestCase
         $query = $query->entity($query2);
         $this->assertEquals($query->args['entity'], [
             'alias' => $query2
+        ]);
+    }
+    
+    
+    /**
+     *
+     * @test
+     */
+    public function testMapperWithAlias()
+    {
+        $entityManager = self::$entityManagerFactory->createEntityManager();
+        $query = $entityManager->query()
+            ->entity(Asset\Author::class, 'author')
+            ->mapper('author');
+        
+        $this->assertEquals($query->args['property'], [
+            new MapperEntity($query, 'author')
         ]);
     }
 }

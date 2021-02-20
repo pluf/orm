@@ -10,8 +10,8 @@ Use this to limit your Query result-set::
 
 ```php
 $q->limit(5, 10);
-    // .. LIMIT 10, 5
+// .. LIMIT 10, 5
 
 $q->limit(5);
-    // .. LIMIT 0, 5
+// .. LIMIT 0, 5
 ```

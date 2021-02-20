@@ -1,6 +1,4 @@
-
-Set Insert Options
-------------------
+# Set Insert Options
 
 .. php:method:: option($option, $mode = 'select')
 

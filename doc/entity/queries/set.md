@@ -1,24 +1,24 @@
+# Insert and Replace query
 
-Insert and Replace query
-========================
+Assigns value to the field during insert.
 
-Set value to a field
---------------------
-
-.. php:method:: set($field, $value)
-
-    Assigns value to the field during insert.
-
-    :param string $field: name of the field
-    :param mixed  $value: value or expression
-    :returns: $this
+```php
+$query->set($field, $value);
+```
 
 Example::
 
-    $q->table('user')->set('name', 'john')->insert();
-        // insert into user (name) values (john)
+```php
+$q->entity(User::class)
+	->set('name', 'john')
+	->insert();
+// insert into user (name) values (john)
 
-    $q->table('log')->set('date', $q->expr('now()'))->insert();
-        // insert into log (date) values (now())
+$q->entity(Log::class)
+	->set('date', $q->expr('now()'))
+	->set('message', 'A new user is inserted')
+	->insert();
+// insert into log (date, message) values (now(), 'A new user is inserted')
+```
 
 Method can be executed several times on the same Query object.

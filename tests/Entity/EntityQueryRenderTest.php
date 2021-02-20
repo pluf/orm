@@ -48,10 +48,31 @@ class EntityQueryRenderTest extends TestCase
             ],
             [
                 $entityManager->query()
-                ->mode('select')
-                ->entity(Book::class)
-                ->limit(10,11),
+                    ->mode('select')
+                    ->entity(Book::class)
+                    ->limit(10, 11),
                 "/^select .* from \"test_books\" \"a\" limit 11, 10$/"
+            ],
+            [
+                $entityManager->query()
+                    ->mode('select')
+                    ->entity(Book::class, 'book')
+                    ->mapper('book'),
+                "/^select .*\"id\".* from \"test_books\".*$/"
+            ],
+            [
+                $entityManager->query()
+                    ->mode('select')
+                    ->entity(Book::class)
+                    ->mapper('a'),
+                "/^select .*\"title\".* from \"test_books\".*$/"
+            ],
+            [
+                $entityManager->query()
+                    ->mode('select')
+                    ->entity(Book::class, 'x')
+                    ->mapper('x'),
+                "/^select .*\"pages\".* from \"test_books\".*$/"
             ]
         ];
     }

@@ -1,6 +1,5 @@
 # Query Modes
 
-
 When you create new Query it always start in "select" mode. You can switch
 query to a different mode using `mode`. Normally you shouldn't bother
 calling this method and instead use one of the following methods.
@@ -49,3 +48,4 @@ If a single instance can be retrieved, then the update will be performed:
 Otherwise an insert operation will be performed:
 
  - `insert into User (name,surname,revision) values ("John", "Smith", 1)`
+ 
