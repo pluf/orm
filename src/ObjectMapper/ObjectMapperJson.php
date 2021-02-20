@@ -1,12 +1,6 @@
 <?php
 namespace Pluf\Orm\ObjectMapper;
 
-use Pluf\Orm\AssertionTrait;
-use Pluf\Orm\ModelDescriptionRepository;
-use Pluf\Orm\ObjectMapper;
-use Pluf\Orm\ObjectUtils;
-use ReflectionClass;
-use Pluf\Orm\ModelDescription;
 use Pluf\Orm\Exception;
 
 /**

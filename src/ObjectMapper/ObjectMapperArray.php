@@ -54,8 +54,10 @@ class ObjectMapperArray implements ObjectMapper
      */
     public function readValue($input, $class, bool $isList = false)
     {
+        $this->assertNotNull($input, 'Impossible to read object from null');
+        
         $data = $this->convertInputToData($input);
-        $this->assertNotEmpty($data, "Not supported input type `{{type}}` with object mapper `{{mapper}}", [
+        $this->assertNotNull($data, "Not supported input type `{{type}}` with object mapper `{{mapper}}", [
             "type" => ObjectUtils::getTypeOf($input),
             "mapper" => $this::class
         ]);
@@ -67,7 +69,7 @@ class ObjectMapperArray implements ObjectMapper
         ]);
 
         // new instance
-        if (ObjectUtils::isArrayassociative($data)) {
+        if (ObjectUtils::isArrayassociative($data) || empty($data)) {
             $entity = $this->loadInstance($md, $data);
         } else {
             $this->assertTrue($isList, "Imposible to load an entity from an array.");

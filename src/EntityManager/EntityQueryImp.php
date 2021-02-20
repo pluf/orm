@@ -85,9 +85,10 @@ class EntityQueryImp extends EntityExpressionImp implements EntityQuery
      * @param array $properties
      * @param EntityManagerImp $entityManager
      */
-    public function __construct($properties = [], EntityManagerImp $entityManager)
+    public function __construct($properties = [], ?EntityManagerImp $entityManager = null)
     {
         $this->entityManager = $entityManager;
+        // TODO: maso, 2020: deal with properties
     }
 
     /**
