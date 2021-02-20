@@ -208,7 +208,28 @@ class EntityManagerImp implements EntityManager
      * @see \Pluf\Orm\EntityManager::merge​()
      */
     public function merge​($entity)
-    {}
+    {
+        // TODO: maso, 2021: co
+        $md = $this->getModelDescriptionOf($entity);
+        $query = $this->entityManagerFactory->connection->dsql()
+            ->table($this->entityManagerFactory->entityManagerSchema->getTableName($md))
+            ->mode("replace");
+
+        foreach ($md->properties as $properyt) {
+            $value = $properyt->getValue($entity);
+            $value = $this->entityManagerFactory->entityManagerSchema->toDb($properyt, $value);
+            $query->set($properyt->column->name, $value);
+        }
+
+        $query->execute();
+        // TODO: maso, 2021: Postgresql need sequence name
+        $id = $md->properties[$md->primaryKey];
+        $primaryKey = $id->getValue($entity);
+        $persistEntity = $this->find($md, $primaryKey);
+
+        $this->contextManager->put($persistEntity, $md);
+        return $persistEntity;
+    }
 
     /**
      *

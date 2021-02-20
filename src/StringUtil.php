@@ -46,7 +46,7 @@ class StringUtil
 
     public static function decapitalize(string $fieldName): string
     {
-        // TODO;
+        // TODO: maso, 2021: to implement decapitalize a string 
         $result = strtolower(substr($fieldName, 0, 1)) . substr($fieldName, 1);
         return $result;
     }
