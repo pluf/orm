@@ -1,6 +1,8 @@
 <?php
 namespace Pluf\Orm;
 
+use Pluf\Orm\Attribute\ArrayHasKey;
+use Pluf\Orm\Attribute\ArrayNotHasKey;
 use Pluf\Orm\Attribute\IsArray;
 use Pluf\Orm\Attribute\IsBool;
 use Pluf\Orm\Attribute\IsEmpty;
@@ -12,11 +14,26 @@ use Pluf\Orm\Attribute\IsString;
 use Pluf\Orm\Attribute\IsTrue;
 use Pluf\Orm\Attribute\NotEmpty;
 use Pluf\Orm\Attribute\NotNull;
-use Pluf\Orm\Attribute\ArrayHasKey;
-use Pluf\Orm\Attribute\ArrayNotHasKey;
+use ArrayAccess;
+use Throwable;
 
 trait AssertionTrait
 {
+
+    /**
+     * Creates new exception
+     *
+     * @param string $message
+     * @param int $code
+     * @param Throwable $previous
+     * @param array $params
+     * @param array $solutions
+     * @return Throwable
+     */
+    protected function generateException($message = '', ?int $code = null, ?Throwable $previous = null, ?array $params = [], ?array $solutions = []): Throwable
+    {
+        return new Exception($message, $code, $previous, $params, $solutions);
+    }
 
     /**
      * Asserts if the actual value is null
@@ -31,9 +48,7 @@ trait AssertionTrait
     {
         $constraint = new NotNull();
         if (! $constraint->isValid($actual)) {
-            throw new \Pluf\Orm\Exception(
-                message:$message, 
-                params: $params);
+            throw $this->generateException($message, params: $params);
         }
     }
 
@@ -50,7 +65,7 @@ trait AssertionTrait
     {
         $constraint = new IsNull();
         if (! $constraint->isValid($actual)) {
-            throw new \Pluf\Orm\Exception($message, params: $params);
+            throw $this->generateException($message, params: $params);
         }
     }
 
@@ -58,7 +73,7 @@ trait AssertionTrait
     {
         $constraint = new NotEmpty();
         if (! $constraint->isValid($actual)) {
-            throw new \Pluf\Orm\Exception($message, params: $params);
+            throw $this->generateException($message, params: $params);
         }
     }
 
@@ -66,7 +81,7 @@ trait AssertionTrait
     {
         $constraint = new IsEmpty();
         if (! $constraint->isValid($actual)) {
-            throw new \Pluf\Orm\Exception($message, params: $params);
+            throw $this->generateException($message, params: $params);
         }
     }
 
@@ -74,7 +89,7 @@ trait AssertionTrait
     {
         $constraint = new IsTrue();
         if (! $constraint->isValid($actual)) {
-            throw new \Pluf\Orm\Exception($message, params: $params);
+            throw $this->generateException($message, params: $params);
         }
     }
 
@@ -82,21 +97,17 @@ trait AssertionTrait
     {
         $constraint = new IsFalse();
         if (! $constraint->isValid($actual)) {
-            throw new \Pluf\Orm\Exception($message, params: $params);
+            throw $this->generateException($message, params: $params);
         }
     }
 
     protected function assertEquals($actual, $expected, string $message = '', array $params = [], float $delta = 0.0, bool $canonicalize = false, bool $ignoreCase = false)
 
     {
-        $constraint = new IsEqual(
-            expectedValue: $expected, 
-            delta: $delta, 
-            canonicalize: $canonicalize, 
-            ignoreCase: $ignoreCase);
+        $constraint = new IsEqual(null, null, $expected, null, $message, $delta, $canonicalize, $ignoreCase);
         $val = $constraint->isValid($actual);
         if (! $val) {
-            throw new \Pluf\Orm\Exception($message, params: $params);
+            throw $this->generateException($message, params: $params);
         }
         return $val;
     }
@@ -111,7 +122,7 @@ trait AssertionTrait
         $constraint = new IsArray();
         $val = $constraint->isValid($actual);
         if (! $val) {
-            throw new \Pluf\Orm\Exception($message, params: $params);
+            throw $this->generateException($message, params: $params);
         }
         return $val;
     }
@@ -126,7 +137,7 @@ trait AssertionTrait
         $constraint = new IsNotArray();
         $val = $constraint->isValid($actual);
         if (! $val) {
-            throw new \Pluf\Orm\Exception($message, params: $params);
+            throw $this->generateException($message, params: $params);
         }
         return $val;
     }
@@ -141,7 +152,7 @@ trait AssertionTrait
         $constraint = new IsBool();
         $val = $constraint->isValid($actual);
         if (! $val) {
-            throw new \Pluf\Orm\Exception($message, params: $params);
+            throw $this->generateException($message, params: $params);
         }
         return $val;
     }
@@ -156,7 +167,7 @@ trait AssertionTrait
         $constraint = new IsString();
         $val = $constraint->isValid($actual);
         if (! $val) {
-            throw new \Pluf\Orm\Exception($message, params: $params);
+            throw $this->generateException($message, params: $params);
         }
         return $val;
     }
@@ -195,7 +206,7 @@ trait AssertionTrait
         $constraint = new ArrayHasKey($key);
         $val = $constraint->isValid($array);
         if (! $val) {
-            throw new \Pluf\Orm\Exception($message, params: $params);
+            throw $this->generateException($message, params: $params);
         }
     }
 
@@ -212,7 +223,7 @@ trait AssertionTrait
         $constraint = new ArrayNotHasKey($key);
         $val = $constraint->isValid($array);
         if (! $val) {
-            throw new \Pluf\Orm\Exception($message, params: $params);
+            throw $this->generateException($message, params: $params);
         }
     }
 }

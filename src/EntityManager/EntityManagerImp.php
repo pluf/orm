@@ -17,10 +17,13 @@ class EntityManagerImp implements EntityManager
     use AssertionTrait;
 
     private bool $open = true;
-    
+
     public EntityManagerFactoryImp $entityManagerFactory;
+
     private ?ContextManager $contextManager;
+
     private array $properties = [];
+
     private string $flashMod = FlushModeType::AUTO;
 
     /**
@@ -63,7 +66,7 @@ class EntityManagerImp implements EntityManager
     protected function fillEntity(ModelDescription $md, $entity, $data)
     {
         // TODO: using object mapper. mayby.
-        $schema =  $this->entityManagerFactory->entityManagerSchema;
+        $schema = $this->entityManagerFactory->entityManagerSchema;
         foreach ($md->properties as $name => $property) {
             // TODO: maso, 2021: support relations
             if (isset($data[$name])) {
@@ -125,7 +128,23 @@ class EntityManagerImp implements EntityManager
      * @see \Pluf\Orm\EntityManager::remove()
      */
     public function remove($entity)
-    {}
+    {
+        // TODO: maso, 2021: co
+        $md = $this->getModelDescriptionOf($entity);
+        // TODO: maso, 2021: check md
+        // TODO: maso, 2021: check md id exist
+        $id = $md->properties[$md->primaryKey];
+
+        $idColumn = $id->getColumnName();
+        $idValue = $id->getValue($entity);
+        $result = $this->entityManagerFactory->connection->dsql()
+            ->table($this->entityManagerFactory->entityManagerSchema->getTableName($md))
+            ->where($idColumn, $idValue)
+            ->delete();
+
+        // TODO: maso, 2021: assert the result value
+        $this->detach​($entity);
+    }
 
     /**
      *
@@ -210,14 +229,14 @@ class EntityManagerImp implements EntityManager
             ->table($this->entityManagerFactory->entityManagerSchema->getTableName($md))
             ->where($primaryKeyProperty->column->name, '=', $primaryKey)
             ->select();
-            
+
         if ($stmt instanceof \Generator) {
             $entityData = iterator_to_array($stmt);
         } else {
             $entityData = $stmt->fetchAll();
         }
-            
-        if (empty($entityData) || sizeof($entityData) == 0){
+
+        if (empty($entityData) || sizeof($entityData) == 0) {
             // TODO: maso, 2021: what to do for not found
             return null;
         }
@@ -237,8 +256,8 @@ class EntityManagerImp implements EntityManager
     }
 
     /**
-     * 
-     * {@inheritDoc}
+     *
+     * {@inheritdoc}
      * @see \Pluf\Orm\EntityManager::getEntityManagerFactory()
      */
     public function getEntityManagerFactory(): EntityManagerFactory
@@ -247,18 +266,18 @@ class EntityManagerImp implements EntityManager
     }
 
     /**
-     * 
-     * {@inheritDoc}
+     *
+     * {@inheritdoc}
      * @see \Pluf\Orm\EntityManager::getFlushMode()
      */
     public function getFlushMode(): string
     {
         return $this->flushMode;
     }
-    
+
     /**
      *
-     * {@inheritDoc}
+     * {@inheritdoc}
      * @see \Pluf\Orm\EntityManager::getDelegate()
      */
     public function getDelegate()
@@ -267,15 +286,15 @@ class EntityManagerImp implements EntityManager
     }
 
     /**
-     * 
-     * {@inheritDoc}
+     *
+     * {@inheritdoc}
      * @see \Pluf\Orm\EntityManager::setProperty()
      */
     public function setProperty(string $propertyName, $value): void
     {
         $this->properties[$propertyName] = $value;
     }
-    
+
     /**
      *
      * {@inheritdoc}
@@ -287,8 +306,8 @@ class EntityManagerImp implements EntityManager
     }
 
     /**
-     * 
-     * {@inheritDoc}
+     *
+     * {@inheritdoc}
      * @see \Pluf\Orm\EntityManager::setFlushMode()
      */
     public function setFlushMode(string $flushMode): void
@@ -300,10 +319,10 @@ class EntityManagerImp implements EntityManager
     {
         return new EntityTransactionImp();
     }
-    
+
     /**
-     * 
-     * {@inheritDoc}
+     *
+     * {@inheritdoc}
      * @see \Pluf\Orm\EntityManager::query()
      */
     public function query($properties = []): EntityQuery
@@ -312,14 +331,13 @@ class EntityManagerImp implements EntityManager
     }
 
     /**
-     * 
-     * {@inheritDoc}
+     *
+     * {@inheritdoc}
      * @see \Pluf\Orm\EntityManager::expr()
      */
     public function expr($properties = [], $arguments = null): EntityExpression
     {
         return new EntityExpressionImp($properties, $arguments, $this);
     }
-
 }
 

@@ -65,7 +65,9 @@ interface EntityManager
 
     /**
      * Find by primary key.
-     * Search for an entity of the specified class and primary key. If the entity instance is contained in the persistence context, it is returned from there.
+     * 
+     * Search for an entity of the specified class and primary key. If the entity 
+     * instance is contained in the persistence context, it is returned from there.
      *
      * @param string $entityType
      * @param mixed $primaryKey
