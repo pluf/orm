@@ -201,7 +201,7 @@ trait AssertionTrait
      *
      * @throws Exception
      */
-    public static function assertArrayHasKey($key, $array, string $message = '', array $params = []): void
+    protected function assertArrayHasKey($key, $array, string $message = '', array $params = []): void
     {
         $constraint = new ArrayHasKey($key);
         $val = $constraint->isValid($array);
@@ -218,7 +218,7 @@ trait AssertionTrait
      *
      * @throws Exception
      */
-    public static function assertArrayNotHasKey($key, $array, string $message = '', array $params = []): void
+    protected function assertArrayNotHasKey($key, $array, string $message = '', array $params = []): void
     {
         $constraint = new ArrayNotHasKey($key);
         $val = $constraint->isValid($array);
