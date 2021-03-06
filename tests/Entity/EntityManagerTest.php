@@ -140,7 +140,7 @@ class EntityManagerTest extends TestCase
     {
         $entityManager = self::$entityManagerFactory->createEntityManager();
 
-        for($i = 0; $i < 3; $i++){
+        for ($i = 0; $i < 3; $i ++) {
             $entity = new Asset\Author();
             $entity->firstName = "fist name";
             $entity->lastName = "last name";
@@ -150,13 +150,30 @@ class EntityManagerTest extends TestCase
         $result = $entityManager->query()
             ->entity(Asset\Author::class, 'address')
             ->mapper('address')
-            ->limit(2,1)
+            ->limit(2, 1)
             ->select();
 
         $this->assertNotNull($result);
         $this->assertIsArray($result);
         $this->assertTrue(sizeof($result) == 2);
         $this->assertInstanceOf(Asset\Author::class, $result[0]);
+    }
+
+    /**
+     *
+     * @test
+     */
+    public function testQueryToFindSimpleVersionOfPublisher()
+    {
+        $entityManager = self::$entityManagerFactory->createEntityManager();
+        $result = $entityManager->query()
+            ->entity(Asset\SimplePublisher::class, '_e')
+            ->mapper('_e')
+            ->limit(10, 0)
+            ->select();
+
+        $this->assertNotNull($result);
+        $this->assertIsArray($result);
     }
 }
 

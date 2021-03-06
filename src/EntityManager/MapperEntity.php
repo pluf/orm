@@ -51,7 +51,7 @@ class MapperEntity extends MapperAbstract
 
         $md = $modelDescriptionRepository->get($class);
         foreach ($md->properties as $property) {
-            $query->field($property->column->name);
+            $query->field($property->getColumnName());
         }
 
         return $query;
