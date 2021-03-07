@@ -273,7 +273,10 @@ class EntityQueryImp extends EntityExpressionImp implements EntityQuery
      * @see \Pluf\Orm\EntityQuery::where()
      */
     public function where(): self
-    {}
+    {
+        // XXX: maso, 2021: add where 
+        return $this;
+    }
 
     /**
      *

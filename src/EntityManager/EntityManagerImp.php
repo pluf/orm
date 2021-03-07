@@ -218,7 +218,7 @@ class EntityManagerImp implements EntityManager
         foreach ($md->properties as $properyt) {
             $value = $properyt->getValue($entity);
             $value = $this->entityManagerFactory->entityManagerSchema->toDb($properyt, $value);
-            $query->set($properyt->column->name, $value);
+            $query->set($properyt->getColumnName(), $value);
         }
 
         $query->execute();

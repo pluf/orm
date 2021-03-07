@@ -149,7 +149,7 @@ abstract class EntityManagerSchema
 
     public string $prefix = '';
 
-    function __construct(string $prefix = '')
+    public function __construct(string $prefix = '')
     {
         $this->prefix = $prefix;
     }
@@ -286,9 +286,9 @@ abstract class EntityManagerSchema
             return null;
         }
         if ($val) {
-            return '1';
+            return 1;
         }
-        return '0';
+        return 0;
     }
 
     public static function sequenceFromDb($val)

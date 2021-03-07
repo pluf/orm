@@ -3,6 +3,7 @@ namespace Pluf\Orm;
 
 use Pluf\Orm\EntityManager\EntityManagerSchemaMySQL;
 use Pluf\Orm\EntityManager\EntityManagerSchemaSQLite;
+use Pluf\Orm\EntityManager\EntityManagerSchemaJson;
 
 class EntityManagerSchemaBuilder
 {
@@ -32,6 +33,9 @@ class EntityManagerSchemaBuilder
                 break;
             case 'sqlite':
                 $engine = new EntityManagerSchemaSQLite($this->prefix);
+                break;
+            case 'json':
+                $engine = new EntityManagerSchemaJson($this->prefix);
                 break;
             default:
                 throw new Exception('Engine type "{{type}}" is not supported with Pluf Data Schema.', params:["type" => $this->type]);

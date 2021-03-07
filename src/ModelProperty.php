@@ -102,7 +102,14 @@ class ModelProperty
         throw new Exception("Property is not writable");
     }
 
-    public function isPrimitive($param)
+    /**
+     * Checks whether the property is primitive
+     *
+     * A non primitive property may be an entity or a PHP object
+     *
+     * @return boolean true if the property is primitive
+     */
+    public function isPrimitive()
     {
         switch ($this->type) {
             case 'int':
@@ -122,7 +129,7 @@ class ModelProperty
 
     public function getColumnName(): string
     {
-        if(!empty($this->column) && !empty($this->column->name)){
+        if (! empty($this->column) && ! empty($this->column->name)) {
             return $this->column->name;
         }
         return $this->name;

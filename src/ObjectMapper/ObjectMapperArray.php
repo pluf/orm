@@ -7,6 +7,9 @@ use Pluf\Orm\ObjectMapper;
 use Pluf\Orm\ObjectUtils;
 use ReflectionClass;
 use Pluf\Orm\ModelDescription;
+use Pluf\Orm\ModelProperty;
+use Pluf\Orm\EntityManagerSchema;
+use Pluf\Orm\EntityManagerSchemaBuilder;
 
 /**
  * Array Data implementation of Object mapper
@@ -19,9 +22,25 @@ class ObjectMapperArray implements ObjectMapper
 
     use AssertionTrait;
 
-    public function __construct(ModelDescriptionRepository $modelDescriptionRepository)
+    var EntityManagerSchema $schema;
+
+    /**
+     * Creates new instance of the object mapper
+     *
+     * @param ModelDescriptionRepository $modelDescriptionRepository
+     * @param EntityManagerSchema $schema
+     */
+    public function __construct(ModelDescriptionRepository $modelDescriptionRepository, ?EntityManagerSchema $schema = null)
     {
         $this->modelDescriptionRepository = $modelDescriptionRepository;
+        if (! isset($schema)) {
+            $factory = new EntityManagerSchemaBuilder();
+            $this->schema = $factory->setPrefix("")
+                ->setType('json')
+                ->build();
+        } else {
+            $this->schema = $schema;
+        }
     }
 
     /**
@@ -55,7 +74,7 @@ class ObjectMapperArray implements ObjectMapper
     public function readValue($input, $class, bool $isList = false)
     {
         $this->assertNotNull($input, 'Impossible to read object from null');
-        
+
         $data = $this->convertInputToData($input);
         $this->assertNotNull($data, "Not supported input type `{{type}}` with object mapper `{{mapper}}", [
             "type" => ObjectUtils::getTypeOf($input),
@@ -146,7 +165,12 @@ class ObjectMapperArray implements ObjectMapper
         $result = [];
         foreach ($md->properties as $property) {
             $value = $property->getValue($entity);
-            $result[$property->getColumnName()] = $this->convertToPrimitives($value, $property->type);
+            if ($property->isPrimitive()) {
+                $value = $this->schema->toDb($property, $value);
+            } else {
+                $value = $this->convertToPrimitives($value, $property->type);
+            }
+            $result[$property->getColumnName()] = $value;
         }
         return $result;
     }
@@ -187,7 +211,8 @@ class ObjectMapperArray implements ObjectMapper
             $property = $md->properties[$varName];
             $key = $property->getColumnName();
             if (array_key_exists($key, $rdata)) {
-                $paramsValues[] = $rdata[$key];
+                $value = $rdata[$key];
+                $paramsValues[] = $this->schema->fromDb($property, $value);
                 unset($rdata[$key]);
             } else {
                 $paramsValues[] = $parameter->getDefaultValue();
