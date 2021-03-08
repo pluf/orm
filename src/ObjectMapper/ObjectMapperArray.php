@@ -166,7 +166,7 @@ class ObjectMapperArray implements ObjectMapper
         foreach ($md->properties as $property) {
             $value = $property->getValue($entity);
             if ($property->isPrimitive()) {
-                $value = $this->schema->toDb($property, $value);
+                $value = $this->encodeProperty($property, $value);
             } else {
                 $value = $this->convertToPrimitives($value, $property->type);
             }
@@ -213,7 +213,7 @@ class ObjectMapperArray implements ObjectMapper
             $key = $property->getColumnName();
             if (array_key_exists($key, $rdata)) {
                 $value = $rdata[$key];
-                $paramsValues[] = $this->schema->fromDb($property, $value);
+                $paramsValues[] = $this->decodeProperty($property, $value);
                 unset($rdata[$key]);
             } else {
                 $paramsValues[] = $parameter->getDefaultValue();
@@ -232,6 +232,26 @@ class ObjectMapperArray implements ObjectMapper
         }
 
         return $data;
+    }
+
+    /**
+     *
+     * {@inheritdoc}
+     * @see \Pluf\Orm\ObjectMapper::encodeProperty()
+     */
+    public function encodeProperty(ModelProperty $property, $value)
+    {
+        return $this->schema->toDb($property, $value);
+    }
+
+    /**
+     *
+     * {@inheritdoc}
+     * @see \Pluf\Orm\ObjectMapper::decodeProperty()
+     */
+    public function decodeProperty(ModelProperty $property, $value)
+    {
+        return $this->schema->fromDb($property, $value);
     }
 }
 

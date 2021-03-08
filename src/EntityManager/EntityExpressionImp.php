@@ -178,7 +178,7 @@ class EntityExpressionImp implements EntityExpression, \ArrayAccess, \IteratorAg
 
     protected function mapToObject($resultSet)
     {
-        if($this->mode === 'insert'){
+        if($this->mode !== 'select'){
             return null;
         }
         

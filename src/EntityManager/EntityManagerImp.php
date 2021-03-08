@@ -164,17 +164,25 @@ class EntityManagerImp implements EntityManager
     public function persist​($entity)
     {
         // TODO: maso, 2021: co
-        $result = $this->query()
-            ->entity(get_class($entity))
-            ->set($entity)
-            ->insert();
+        $query = $this->query()
+            ->entity($entity::class)
+            ->set($entity);
 
-        // TODO: maso, 2021: Postgresql need sequence name
-        // TODO: maso, 2021: get from query
         $md = $this->getModelDescriptionOf($entity);
-        $primaryKey = $this->entityManagerFactory->connection->lastInsertId();
-        $persistEntity = $this->find($md, $primaryKey);
+        $primaryKeyProperty = $md->properties[$md->primaryKey];
+        $primaryKey = $primaryKeyProperty->getValue($entity);
+        if (isset($primaryKey)) {
+            $query->where($primaryKeyProperty->name, $primaryKey)
+                ->update();
+        } else {
+            $query->insert();
+            // TODO: maso, 2021: Postgresql need sequence name
+            // TODO: maso, 2021: get from query
+            $md = $this->getModelDescriptionOf($entity);
+            $primaryKey = $this->entityManagerFactory->connection->lastInsertId();
+        }
 
+        $persistEntity = $this->find($md, $primaryKey);
         $this->contextManager->put($persistEntity, $md);
         return $persistEntity;
     }

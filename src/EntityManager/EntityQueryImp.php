@@ -4,7 +4,7 @@ namespace Pluf\Orm\EntityManager;
 use Pluf\Orm\AssertionTrait;
 use Pluf\Orm\EntityQuery;
 use Pluf\Orm\StringUtil;
-use Pluf\Orm\EntityExpression;
+use Pluf\Orm\ModelProperty;
 
 class EntityQueryImp extends EntityExpressionImp implements EntityQuery
 {
@@ -66,7 +66,8 @@ class EntityQueryImp extends EntityExpressionImp implements EntityQuery
     protected $template_update = [
         'with',
         'entity_noalias',
-        'set',
+        // 'set',
+        'set_properties',
         'where'
     ];
 
@@ -357,7 +358,7 @@ class EntityQueryImp extends EntityExpressionImp implements EntityQuery
      */
     public function delete()
     {
-        return $this->mode('delete')->exec();
+        return $this->mode('delete')->execute();
     }
 
     // protected function selectEntities()
@@ -630,24 +631,60 @@ class EntityQueryImp extends EntityExpressionImp implements EntityQuery
             switch (count($row)){
                 case 3:
                     [$field, $cond, $value] = $row;
-                    // TODO: maso, 2021: convert value
-                    // TODO: maso, 2021: convert field name to column
-                    $query = $query->where($field, $cond, $value);
                     break;
                 case 2:
                     [$field, $value] = $row;
-                    // TODO: maso, 2021: convert value
-                    // TODO: maso, 2021: convert field name to column
-                    $query = $query->where($field, $value);
+                    $cond = null;
                     break;
                 case 1:
                     [$field] = $row;
                     // TODO: maso, 2021: convert model query and expression to db expression
                     $query = $query->where($field);
-                    break;
+                    return;
             }
         }
+        // first argument is string containing more than just a field name and no more than 2
+        // arguments means that we either have a string expression or embedded condition.
+        $matches = [];
+        if (is_string($field) && preg_match('/^((?<alias>[a-zA-Z_][a-zA-Z0-9_]*)\.)?(?<property>[a-zA-Z_][a-zA-Z0-9_]*)$/m', $field, $matches)) {
+            $alias = array_key_exists('alias', $matches)?$matches['alias']:null;
+            $propertyName = $matches['property'];
+            $property = $this->findProperty($propertyName, $alias);
+            if(isset($property)){
+                $field = $property->getColumnName();
+                if(!empty($alias)){
+                    $field = $alias . $field;
+                }
+                $value = $this->entityManager->entityManagerFactory->objectMapper->encodeProperty($property, $value);
+            }
+        }
+        
+        if(isset($cond)){
+            $query = $query->where($field, $cond, $value);
+        }else {
+            $query = $query->where($field, $value);
+        }
         return $query;
+    }
+    
+    protected function findProperty($property, $alias): ?ModelProperty
+    {
+        $result = null;
+        if (empty($alias)) {
+            foreach ($this->args['entity'] as $aliasL => $entity) {
+                $result = $this->findProperty($property, $aliasL);
+                if ($result) {
+                    break;
+                }
+            }
+        } else if (array_key_exists($alias, $this->args['entity'])) {
+            $entity = $this->args['entity'][$alias];
+            $md = $this->entityManager->entityManagerFactory->modelDescriptionRepository->get($entity);
+            if (array_key_exists($property, $md->properties)) {
+                $result = $md->properties[$property];
+            }
+        }
+        return $result;
     }
     
     /**
@@ -702,6 +739,7 @@ class EntityQueryImp extends EntityExpressionImp implements EntityQuery
         $this->assertTrue(sizeof($this->args['entity']) == 1, 'Just set an entitiy with insert, or replace query.');
 
         $modelDescriptionRepository = $this->entityManager->entityManagerFactory->modelDescriptionRepository;
+        $objectMapper = $this->entityManager->entityManagerFactory->objectMapper;
         // process tables one by one
         foreach ($this->args['entity'] as /* $alias => */ $entity) {
             $md = $modelDescriptionRepository->get($entity);
@@ -718,7 +756,8 @@ class EntityQueryImp extends EntityExpressionImp implements EntityQuery
                     $vmd = $modelDescriptionRepository->get($name::class);
                     foreach ($vmd->properties as $property) {
                         // XXX: maso, 2021: value must be converted wtih object mapper schema
-                        $query->set($property->getColumnName(), $property->getValue($name));
+                        $value = $objectMapper->encodeProperty($property, $property->getValue($name));
+                        $query->set($property->getColumnName(), $value);
                     }
                 }
             }
@@ -726,5 +765,6 @@ class EntityQueryImp extends EntityExpressionImp implements EntityQuery
 
         return $query;
     }
+    
 }
 

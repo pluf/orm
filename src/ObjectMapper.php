@@ -105,5 +105,9 @@ interface ObjectMapper
      * @param bool $isList Defines whehter the root object is list or not
      */
     public function readValue($input, $class, bool $isList = false);
+    
+    
+    public function encodeProperty(ModelProperty $property, $value);
+    public function decodeProperty(ModelProperty $property, $value);
 }
 
