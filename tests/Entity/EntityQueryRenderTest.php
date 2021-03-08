@@ -75,7 +75,28 @@ class EntityQueryRenderTest extends TestCase
                     ->entity(Book::class, 'x')
                     ->mapper('x'),
                 "/^select .*\"pages\".* from \"test_books\".*$/"
-            ]
+            ],
+            [
+                $entityManager->query()
+                ->where('id', 1)
+                ->mode('select')
+                ->entity(Author::class),
+                "/^select .* from \"test_authors\" \"a\".*where.*id.*=.*1.*$/"
+            ],
+            [
+                $entityManager->query()
+                ->where('id', '>', 1)
+                ->mode('select')
+                ->entity(Author::class),
+                "/^select .* from \"test_authors\" \"a\".*where.*id.*>.*1.*$/"
+            ],
+            [
+                $entityManager->query()
+                ->where('id', '<', 1)
+                ->mode('select')
+                ->entity(Author::class),
+                "/^select .* from \"test_authors\" \"a\".*where.*id.*<.*1.*$/"
+            ],
         ];
     }
 
