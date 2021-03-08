@@ -21,6 +21,7 @@ namespace Pluf\Orm;
 use Pluf\Orm\Attribute\Column;
 use Pluf\Orm\Attribute\Id;
 use ArrayObject;
+use DateTime;
 use Iterator;
 
 class ModelProperty
@@ -121,6 +122,7 @@ class ModelProperty
             case 'array':
             case Iterator::class:
             case ArrayObject::class:
+            case DateTime::class:
                 return true;
             default:
                 return false;

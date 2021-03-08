@@ -2,6 +2,8 @@
 namespace Pluf\Tests\Mapper;
 
 use Pluf\Orm\Attribute\Entity;
+use Pluf\Orm\Attribute\Column;
+use \DateTime;
 
 #[Entity]
 class Foo8
@@ -15,6 +17,9 @@ class Foo8
         #[Column('strValue8')]
         public string $strValue = '',
         #[Column('boolValue8')]
-        public bool $boolValue = false){}
+        public bool $boolValue = false,
+        #[Column('value_dtime')]
+        public DateTime $dateTimeValue
+        ){}
 }
 

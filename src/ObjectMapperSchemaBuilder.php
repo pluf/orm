@@ -1,20 +1,19 @@
 <?php
 namespace Pluf\Orm;
 
-use Pluf\Orm\EntityManager\EntityManagerSchemaMySQL;
-use Pluf\Orm\EntityManager\EntityManagerSchemaSQLite;
-use Pluf\Orm\EntityManager\EntityManagerSchemaJson;
+use Pluf\Orm\ObjectMapper\ObjectMapperSchemaJson;
+use Pluf\Orm\ObjectMapper\ObjectMapperSchemaMySql;
+use Pluf\Orm\ObjectMapper\ObjectMapperSchemaSQLite;
 
-class EntityManagerSchemaBuilder
+class ObjectMapperSchemaBuilder
 {
 
     private ?string $type = 'sqlite';
 
-    private ?string $prefix = '';
 
     public function setPrefix(string $prefix): self
     {
-        $this->prefix = $prefix;
+//         $this->prefix = $prefix;
         return $this;
     }
 
@@ -24,18 +23,18 @@ class EntityManagerSchemaBuilder
         return $this;
     }
     
-    public function build(): EntityManagerSchema
+    public function build(): ObjectMapperSchema
     {
         $engine = null;
         switch ($this->type) {
             case 'mysql':
-                $engine = new EntityManagerSchemaMySQL($this->prefix);
+                $engine = new ObjectMapperSchemaMySql();
                 break;
             case 'sqlite':
-                $engine = new EntityManagerSchemaSQLite($this->prefix);
+                $engine = new ObjectMapperSchemaSQLite();
                 break;
             case 'json':
-                $engine = new EntityManagerSchemaJson($this->prefix);
+                $engine = new ObjectMapperSchemaJson();
                 break;
             default:
                 throw new Exception('Engine type "{{type}}" is not supported with Pluf Data Schema.', params:["type" => $this->type]);

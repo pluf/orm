@@ -22,5 +22,6 @@ interface ModelDescriptionLoaderInterface
 {
 
     public function get(string $class): ?ModelDescription;
+    public function has(string $class): bool;
 }
 

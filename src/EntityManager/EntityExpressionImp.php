@@ -35,6 +35,8 @@ class EntityExpressionImp implements EntityExpression, \ArrayAccess, \IteratorAg
      * @var string
      */
     protected $template;
+    
+    protected string $mode = 'select';
 
     /**
      * Hash containing configuration accumulated by calling methods
@@ -176,6 +178,10 @@ class EntityExpressionImp implements EntityExpression, \ArrayAccess, \IteratorAg
 
     protected function mapToObject($resultSet)
     {
+        if($this->mode === 'insert'){
+            return null;
+        }
+        
         $mappers = [];
         if(array_key_exists('property', $this->args)){
             $mappers = $this->args['property'];
@@ -196,6 +202,24 @@ class EntityExpressionImp implements EntityExpression, \ArrayAccess, \IteratorAg
         
         
         throw new Exception("XXX: Not suppoert more than one mapper");
+    }
+    
+    /**
+     *
+     * {@inheritdoc}
+     * @see \Pluf\Orm\EntityQuery::mode()
+     */
+    public function mode(string $mode): self
+    {
+        $prop = 'template_' . $mode;
+        
+        $this->assertNotEmpty($this->{$prop}, 'Query does not have this mode', [
+            'mode' => $mode
+        ]);
+        
+        $this->mode = $mode;
+        $this->template = $this->{$prop};
+        return $this;
     }
     
     
@@ -222,11 +246,11 @@ class EntityExpressionImp implements EntityExpression, \ArrayAccess, \IteratorAg
             } elseif (method_exists($this, $fx)) {
                 $query = $this->{$fx}($query);
             } else {
-                throw new Exception('Expression could not render tag', params:['tag' => $identifier]);
+                throw new Exception('Expression could not render tag {{tag}}', params:['tag' => $identifier]);
             }
         }
         
-        return $query;
+        return $query->mode($this->mode);
     }
     
     /**

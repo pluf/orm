@@ -12,8 +12,6 @@ class EntityQueryImp extends EntityExpressionImp implements EntityQuery
 
     protected ?string $entityType;
 
-    protected string $mode = 'select';
-
     /**
      * Name or alias of base entity to use when using default join().
      *
@@ -40,15 +38,17 @@ class EntityQueryImp extends EntityExpressionImp implements EntityQuery
     protected $template_insert = [
         'option',
         'entity_noalias',
-        'set_fields',
-        'set_values'
+        // 'set_fields',
+        // 'set_values',
+        'set_properties'
     ];
 
     protected $template_replace = [
         'option',
         'entity_noalias',
-        'set_fields',
-        'set_values'
+        // 'set_fields',
+        // 'set_values',
+        'set_properties'
     ];
 
     protected $template_delete = [
@@ -155,7 +155,11 @@ class EntityQueryImp extends EntityExpressionImp implements EntityQuery
         }
 
         // save field in args
-        $this->_set_args('property', $alias, new MapperEntity($this, $class, $map));
+        $this->_set_args('property', $alias, new MapperEntity(
+            $this->entityManager->entityManagerFactory->objectMapper, 
+            $this->entityManager->entityManagerFactory->modelDescriptionRepository, 
+            $class,
+            $map));
 
         return $this;
     }
@@ -214,24 +218,6 @@ class EntityQueryImp extends EntityExpressionImp implements EntityQuery
     /**
      *
      * {@inheritdoc}
-     * @see \Pluf\Orm\EntityQuery::mode()
-     */
-    public function mode(string $mode): self
-    {
-        $prop = 'template_' . $mode;
-
-        $this->assertNotEmpty($this->{$prop}, 'Query does not have this mode', [
-            'mode' => $mode
-        ]);
-
-        $this->mode = $mode;
-        $this->template = $this->{$prop};
-        return $this;
-    }
-
-    /**
-     *
-     * {@inheritdoc}
      * @see \Pluf\Orm\EntityQuery::having()
      */
     public function having(): self
@@ -272,9 +258,95 @@ class EntityQueryImp extends EntityExpressionImp implements EntityQuery
      * {@inheritdoc}
      * @see \Pluf\Orm\EntityQuery::where()
      */
-    public function where(): self
+    public function where($field, $cond = null, $value = null, $kind = 'where', $num_args = null): self
     {
-        // XXX: maso, 2021: add where 
+        // Number of passed arguments will be used to determine if arguments were specified or not
+        if ($num_args === null) {
+            $num_args = func_num_args();
+        }
+        
+        // Array as first argument means we have to replace it with orExpr()
+        if (is_array($field)) {
+            // TODO: or conditions
+            $or = $this->orExpr();
+            foreach ($field as $row) {
+                if (is_array($row)) {
+                    $or->where(...$row);
+                } else {
+                    $or->where($row);
+                }
+            }
+            $field = $or;
+        }
+        
+        if ($num_args === 1 && is_string($field)) {
+            // TODO: native expression support
+            $this->args[$kind][] = [$this->expr($field)];
+            return $this;
+        }
+        
+        // first argument is string containing more than just a field name and no more than 2
+        // arguments means that we either have a string expression or embedded condition.
+        if ($num_args === 2 && is_string($field) && !preg_match('/^[.a-zA-Z0-9_]*$/', $field)) {
+            $matches = [];
+            // field contains non-alphanumeric values. Look for condition
+            preg_match(
+                '/^([^ <>!=]*)([><!=]*|( *(not|is|in|like))*) *$/',
+                $field,
+                $matches
+                );
+            
+            // matches[2] will contain the condition, but $cond will contain the value
+            $value = $cond;
+            $cond = $matches[2];
+            
+            // if we couldn't clearly identify the condition, we might be dealing with
+            // a more complex expression. If expression is followed by another argument
+            // we need to add equation sign  where('now()',123).
+            if (!$cond) {
+                $matches[1] = $this->expr($field);
+                $cond = '=';
+            } else {
+                ++$num_args;
+            }
+            
+            $field = $matches[1];
+        }
+        switch ($num_args) {
+            case 1:
+                $this->args[$kind][] = [
+                    $field
+                ];
+                break;
+
+            case 2:
+                $this->assertFalse(is_object($cond) && ! $cond instanceof EntityQuery /*  && !$cond instanceof Expression */,
+                'Value cannot be converted to SQL-compatible expression', [
+                    'field' => $field,
+                    'value' => $cond
+                ]);
+                $this->args[$kind][] = [
+                    $field,
+                    $cond
+                ];
+                break;
+
+            case 3:
+                $this->assertFalse(is_object($value) && ! $value instanceof EntityQuery/*  && !$value instanceof Expression */,
+                    'Value cannot be converted to SQL-compatible expression', [
+                    'field' => $field,
+                    'cond' => $cond,
+                    'value' => $value
+                ]);
+                $this->args[$kind][] = [
+                    $field,
+                    $cond,
+                    $value
+                ];
+                break;
+        }
+        
+        
         return $this;
     }
 
@@ -290,7 +362,7 @@ class EntityQueryImp extends EntityExpressionImp implements EntityQuery
 
     // protected function selectEntities()
     // {
-    // $schema = $this->entityManager->entityManagerFactory->entityManagerSchema;
+    // $schema = $this->entityManager->entityManagerFactory->objectMapper;
     // $mdr = $this->entityManager->entityManagerFactory->modelDescriptionRepository;
     // $connection = $this->entityManager->entityManagerFactory->connection;
 
@@ -335,6 +407,40 @@ class EntityQueryImp extends EntityExpressionImp implements EntityQuery
         $this->args['limit'] = [
             'count' => $count,
             'start' => $start
+        ];
+        return $this;
+    }
+
+    /**
+     *
+     * {@inheritdoc}
+     * @see \Pluf\Orm\EntityQuery::set($field, $value)
+     */
+    public function set($field, $value = null): self
+    {
+        $this->assertFalse($value === false, 'Value "false" is not supported by SQL', [
+            'field' => $field,
+            'value' => $value
+        ]);
+        $this->assertIsNotArray($value, 'Array values are not supported by SQL', [
+            'field' => $field,
+            'value' => $value
+        ]);
+
+        if (is_array($field)) {
+            foreach ($field as $key => $value) {
+                $this->set($key, $value);
+            }
+            return $this;
+        }
+
+        $this->assertTrue(is_string($field) || $this->entityManager->entityManagerFactory->modelDescriptionRepository->has($field::class), 'Field name should be string, Query, or entity', [
+            'field' => $field
+        ]);
+
+        $this->args['set'][] = [
+            $field,
+            $value
         ];
         return $this;
     }
@@ -388,7 +494,7 @@ class EntityQueryImp extends EntityExpressionImp implements EntityQuery
      *
      * @param bool $add_alias
      *            Should we add aliases, see _render_entity_noalias()
-     * @return atk\dsql\Query Parsed template chunk
+     * @return mixed Parsed template chunk
      */
     protected function _render_entity($query, $add_alias = true)
     {
@@ -396,7 +502,6 @@ class EntityQueryImp extends EntityExpressionImp implements EntityQuery
             return $query;
         }
 
-        $schema = $this->entityManager->entityManagerFactory->entityManagerSchema;
         $modelDescriptionRepository = $this->entityManager->entityManagerFactory->modelDescriptionRepository;
 
         // process tables one by one
@@ -406,7 +511,7 @@ class EntityQueryImp extends EntityExpressionImp implements EntityQuery
                 $this->assertTrue($add_alias, 'Table cannot be Query in UPDATE, INSERT etc. query modes');
             } else {
                 $md = $modelDescriptionRepository->get($entity);
-                $table = $schema->getTableName($md);
+                $table = $this->entityManager->entityManagerFactory->getTableName($md);
             }
 
             // Do not add alias, if:
@@ -426,9 +531,9 @@ class EntityQueryImp extends EntityExpressionImp implements EntityQuery
     /**
      * Renders [limit].
      *
-     * @param atk\dsql\Connection $connection
+     * @param mixed $query
      *            to update
-     * @return atk\dsql\Connection
+     * @return mixed
      */
     protected function _render_limit($query)
     {
@@ -441,9 +546,9 @@ class EntityQueryImp extends EntityExpressionImp implements EntityQuery
     /**
      * Renders [limit].
      *
-     * @param atk\dsql\Connection $connection
+     * @param mixed $query
      *            to update
-     * @return atk\dsql\Connection
+     * @return mixed
      */
     protected function _render_with($query)
     {
@@ -453,9 +558,9 @@ class EntityQueryImp extends EntityExpressionImp implements EntityQuery
     /**
      * Renders [limit].
      *
-     * @param atk\dsql\Connection $connection
+     * @param mixed $query
      *            to update
-     * @return atk\dsql\Connection
+     * @return mixed
      */
     protected function _render_option($query)
     {
@@ -465,9 +570,9 @@ class EntityQueryImp extends EntityExpressionImp implements EntityQuery
     /**
      * Renders [limit].
      *
-     * @param atk\dsql\Query $query
+     * @param mixed $query
      *            The origin query to update and build result from.
-     * @return atk\dsql\Query Generated query
+     * @return mixed Generated query
      */
     protected function _render_property($query, $add_alias = true)
     {
@@ -475,16 +580,8 @@ class EntityQueryImp extends EntityExpressionImp implements EntityQuery
             return $query;
         }
 
-        $schema = $this->entityManager->entityManagerFactory->entityManagerSchema;
-        $modelDescriptionRepository = $this->entityManager->entityManagerFactory->modelDescriptionRepository;
-
         foreach ($this->args['property'] as $alias => $mapper) {
-            $query = $mapper->render(
-                schema: $schema,
-                modelDescriptionRepository: $modelDescriptionRepository,
-                alias: $alias,
-                query: $query
-            );
+            $query = $mapper->render($this, $query, $alias);
         }
         return $query;
     }
@@ -492,9 +589,9 @@ class EntityQueryImp extends EntityExpressionImp implements EntityQuery
     /**
      * Renders [limit].
      *
-     * @param atk\dsql\Connection $connection
+     * @param mixed $query
      *            to update
-     * @return atk\dsql\Connection
+     * @return mixed
      */
     protected function _render_join($query)
     {
@@ -504,21 +601,61 @@ class EntityQueryImp extends EntityExpressionImp implements EntityQuery
     /**
      * Renders [limit].
      *
-     * @param atk\dsql\Connection $connection
+     * @param mixed $query
      *            to update
-     * @return atk\dsql\Connection
+     * @return mixed
      */
     protected function _render_where($query)
     {
+        
+        if (!isset($this->args['where'])) {
+            return $query;
+        }
+        
+        return $this->_sub_render_where($query, 'where');
+    }
+    
+    /**
+     * Subroutine which renders either [where] or [having].
+     *
+     * @param string $kind 'where' or 'having'
+     *
+     * @return array Parsed chunks of query
+     */
+    protected function _sub_render_where($query, $kind)
+    {
+        // where() might have been called multiple times. Collect all conditions,
+        // then join them with AND keyword
+        foreach ($this->args[$kind] as $row) {
+            switch (count($row)){
+                case 3:
+                    [$field, $cond, $value] = $row;
+                    // TODO: maso, 2021: convert value
+                    // TODO: maso, 2021: convert field name to column
+                    $query = $query->where($field, $cond, $value);
+                    break;
+                case 2:
+                    [$field, $value] = $row;
+                    // TODO: maso, 2021: convert value
+                    // TODO: maso, 2021: convert field name to column
+                    $query = $query->where($field, $value);
+                    break;
+                case 1:
+                    [$field] = $row;
+                    // TODO: maso, 2021: convert model query and expression to db expression
+                    $query = $query->where($field);
+                    break;
+            }
+        }
         return $query;
     }
-
+    
     /**
      * Renders [limit].
      *
-     * @param atk\dsql\Connection $connection
+     * @param mixed $query
      *            to update
-     * @return atk\dsql\Connection
+     * @return mixed
      */
     protected function _render_group($query)
     {
@@ -528,9 +665,9 @@ class EntityQueryImp extends EntityExpressionImp implements EntityQuery
     /**
      * Renders [limit].
      *
-     * @param atk\dsql\Connection $connection
+     * @param mixed $query
      *            to update
-     * @return atk\dsql\Connection
+     * @return mixed
      */
     protected function _render_having($query)
     {
@@ -540,12 +677,53 @@ class EntityQueryImp extends EntityExpressionImp implements EntityQuery
     /**
      * Renders [limit].
      *
-     * @param atk\dsql\Connection $connection
+     * @param mixed $query
      *            to update
-     * @return atk\dsql\Connection
+     * @return mixed
      */
     protected function _render_order($query)
     {
+        return $query;
+    }
+
+    /**
+     * Renders [set_fields].
+     *
+     * @param mixed $query
+     *            to update
+     * @return mixed
+     */
+    protected function _render_set_properties($query)
+    {
+        if (! is_array($this->args['set']) || sizeof($this->args['set']) == 0) {
+            return $query;
+        }
+
+        $this->assertTrue(sizeof($this->args['entity']) == 1, 'Just set an entitiy with insert, or replace query.');
+
+        $modelDescriptionRepository = $this->entityManager->entityManagerFactory->modelDescriptionRepository;
+        // process tables one by one
+        foreach ($this->args['entity'] as /* $alias => */ $entity) {
+            $md = $modelDescriptionRepository->get($entity);
+
+            foreach ($this->args['set'] as [
+                $name,
+                $value
+            ]) {
+                if (is_string($name)) {
+                    $property = $md->properties[$name];
+                    // XXX: maso, 2021: value must be converted wtih object mapper schema
+                    $query->set($property->getColumnName(), $value);
+                } else {
+                    $vmd = $modelDescriptionRepository->get($name::class);
+                    foreach ($vmd->properties as $property) {
+                        // XXX: maso, 2021: value must be converted wtih object mapper schema
+                        $query->set($property->getColumnName(), $property->getValue($name));
+                    }
+                }
+            }
+        }
+
         return $query;
     }
 }

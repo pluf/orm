@@ -4,19 +4,21 @@ namespace Pluf\Tests\Entity;
 use PHPUnit\Framework\TestCase;
 use Pluf\Orm\EntityManagerFactory;
 use Pluf\Orm\EntityManagerFactoryBuilder;
-use Pluf\Orm\EntityManagerSchemaBuilder;
+use Pluf\Orm\ObjectMapperSchemaBuilder;
 use Pluf\Orm\ModelDescriptionRepository;
 use Pluf\Orm\Loader\ModelDescriptionLoaderAttribute;
 use atk4\dsql\Connection;
 use Pluf\Orm\Exception;
 use Pluf\Orm\EntityManager\MapperEntity;
+use Pluf\Orm\ObjectMapperBuilder;
+use Pluf\Orm\EntityManager\EntityManagerFactoryImp;
 
 class EntityQueryTest extends TestCase
 {
 
     public static ?Connection $connection = null;
 
-    public static ?EntityManagerFactory $entityManagerFactory = null;
+    public static ?EntityManagerFactoryImp $entityManagerFactory = null;
 
     /**
      *
@@ -33,15 +35,15 @@ class EntityQueryTest extends TestCase
         ]);
 
         // entity manger schema
-        $builder = new EntityManagerSchemaBuilder();
-        $schema = $builder->setPrefix("")
-            ->setType($GLOBALS['DB_SCHEMA'])
-            ->build();
+        $builder = new ObjectMapperBuilder();
+        $schema = $builder->setType("array")->
+        // ->setSchema($GLOBALS['DB_SCHEMA'])
+        build();
 
         // entity manager
         $builder = new EntityManagerFactoryBuilder();
         self::$entityManagerFactory = $builder->setConnection($c)
-            ->setSchema($schema)
+            ->setObjectMapper($schema)
             ->setModelDescriptionRepository($repo)
             ->setEnableMultitinancy(false)
             ->build();
@@ -210,8 +212,7 @@ class EntityQueryTest extends TestCase
             'alias' => $query2
         ]);
     }
-    
-    
+
     /**
      *
      * @test
@@ -222,10 +223,9 @@ class EntityQueryTest extends TestCase
         $query = $entityManager->query()
             ->entity(Asset\Author::class, 'author')
             ->mapper('author');
-        
-        $this->assertEquals($query->args['property'], [
-            new MapperEntity($query, 'author')
-        ]);
+
+        $this->assertIsArray($query->args['property']);
+        $this->assertTrue(count($query->args['property']) == 1);
     }
 }
 

@@ -1,8 +1,6 @@
 <?php
 namespace Pluf\Orm\EntityManager;
 
-use Pluf\Orm\EntityManagerSchema;
-use Pluf\Orm\ModelDescriptionRepository;
 
 class MapperProperty extends MapperAbstract
 {
@@ -15,9 +13,12 @@ class MapperProperty extends MapperAbstract
         $this->property = $property;
     }
 
-    public function render(\atk4\dsql\Query $query, ModelDescriptionRepository $modelDescriptionRepository, EntityManagerSchema $schema, ?string $alias = null)
+    public function render(\atk4\dsql\Query $query, ?string $alias = null)
     {
         return $query;
     }
+    public function newInstance($raw)
+    {}
+
 }
 

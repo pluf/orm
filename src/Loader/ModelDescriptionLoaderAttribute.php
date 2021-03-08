@@ -23,6 +23,18 @@ class ModelDescriptionLoaderAttribute implements ModelDescriptionLoaderInterface
     /**
      *
      * {@inheritdoc}
+     * @see \Pluf\Orm\ModelDescriptionLoaderInterface::has()
+     */
+    public function has(string $class): bool
+    {
+        $reflectionClass = new ReflectionClass($class);
+        $entity = $this->getEntityOf($reflectionClass);
+        return isset($entity);
+    }
+
+    /**
+     *
+     * {@inheritdoc}
      * @see \Pluf\Orm\ModelDescriptionLoaderInterface::loadModelDescription()
      */
     public function get(string $class): ?ModelDescription
@@ -93,7 +105,7 @@ class ModelDescriptionLoaderAttribute implements ModelDescriptionLoaderInterface
         $rprops = $reflectionClass->getProperties();
         foreach ($rprops as $reflectionProperty) {
             $name = $this->getPropertyName($reflectionProperty);
-            if(in_array($name, $ignored)){
+            if (in_array($name, $ignored)) {
                 continue;
             }
             $isPublic = $reflectionProperty->isPublic();
@@ -120,14 +132,13 @@ class ModelDescriptionLoaderAttribute implements ModelDescriptionLoaderInterface
             if (empty($column)) {
                 continue;
             }
-            
+
             $name = $reflectionMethod->getName();
             $match = [];
             $this->assertTrue(preg_match("#^get(.*)$#", $name, $match) > 0, "Just a getter metoth can annotate with Column or explicit define name.");
             $name = StringUtil::decapitalize($match[1]);
 
-            
-            if(in_array($name, $ignored)){
+            if (in_array($name, $ignored)) {
                 continue;
             }
 

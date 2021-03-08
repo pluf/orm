@@ -8,6 +8,7 @@ use Pluf\Orm\ModelDescriptionRepository;
 use Pluf\Orm\ObjectMapper;
 use Pluf\Orm\ObjectMapperBuilder;
 use Pluf\Orm\Loader\ModelDescriptionLoaderAttribute;
+use DateTime;
 
 class ObjectMapperBasicsTest extends TestCase
 {
@@ -30,8 +31,20 @@ class ObjectMapperBasicsTest extends TestCase
         $items = [
                 new Foo(intValue: rand(), floatValue: 1.3, strValue: "xxx", boolValue: false),
                 new Foo(intValue: -12, floatValue: 0.0, strValue: "yyy", boolValue: true),
-                new Foo8(intValue: -12, floatValue: 0.0, strValue: "yyy", boolValue: true),
-                new Foo8(intValue: rand(), floatValue: 448.5, strValue: "xyz", boolValue: false),
+                new Foo8(
+                        intValue: -12, 
+                        floatValue: 0.0, 
+                        strValue: "yyy", 
+                        boolValue: true, 
+                        dateTimeValue: DateTime::createFromFormat('Y-m-d', '2009-02-15')
+                ),
+                new Foo8(
+                    intValue: rand(),
+                    floatValue: 448.5,
+                    strValue: "xyz",
+                    boolValue: false,
+                    dateTimeValue: DateTime::createFromFormat('Y-m-d', '2022-02-15')
+                ),
                 new FooRestInput(arrayValue: [1,2,3,4], intValue: 3),
                 new FooRestInput(arrayValue: [], intValue: 0),
                 new FooRestInput(),

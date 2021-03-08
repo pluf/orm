@@ -4,13 +4,14 @@ namespace Pluf\Tests\Entity;
 use PHPUnit\Framework\TestCase;
 use Pluf\Orm\EntityManagerFactory;
 use Pluf\Orm\EntityManagerFactoryBuilder;
-use Pluf\Orm\EntityManagerSchemaBuilder;
+use Pluf\Orm\ObjectMapperSchemaBuilder;
 use Pluf\Orm\ModelDescriptionRepository;
 use Pluf\Orm\EntityManager\EntityQueryImp;
 use Pluf\Orm\Loader\ModelDescriptionLoaderAttribute;
 use atk4\dsql\Connection;
 use Pluf\Tests\Entity\Asset\Author;
 use Pluf\Tests\Entity\Asset\Book;
+use Pluf\Orm\ObjectMapperBuilder;
 
 class EntityQueryRenderTest extends TestCase
 {
@@ -25,15 +26,16 @@ class EntityQueryRenderTest extends TestCase
         ]);
 
         // entity manger schema
-        $builder = new EntityManagerSchemaBuilder();
-        $schema = $builder->setPrefix("")
-            ->setType($GLOBALS['DB_SCHEMA'])
+        $builder = new ObjectMapperBuilder();
+        $mapper = $builder
+            ->setType("array")
+            //->setSchema($GLOBALS['DB_SCHEMA'])
             ->build();
 
         // entity manager
         $builder = new EntityManagerFactoryBuilder();
         $entityManagerFactory = $builder->setConnection($c)
-            ->setSchema($schema)
+            ->setObjectMapper($mapper)
             ->setModelDescriptionRepository($repo)
             ->setEnableMultitinancy(false)
             ->build();

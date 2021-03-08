@@ -8,8 +8,8 @@ use Pluf\Orm\ObjectUtils;
 use ReflectionClass;
 use Pluf\Orm\ModelDescription;
 use Pluf\Orm\ModelProperty;
-use Pluf\Orm\EntityManagerSchema;
-use Pluf\Orm\EntityManagerSchemaBuilder;
+use Pluf\Orm\ObjectMapperSchema;
+use Pluf\Orm\ObjectMapperSchemaBuilder;
 
 /**
  * Array Data implementation of Object mapper
@@ -22,19 +22,19 @@ class ObjectMapperArray implements ObjectMapper
 
     use AssertionTrait;
 
-    var EntityManagerSchema $schema;
+    private ?ObjectMapperSchema $schema = null;
 
     /**
      * Creates new instance of the object mapper
      *
      * @param ModelDescriptionRepository $modelDescriptionRepository
-     * @param EntityManagerSchema $schema
+     * @param ObjectMapperSchema $schema
      */
-    public function __construct(ModelDescriptionRepository $modelDescriptionRepository, ?EntityManagerSchema $schema = null)
+    public function __construct(ModelDescriptionRepository $modelDescriptionRepository, ?ObjectMapperSchema $schema = null)
     {
         $this->modelDescriptionRepository = $modelDescriptionRepository;
         if (! isset($schema)) {
-            $factory = new EntityManagerSchemaBuilder();
+            $factory = new ObjectMapperSchemaBuilder();
             $this->schema = $factory->setPrefix("")
                 ->setType('json')
                 ->build();
@@ -181,7 +181,8 @@ class ObjectMapperArray implements ObjectMapper
         foreach ($md->properties as $property) {
             $key = $property->getColumnName();
             if (array_key_exists($key, $data)) {
-                $property->setValue($entity, $data[$key]);
+                $value = $this->schema->fromDb($property, $data[$key]);
+                $property->setValue($entity, $value);
                 unset($data[$key]);
             }
         }

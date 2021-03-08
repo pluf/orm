@@ -21,5 +21,7 @@ interface EntityExpression
     public function reset($tag = null): self;
     
     public function execute(?EntityManager $entityManager = null);
+    
+    public function mode(string $mode): self;
 }
 

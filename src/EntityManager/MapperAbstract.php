@@ -2,25 +2,33 @@
 namespace Pluf\Orm\EntityManager;
 
 use Pluf\Orm\ModelDescriptionRepository;
-use Pluf\Orm\EntityManagerSchema;
+use Pluf\Orm\ObjectMapper;
 
 abstract class MapperAbstract
 {
 
-    public ?EntityQueryImp $entityQuery = null;
+    public ?ObjectMapper $objectMapper;
 
-    public function __construct(EntityQueryImp $entityQuery)
+    public ?ModelDescriptionRepository $modelDescriptionRepository;
+
+    public function __construct($objectMapper, $modelDescriptionRepository)
     {
-        $this->entityQuery = $entityQuery;
+        $this->objectMapper = $objectMapper;
+        $this->modelDescriptionRepository = $modelDescriptionRepository;
     }
-    
-    public abstract function render(
-        \atk4\dsql\Query $query,
-        ModelDescriptionRepository $modelDescriptionRepository,
-        EntityManagerSchema $schema,
-        string $alias
-        );
-    
+
+    public function getObjectMapper(): ObjectMapper
+    {
+        return $this->objectMapper;
+    }
+
+    public function getModelDescriptionRepository(): ModelDescriptionRepository
+    {
+        return $this->modelDescriptionRepository;
+    }
+
+    public abstract function render(EntityQueryImp $entityQuery, \atk4\dsql\Query $query, ?string $alias = null);
+
     public abstract function newInstance($raw);
 }
 

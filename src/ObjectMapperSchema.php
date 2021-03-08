@@ -1,9 +1,6 @@
 <?php
 namespace Pluf\Orm;
 
-use Pluf\Orm\Attribute\Table;
-use ReflectionClass;
-use ReflectionProperty;
 use DateTime;
 
 /**
@@ -11,7 +8,7 @@ use DateTime;
  *
  * @author maso
  */
-abstract class EntityManagerSchema
+abstract class ObjectMapperSchema
 {
     use AssertionTrait;
 
@@ -78,90 +75,75 @@ abstract class EntityManagerSchema
          * Old model
          */
         self::BOOLEAN => array(
-            EntityManagerSchema::class . '::booleanFromDb',
-            EntityManagerSchema::class . '::booleanToDb'
+            ObjectMapperSchema::class . '::booleanFromDb',
+            ObjectMapperSchema::class . '::booleanToDb'
         ),
         // self::DATE => array(
-        // EntityManagerSchema::class . '::identityFromDb',
-        // EntityManagerSchema::class . '::identityToDb'
+        // ObjectMapperSchema::class . '::identityFromDb',
+        // ObjectMapperSchema::class . '::identityToDb'
         // ),
         self::DATETIME => array(
-            EntityManagerSchema::class . '::identityFromDb',
-            EntityManagerSchema::class . '::identityToDb'
+            ObjectMapperSchema::class . '::identityFromDb',
+            ObjectMapperSchema::class . '::identityToDb'
         ),
         self::EMAIL => array(
-            EntityManagerSchema::class . '::identityFromDb',
-            EntityManagerSchema::class . '::identityToDb'
+            ObjectMapperSchema::class . '::identityFromDb',
+            ObjectMapperSchema::class . '::identityToDb'
         ),
         self::FILE => array(
-            EntityManagerSchema::class . '::identityFromDb',
-            EntityManagerSchema::class . '::identityToDb'
+            ObjectMapperSchema::class . '::identityFromDb',
+            ObjectMapperSchema::class . '::identityToDb'
         ),
         self::FLOAT => array(
-            EntityManagerSchema::class . '::floatFromDb',
-            EntityManagerSchema::class . '::floatToDb'
+            ObjectMapperSchema::class . '::floatFromDb',
+            ObjectMapperSchema::class . '::floatToDb'
         ),
         // self::MANY_TO_ONE => array(
-        // EntityManagerSchema::class . '::sequenceFromDb',
-        // EntityManagerSchema::class . '::sequenceToDb'
+        // ObjectMapperSchema::class . '::sequenceFromDb',
+        // ObjectMapperSchema::class . '::sequenceToDb'
         // ),
         // self::FOREIGNKEY => array(
-        // EntityManagerSchema::class . '::sequenceFromDb',
-        // EntityManagerSchema::class . '::sequenceToDb'
+        // ObjectMapperSchema::class . '::sequenceFromDb',
+        // ObjectMapperSchema::class . '::sequenceToDb'
         // ),
         self::INTEGER => array(
-            EntityManagerSchema::class . '::integerFromDb',
-            EntityManagerSchema::class . '::integerToDb'
+            ObjectMapperSchema::class . '::integerFromDb',
+            ObjectMapperSchema::class . '::integerToDb'
         ),
         self::PASSWORD => array(
-            EntityManagerSchema::class . '::identityFromDb',
-            EntityManagerSchema::class . '::passwordToDb'
+            ObjectMapperSchema::class . '::identityFromDb',
+            ObjectMapperSchema::class . '::passwordToDb'
         ),
         self::SEQUENCE => array(
-            EntityManagerSchema::class . '::sequenceFromDb',
-            EntityManagerSchema::class . '::sequenceToDb'
+            ObjectMapperSchema::class . '::sequenceFromDb',
+            ObjectMapperSchema::class . '::sequenceToDb'
         ),
         self::SLUG => array(
-            EntityManagerSchema::class . '::identityFromDb',
-            EntityManagerSchema::class . '::slugToDb'
+            ObjectMapperSchema::class . '::identityFromDb',
+            ObjectMapperSchema::class . '::slugToDb'
         ),
         self::TEXT => array(
-            EntityManagerSchema::class . '::identityFromDb',
-            EntityManagerSchema::class . '::identityToDb'
+            ObjectMapperSchema::class . '::identityFromDb',
+            ObjectMapperSchema::class . '::identityToDb'
         ),
         self::VARCHAR => array(
-            EntityManagerSchema::class . '::identityFromDb',
-            EntityManagerSchema::class . '::identityToDb'
+            ObjectMapperSchema::class . '::identityFromDb',
+            ObjectMapperSchema::class . '::identityToDb'
         ),
         self::SERIALIZED => array(
-            EntityManagerSchema::class . '::serializedFromDb',
-            EntityManagerSchema::class . '::serializedToDb'
+            ObjectMapperSchema::class . '::serializedFromDb',
+            ObjectMapperSchema::class . '::serializedToDb'
         ),
         self::COMPRESSED => array(
-            EntityManagerSchema::class . '::compressedFromDb',
-            EntityManagerSchema::class . '::compressedToDb'
+            ObjectMapperSchema::class . '::compressedFromDb',
+            ObjectMapperSchema::class . '::compressedToDb'
         ),
         self::GEOMETRY => array(
-            EntityManagerSchema::class . '::geometryFromDb',
-            EntityManagerSchema::class . '::geometryToDb'
+            ObjectMapperSchema::class . '::geometryFromDb',
+            ObjectMapperSchema::class . '::geometryToDb'
         )
     );
 
-    public string $prefix = '';
-
-    public function __construct(string $prefix = '')
-    {
-        $this->prefix = $prefix;
-    }
-
-    /**
-     *
-     * @return string
-     */
-    public function getPrefix()
-    {
-        return $this->prefix;
-    }
 
     /**
      * Converts a data value into valid DB value
@@ -195,27 +177,6 @@ abstract class EntityManagerSchema
         ]);
     }
 
-    /**
-     * Generate real table name for model
-     *
-     * @param ModelDescription $modelDescription
-     *            to fetch table name for
-     * @return string real table name
-     */
-    public function getTableName(ModelDescription $md): string
-    {
-        $table = null;
-        if(!empty($md->table)){
-            $table = $md->table->name;
-        }
-        
-        $this->assertNotEmpty($table, "Imposible to find table name from Model Description `{{model}}", ["model" => $md->name]);
-        
-        if (! empty($this->prefix)) {
-            $table = $this->prefix . $table;
-        }
-        return $table;
-    }
 
     /**
      * Identity function.

@@ -4,11 +4,12 @@ namespace Pluf\Tests\Entity;
 use PHPUnit\Framework\TestCase;
 use Pluf\Orm\EntityManagerFactory;
 use Pluf\Orm\EntityManagerFactoryBuilder;
-use Pluf\Orm\EntityManagerSchemaBuilder;
+use Pluf\Orm\ObjectMapperSchemaBuilder;
 use Pluf\Orm\ModelDescriptionRepository;
 use Pluf\Orm\Loader\ModelDescriptionLoaderAttribute;
 use atk4\dsql\Connection;
 use Pluf\Tests\Entity\Asset\Author;
+use Pluf\Orm\ObjectMapperBuilder;
 
 class EntityManagerTest extends TestCase
 {
@@ -35,9 +36,9 @@ class EntityManagerTest extends TestCase
         }
 
         self::$connection = $c;
-        // $c = new \atk4\dsql\Debug\Stopwatch\Connection([
-        // 'connection' => self::$connection
-        // ]);
+//         self::$connection = new \atk4\dsql\Debug\Stopwatch\Connection([
+//             'connection' => $c
+//         ]);
 
         // model repository
         $repo = new ModelDescriptionRepository([
@@ -45,15 +46,16 @@ class EntityManagerTest extends TestCase
         ]);
 
         // entity manger schema
-        $builder = new EntityManagerSchemaBuilder();
-        $schema = $builder->setPrefix("")
-            ->setType($GLOBALS['DB_SCHEMA'])
+        $builder = new ObjectMapperBuilder();
+        $objectMapper = $builder
+            ->setType("array")
+            // ->setSchema($GLOBALS['DB_SCHEMA'])
             ->build();
 
         // entity manager
         $builder = new EntityManagerFactoryBuilder();
         self::$entityManagerFactory = $builder->setConnection($c)
-            ->setSchema($schema)
+            ->setObjectMapper($objectMapper)
             ->setModelDescriptionRepository($repo)
             ->setEnableMultitinancy(false)
             ->build();

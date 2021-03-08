@@ -27,6 +27,18 @@ class ModelDescriptionRepository
     public function __construct(
         private array $loaders = []
     ){}
+    
+    
+    public function has(string $class): bool
+    {
+        // TODO: Check if it exist in cache
+        foreach ($this->loaders as $loader) {
+            if ($loader->has($class)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public function get(string $class): ModelDescription
     {

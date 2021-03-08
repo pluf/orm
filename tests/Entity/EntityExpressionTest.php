@@ -4,10 +4,11 @@ namespace Pluf\Tests\Entity;
 use PHPUnit\Framework\TestCase;
 use Pluf\Orm\EntityManagerFactory;
 use Pluf\Orm\EntityManagerFactoryBuilder;
-use Pluf\Orm\EntityManagerSchemaBuilder;
+use Pluf\Orm\ObjectMapperSchemaBuilder;
 use Pluf\Orm\ModelDescriptionRepository;
 use Pluf\Orm\Loader\ModelDescriptionLoaderAttribute;
 use atk4\dsql\Connection;
+use Pluf\Orm\ObjectMapperBuilder;
 
 class EntityExpressionTest extends TestCase
 {
@@ -31,15 +32,16 @@ class EntityExpressionTest extends TestCase
         ]);
 
         // entity manger schema
-        $builder = new EntityManagerSchemaBuilder();
-        $schema = $builder->setPrefix("")
-            ->setType($GLOBALS['DB_SCHEMA'])
+        $builder = new ObjectMapperBuilder();
+        $objectMapper = $builder
+            ->setType("array")
+            // ->setSchema($GLOBALS['DB_SCHEMA'])
             ->build();
 
         // entity manager
         $builder = new EntityManagerFactoryBuilder();
         EntityExpressionTest::$entityManagerFactory = $builder->setConnection($c)
-            ->setSchema($schema)
+            ->setObjectMapper($objectMapper)
             ->setModelDescriptionRepository($repo)
             ->setEnableMultitinancy(false)
             ->build();
