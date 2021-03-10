@@ -3,7 +3,7 @@ namespace Pluf\Tests\Mapper;
 
 use PHPUnit\Framework\TestCase;
 use Pluf\Orm\ObjectMapperBuilder;
-use Pluf\Orm\ObjectMapperInterface;
+use Pluf\Orm\ObjectMapper;
 use Pluf\Orm\ObjectMapper\ObjectMapperJson;
 
 /**
@@ -25,7 +25,7 @@ class ObjectMapperBuilderTest extends TestCase
         $mapper = $builder->build();
 
         $this->assertNotNull($mapper);
-        $this->assertTrue($mapper instanceof ObjectMapperInterface);
+        $this->assertTrue($mapper instanceof ObjectMapper);
         $this->assertTrue($mapper instanceof ObjectMapperJson);
     }
 }

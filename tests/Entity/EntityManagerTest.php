@@ -4,10 +4,12 @@ namespace Pluf\Tests\Entity;
 use PHPUnit\Framework\TestCase;
 use Pluf\Orm\EntityManagerFactory;
 use Pluf\Orm\EntityManagerFactoryBuilder;
-use Pluf\Orm\EntityManagerSchemaBuilder;
+use Pluf\Orm\ObjectMapperSchemaBuilder;
 use Pluf\Orm\ModelDescriptionRepository;
 use Pluf\Orm\Loader\ModelDescriptionLoaderAttribute;
 use atk4\dsql\Connection;
+use Pluf\Tests\Entity\Asset\Author;
+use Pluf\Orm\ObjectMapperBuilder;
 
 class EntityManagerTest extends TestCase
 {
@@ -34,8 +36,8 @@ class EntityManagerTest extends TestCase
         }
 
         self::$connection = $c;
-//         $c = new \atk4\dsql\Debug\Stopwatch\Connection([
-//             'connection' => self::$connection
+//         self::$connection = new \atk4\dsql\Debug\Stopwatch\Connection([
+//             'connection' => $c
 //         ]);
 
         // model repository
@@ -44,21 +46,23 @@ class EntityManagerTest extends TestCase
         ]);
 
         // entity manger schema
-        $builder = new EntityManagerSchemaBuilder();
-        $schema = $builder->setPrefix("")
-            ->setType($GLOBALS['DB_SCHEMA'])
+        $builder = new ObjectMapperBuilder();
+        $objectMapper = $builder
+            ->setType("array")
+            // ->setSchema($GLOBALS['DB_SCHEMA'])
             ->build();
 
         // entity manager
         $builder = new EntityManagerFactoryBuilder();
         self::$entityManagerFactory = $builder->setConnection($c)
-            ->setSchema($schema)
+            ->setObjectMapper($objectMapper)
             ->setModelDescriptionRepository($repo)
             ->setEnableMultitinancy(false)
             ->build();
     }
-    
+
     /**
+     *
      * @test
      */
     public function testDb()
@@ -80,6 +84,7 @@ class EntityManagerTest extends TestCase
     }
 
     /**
+     *
      * @test
      */
     public function testPersistEntityWithId()
@@ -98,6 +103,79 @@ class EntityManagerTest extends TestCase
         $this->assertEquals($entity, $newEntity);
         $entityManager->close();
         $this->assertFalse($entityManager->isOpen());
+    }
+
+    /**
+     *
+     * @test
+     */
+    public function testQueryToFind()
+    {
+        $entity = new Asset\Author();
+        $entity->firstName = "fist name";
+        $entity->lastName = "last name";
+
+        $entityManager = self::$entityManagerFactory->createEntityManager();
+
+        $this->assertTrue($entityManager->isOpen());
+        $entity = $entityManager->persist​($entity);
+        $entityManager->detach​($entity);
+
+        $result = $entityManager->query()
+            ->entity(Asset\Author::class, 'address')
+            ->mapper('address')
+            ->select();
+
+        $this->assertNotNull($result);
+        $this->assertIsArray($result);
+        $this->assertTrue(sizeof($result) > 1);
+        for ($i = 0; $i < sizeof($result); $i ++) {
+            $this->assertInstanceOf(Asset\Author::class, $result[$i]);
+        }
+    }
+
+    /**
+     *
+     * @test
+     */
+    public function testQueryToFindWitLimit()
+    {
+        $entityManager = self::$entityManagerFactory->createEntityManager();
+
+        for ($i = 0; $i < 3; $i ++) {
+            $entity = new Asset\Author();
+            $entity->firstName = "fist name";
+            $entity->lastName = "last name";
+            $entity = $entityManager->persist​($entity);
+        }
+
+        $result = $entityManager->query()
+            ->entity(Asset\Author::class, 'address')
+            ->mapper('address')
+            ->limit(2, 1)
+            ->select();
+
+        $this->assertNotNull($result);
+        $this->assertIsArray($result);
+        $this->assertTrue(sizeof($result) == 2);
+        $this->assertInstanceOf(Asset\Author::class, $result[0]);
+    }
+
+    /**
+     *
+     * @test
+     */
+    public function testQueryToFindSimpleVersionOfPublisher()
+    {
+        $entityManager = self::$entityManagerFactory->createEntityManager();
+        $result = $entityManager->query()
+            ->entity(Asset\SimplePublisher::class, '_e')
+            ->mapper('_e')
+            ->limit(10, 0)
+            ->select();
+
+        $this->assertNotNull($result);
+        $this->assertIsArray($result);
     }
 }
 

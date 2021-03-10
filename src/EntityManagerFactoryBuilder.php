@@ -2,9 +2,9 @@
 namespace Pluf\Orm;
 
 use Pluf\Orm\Loader\ModelDescriptionLoaderAttribute;
-use Pluf\Orm\EntityManager\EntityManagerSchemaMySQL;
-use Pluf\Orm\EntityManager\EntityManagerSchemaSQLite;
-use Pluf\Orm\EntityManager\EntityManagerFactoryImp;
+use Pluf\Orm\ObjectMapper\ObjectMapperSchemaMySql;
+use Pluf\Orm\ObjectMapper\ObjectMapperSchemaSQLite;
+use Pluf\Orm\ObjectMapper\ObjectMapperArray;
 
 /**
  * Builds a new EntityManager
@@ -18,7 +18,7 @@ class EntityManagerFactoryBuilder
 
     private $connection;
 
-    private EntityManagerSchema $schema;
+    private ?ObjectMapper $objectMapper;
 
     private bool $enableMultitinancy = false;
 
@@ -36,32 +36,33 @@ class EntityManagerFactoryBuilder
         return $this->connection;
     }
 
-    public function setSchema(EntityManagerSchema $schema): self
+    public function setObjectMapper(ObjectMapper $objectMapper): self
     {
-        $this->schema = $schema;
+        $this->objectMapper = $objectMapper;
         return $this;
     }
 
-    private function getEntityManagerSchema(): EntityManagerSchema
+    private function getObjectMapper(): ObjectMapper
     {
         if (empty($this->schema)) {
             $connection = $this->getConnection();
             switch ($connection->driverType) {
                 case 'sqlite':
-                    $this->schema = new EntityManagerSchemaSQLite();
+                    $schema = new ObjectMapperSchemaSQLite();
                     break;
-                case 'myslq':
-                    $this->schema = new EntityManagerSchemaMySQL();
+                case 'mysql':
+                    $schema = new ObjectMapperSchemaMySql();
                     break;
                 case 'pgsql':
                 default:
                     $this->schema = null;
             }
+            $this->objectMapper = new ObjectMapperArray($this->getModelDescriptionRepository(), $schema);
         }
-        $this->assertNotNull($this->schema, "Entity Manager Schema not specified nigther support for dirver {{driver}}", [
+        $this->assertNotNull($this->objectMapper, "Object Mapper not specified nigther support for dirver {{driver}}", [
             "driver" => $this->connection->driverType
         ]);
-        return $this->schema;
+        return $this->objectMapper;
     }
 
     public function setEnableMultitinancy(bool $enableMultitinancy): self
@@ -93,10 +94,10 @@ class EntityManagerFactoryBuilder
      */
     public function build(): EntityManagerFactory
     {
-        $factory = new EntityManagerFactoryImp(
+        $factory = new EntityManager\EntityManagerFactoryImp(
             modelDescriptionRepository: $this->getModelDescriptionRepository(),
             connection: $this->getConnection(),
-            entityManagerSchema: $this->getEntityManagerSchema()
+            objectMapper: $this->getObjectMapper()
         );
         return $factory;
     }

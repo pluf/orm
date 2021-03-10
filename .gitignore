@@ -9,3 +9,4 @@ composer.phar
 /.build/
 /.phpunit.result.cache
 /composer.lock
+/tmp/

@@ -2,8 +2,8 @@
 namespace Pluf\Tests\Entity;
 
 use PHPUnit\Framework\TestCase;
-use Pluf\Orm\EntityManagerSchema;
-use Pluf\Orm\EntityManagerSchemaBuilder;
+use Pluf\Orm\ObjectMapperSchema;
+use Pluf\Orm\ObjectMapperSchemaBuilder;
 use ReflectionClass;
 
 // class EntityManagerSchemaTest extends TestCase
@@ -11,7 +11,7 @@ use ReflectionClass;
 
 //     public function getSchemaTableNameData()
 //     {
-//         $builder = new EntityManagerSchemaBuilder();
+//         $builder = new ObjectMapperSchemaBuilder();
 //         return [
 //             [
 //                 $builder->setType('sqlite')

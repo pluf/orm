@@ -10,7 +10,7 @@ use Attribute;
  *
  * @author maso
  */
-#[Attribute(Attribute::TARGET_PROPERTY|Attribute::TARGET_METHOD|Attribute::TARGET_PARAMETER)]
+#[Attribute(Attribute::TARGET_CLASS|Attribute::TARGET_PROPERTY|Attribute::TARGET_METHOD|Attribute::TARGET_PARAMETER)]
 class NotNull extends ObjectValidatorConstraintImp implements ObjectValidatorConstraint
 {
 
@@ -19,9 +19,9 @@ class NotNull extends ObjectValidatorConstraintImp implements ObjectValidatorCon
      * {@inheritdoc}
      * @see \Pluf\Data\ObjectValidatorConstraint::isValid()
      */
-    public function isValid($value): bool
+    public function isValid($value, $target = null): bool
     {
-        return $value !== null;
+        return ! is_null($this->getExpected($value, $target));
     }
 }
 

@@ -35,7 +35,7 @@ class ObjectValidatorImp implements ObjectValidatorInterface
                 if (class_implements($attribute->getName(), ObjectValidatorConstraint::class)) {
                     // TODO: maso, 2021: avoid create new instance of the attribute
                     $validator = $attribute->newInstance();
-                    if (! $validator->isValid($property->getValue($entity))) {
+                    if (! $validator->isValid($property->getValue($entity), $entity)) {
                         $propertyErrors[] = new Exception($validator->getMessage());
                     }
                 }

@@ -41,7 +41,7 @@ namespace Pluf\Orm;
  * @author maso
  *        
  */
-interface ObjectMapperInterface
+interface ObjectMapper
 {
 
     /**
@@ -79,7 +79,7 @@ interface ObjectMapperInterface
      * @param mixed $class
      * @return self
      */
-    public function writeValue($output, $entity, $class): self;
+    public function writeValue(&$output, $entity, $class): self;
 
     /**
      * Method that can be used to serialize any value as a String.
@@ -100,10 +100,14 @@ interface ObjectMapperInterface
      * Note: this method should NOT be used if the result type is a container
      * (Array. The reason is that due to type erasure, key and value types can not be introspected when using this method.
      *
-     * @param mixed $input
-     * @param mixed $class
-     * @param bool $isList
+     * @param mixed $input input data
+     * @param mixed $class the root class name
+     * @param bool $isList Defines whehter the root object is list or not
      */
     public function readValue($input, $class, bool $isList = false);
+    
+    
+    public function encodeProperty(ModelProperty $property, $value);
+    public function decodeProperty(ModelProperty $property, $value);
 }
 

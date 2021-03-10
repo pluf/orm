@@ -28,7 +28,7 @@ class ModelDescriptionBuilder
         return $this;
     }
 
-    private function getTable(): Table
+    private function getTable(): ?Table
     {
         if (empty($this->entity)) {
             $this->assertEmpty($this->table, "Table attribute is allowed just for an entity {{class}} is not entity.", [
@@ -50,7 +50,7 @@ class ModelDescriptionBuilder
         return $this;
     }
 
-    private function getEntity(): Entity
+    private function getEntity(): ?Entity
     {
         return $this->entity;
     }

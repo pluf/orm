@@ -15,7 +15,7 @@ class ExceptionTest extends TestCase
     public function toStringTest()
     {
         $message = "xx" . rand();
-        $ex = new Exception($message, 123, null, 501, [], []);
+        $ex = new Exception($message, 123, null, [], []);
         $str = "" . $ex;
         $this->assertTrue(strpos($str, $message) >= 0);
     }
@@ -27,7 +27,7 @@ class ExceptionTest extends TestCase
     public function toJsonTest()
     {
         $message = "xx" . rand();
-        $ex = new Exception($message, 123, null, 501, [], []);
+        $ex = new Exception($message, 123, null, [], []);
         $str = json_encode($ex);
         $this->assertTrue(strpos($str, $message) >= 0);
     }
@@ -40,7 +40,6 @@ class ExceptionTest extends TestCase
     {
         $builder = new ExceptionBuilder();
         $ex = $builder->setCode(123)
-            ->setStatus(234)
             ->setMessage("This is a test {{count}} list")
             ->setPrevious(null)
             ->setParams([])

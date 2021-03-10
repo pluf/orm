@@ -2,6 +2,7 @@
 namespace Pluf\Orm\EntityManager;
 
 use Pluf\Orm\AssertionTrait;
+use Pluf\Orm\EntityExpression;
 use Pluf\Orm\EntityManager;
 use Pluf\Orm\EntityManagerFactory;
 use Pluf\Orm\EntityQuery;
@@ -9,6 +10,7 @@ use Pluf\Orm\EntityTransaction;
 use Pluf\Orm\FlushModeType;
 use Pluf\Orm\ModelDescription;
 use Pluf\Orm\ModelDescriptionRepository;
+use Pluf\Orm\ObjectMapper;
 
 class EntityManagerImp implements EntityManager
 {
@@ -16,21 +18,28 @@ class EntityManagerImp implements EntityManager
     use AssertionTrait;
 
     private bool $open = true;
-    private EntityManagerFactoryImp $entityManagerFactory;
+
+    public EntityManagerFactoryImp $entityManagerFactory;
+
     private ?ContextManager $contextManager;
+
     private array $properties = [];
+
     private string $flashMod = FlushModeType::AUTO;
+    
+    private ObjectMapper $objectMapper;
 
     /**
      * Creates new instance of entity manger
      *
      * @param ModelDescriptionRepository $modelDescriptionRepository
      */
-    public function __construct(EntityManagerFactoryImp $entityManagerFactory)
+    public function __construct(EntityManagerFactoryImp $entityManagerFactory, ObjectMapper $objectMapper)
     {
         $this->entityManagerFactory = $entityManagerFactory;
 
         $this->contextManager = new ContextManager();
+        $this->objectMapper = $objectMapper;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -43,9 +52,11 @@ class EntityManagerImp implements EntityManager
      * @param mixed $data
      * @return mixed
      */
-    protected function newInstance(ModelDescription $md, $data)
+    private function newInstance(ModelDescription $md, $data)
     {
         // TODO: using object mapper. mayby.
+        // TODO: put in context
+        // TODO: update context if the object is new
         $entity = $md->newInstance($data);
         return $this->fillEntity($md, $entity, $data);
     }
@@ -56,10 +67,10 @@ class EntityManagerImp implements EntityManager
      * @param ModelDescription $md
      * @param mixed $model
      */
-    protected function fillEntity(ModelDescription $md, $entity, $data)
+    private function fillEntity(ModelDescription $md, $entity, $data)
     {
         // TODO: using object mapper. mayby.
-        $schema =  $this->entityManagerFactory->entityManagerSchema;
+        $schema = $this->entityManagerFactory->objectMapperSchema;
         foreach ($md->properties as $name => $property) {
             // TODO: maso, 2021: support relations
             if (isset($data[$name])) {
@@ -69,7 +80,7 @@ class EntityManagerImp implements EntityManager
         return $entity;
     }
 
-    protected function getModelDescriptionOf($entity): ModelDescription
+    private function getModelDescriptionOf($entity): ModelDescription
     {
         $class = get_class($entity);
         $md = $this->entityManagerFactory->modelDescriptionRepository->get($class);
@@ -100,14 +111,6 @@ class EntityManagerImp implements EntityManager
     /**
      *
      * {@inheritdoc}
-     * @see \Pluf\Orm\EntityManager::createQuery()
-     */
-    public function createQuery(): EntityQuery
-    {}
-
-    /**
-     *
-     * {@inheritdoc}
      * @see \Pluf\Orm\EntityManager::clear()
      */
     public function clear()
@@ -129,7 +132,21 @@ class EntityManagerImp implements EntityManager
      * @see \Pluf\Orm\EntityManager::remove()
      */
     public function remove($entity)
-    {}
+    {
+        // TODO: maso, 2021: co
+        $md = $this->getModelDescriptionOf($entity);
+        // TODO: maso, 2021: check md
+        // TODO: maso, 2021: check md id exist
+        $id = $md->properties[$md->primaryKey];
+
+        $this->query()
+            ->entity($md->name)
+            ->where($id->getColumnName(), $id->getValue($entity))
+            ->delete();
+
+        // TODO: maso, 2021: assert the result value
+        $this->detach​($entity);
+    }
 
     /**
      *
@@ -147,23 +164,25 @@ class EntityManagerImp implements EntityManager
     public function persist​($entity)
     {
         // TODO: maso, 2021: co
-        $md = $this->getModelDescriptionOf($entity);
-        $query = $this->entityManagerFactory->connection->dsql()
-            ->table($md->table->name)
-            ->mode("insert");
+        $query = $this->query()
+            ->entity($entity::class)
+            ->set($entity);
 
-        foreach ($md->properties as $properyt) {
-            $value = $properyt->getValue($entity);
-            $value = $this->entityManagerFactory->entityManagerSchema->toDb($properyt, $value);
-            $query->set($properyt->column->name, $value);
+        $md = $this->getModelDescriptionOf($entity);
+        $primaryKeyProperty = $md->properties[$md->primaryKey];
+        $primaryKey = $primaryKeyProperty->getValue($entity);
+        if (isset($primaryKey)) {
+            $query->where($primaryKeyProperty->name, $primaryKey)
+                ->update();
+        } else {
+            $query->insert();
+            // TODO: maso, 2021: Postgresql need sequence name
+            // TODO: maso, 2021: get from query
+            $md = $this->getModelDescriptionOf($entity);
+            $primaryKey = $this->entityManagerFactory->connection->lastInsertId();
         }
 
-        $query->insert()->execute();
-
-        // TODO: maso, 2021: Postgresql need sequence name
-        $primaryKey = $this->entityManagerFactory->connection->lastInsertId();
         $persistEntity = $this->find($md, $primaryKey);
-
         $this->contextManager->put($persistEntity, $md);
         return $persistEntity;
     }
@@ -194,7 +213,10 @@ class EntityManagerImp implements EntityManager
      * @see \Pluf\Orm\EntityManager::merge​()
      */
     public function merge​($entity)
-    {}
+    {
+        // TODO: maso, 2021: co
+        return $this->persist​($entity);
+    }
 
     /**
      *
@@ -211,23 +233,18 @@ class EntityManagerImp implements EntityManager
         }
 
         $primaryKeyProperty = $md->properties[$md->primaryKey];
-        $stmt = $this->entityManagerFactory->connection->dsql()
-            ->table($this->entityManagerFactory->entityManagerSchema->getTableName($md))
-            ->where($primaryKeyProperty->column->name, '=', $primaryKey)
+        
+        $list = $this->query()
+            ->entity($md->name, 'entity')
+            ->mapper('entity')
+            ->where($primaryKeyProperty->getColumnName(), $primaryKey)
             ->select();
-            
-        if ($stmt instanceof \Generator) {
-            $entityData = iterator_to_array($stmt);
-        } else {
-            $entityData = $stmt->fetchAll();
-        }
-            
-        if (empty($entityData) || sizeof($entityData) == 0){
+
+        if (empty($list)   || sizeof($list) == 0) {
             // TODO: maso, 2021: what to do for not found
             return null;
         }
-        $entity = $this->newInstance($md, $entityData[0]);
-        return $this->contextManager->put($entity, $md);
+        return $this->contextManager->put($list[0], $md);
     }
 
     /**
@@ -242,8 +259,8 @@ class EntityManagerImp implements EntityManager
     }
 
     /**
-     * 
-     * {@inheritDoc}
+     *
+     * {@inheritdoc}
      * @see \Pluf\Orm\EntityManager::getEntityManagerFactory()
      */
     public function getEntityManagerFactory(): EntityManagerFactory
@@ -252,18 +269,18 @@ class EntityManagerImp implements EntityManager
     }
 
     /**
-     * 
-     * {@inheritDoc}
+     *
+     * {@inheritdoc}
      * @see \Pluf\Orm\EntityManager::getFlushMode()
      */
     public function getFlushMode(): string
     {
         return $this->flushMode;
     }
-    
+
     /**
      *
-     * {@inheritDoc}
+     * {@inheritdoc}
      * @see \Pluf\Orm\EntityManager::getDelegate()
      */
     public function getDelegate()
@@ -272,15 +289,15 @@ class EntityManagerImp implements EntityManager
     }
 
     /**
-     * 
-     * {@inheritDoc}
+     *
+     * {@inheritdoc}
      * @see \Pluf\Orm\EntityManager::setProperty()
      */
     public function setProperty(string $propertyName, $value): void
     {
         $this->properties[$propertyName] = $value;
     }
-    
+
     /**
      *
      * {@inheritdoc}
@@ -292,8 +309,8 @@ class EntityManagerImp implements EntityManager
     }
 
     /**
-     * 
-     * {@inheritDoc}
+     *
+     * {@inheritdoc}
      * @see \Pluf\Orm\EntityManager::setFlushMode()
      */
     public function setFlushMode(string $flushMode): void
@@ -302,6 +319,28 @@ class EntityManagerImp implements EntityManager
     }
 
     public function getTransaction(): EntityTransaction
-    {}
+    {
+        return new EntityTransactionImp();
+    }
+
+    /**
+     *
+     * {@inheritdoc}
+     * @see \Pluf\Orm\EntityManager::query()
+     */
+    public function query($properties = []): EntityQuery
+    {
+        return new EntityQueryImp($properties, $this);
+    }
+
+    /**
+     *
+     * {@inheritdoc}
+     * @see \Pluf\Orm\EntityManager::expr()
+     */
+    public function expr($properties = [], $arguments = null): EntityExpression
+    {
+        return new EntityExpressionImp($properties, $arguments, $this);
+    }
 }
 

@@ -1,0 +1,55 @@
+language: php
+php:
+  - '8.0'
+
+git:
+  depth: 1
+
+install:
+  # Install composer packages, will also trigger dump-autoload
+  - travis_retry composer install --no-interaction
+  
+script:
+  - ./vendor/bin/phpunit -c phpunit.xml
+
+after_success:
+  #
+  # Codecove
+  #
+  # Submit coverage report to codecov.io
+  - bash <(curl -s https://codecov.io/bash)
+  
+  #
+  # Coveralls
+  #
+  # Submit coverage report to Coveralls servers, see .coveralls.yml
+  - travis_retry composer require --dev php-coveralls/php-coveralls --no-interaction
+  - travis_retry php vendor/bin/php-coveralls -v
+  - travis_retry composer remove  --dev php-coveralls/php-coveralls --no-interaction
+  
+  #
+  # Code Cliemet 
+  #
+  - travis_retry composer require --dev codeclimate/php-test-reporter --no-interaction
+  - travis_retry vendor/bin/test-reporter
+  - travis_retry composer remove --dev codeclimate/php-test-reporter --no-interaction
+
+notifications:
+  email:
+    recipients:
+      - mostafabarmshory+eeqna5hwqenxwczq7lax@boards.trello.com
+      - mostafa.barmshory@gmail.com
+      - mohammad.hadi.mansouri@gmail.com
+    on_success: never
+    on_failure: always
+
+branches:
+  only:
+    - master
+    - develop
+
+
+#
+# Build docuemtns
+#
+# docker run --rm -v $(pwd):/data phpdoc/phpdoc

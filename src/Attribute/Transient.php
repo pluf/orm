@@ -18,7 +18,25 @@
  */
 namespace Pluf\Orm\Attribute;
 
-#[Attribute]
+use Attribute;
+
+/**
+ * Specifies that the property or field is not persistent. 
+ * 
+ * It is used to annotate a property or field of an entity class, mapped superclass, or embeddable class.
+ * 
+ * ```php
+ * #[Entity]
+ * class Employee {
+ *  #[Id]
+ *  public ?int id;
+ *  
+ *  #[Transient]
+ *  public ?User $currentUser;
+ * }
+ * ```
+ */
+#[Attribute(Attribute::TARGET_METHOD|Attribute::TARGET_PROPERTY)]
 class Transient
 {
 }

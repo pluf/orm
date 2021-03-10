@@ -18,47 +18,123 @@
  */
 namespace Pluf\Orm;
 
-use Pluf\Orm\Attribute\Id;
 use Pluf\Orm\Attribute\Column;
+use Pluf\Orm\Attribute\Id;
+use ArrayObject;
+use DateTime;
+use Iterator;
 
 class ModelProperty
 {
+
     public string $name;
-    public string $type;
+
+    public ?string $type = "mixed";
+
     public ?Id $id = null;
+
     public ?Column $column = null;
-    
+
+    /**
+     * The property is a public property and you can set or get directly
+     *
+     * For a public property you can use the property name to set.
+     *
+     * @var boolean true if property is public
+     */
+    public bool $accessable = true;
+
+    /**
+     * Getter method
+     *
+     * @var string
+     */
+    public ?string $getter = null;
+
+    /**
+     * Setter method
+     *
+     * @var string
+     */
+    public ?string $setter = null;
+
     /**
      * Creates new instance of model property
      */
-    public function __construct(
-        string $name,
-        string $type,
-        ?Id $id = null,
-        ?Column $column = null
-    )
+    public function __construct(string $name, ?string $type = 'mixed', ?Id $id = null, ?Column $column = null, bool $accessable = false, ?string $getter = null, ?string $setter = null)
     {
-        $this->name  = $name;
+        $this->name = $name;
         $this->id = $id;
         $this->column = $column;
         $this->type = $type;
+        $this->accessable = $accessable;
+        $this->getter = $getter;
+        $this->setter = $setter;
     }
 
     public function isId(): bool
     {
         return ! empty($this->id);
     }
-    
+
     public function getValue($model)
     {
-        $name = $this->name;
-        return $model->$name;
+        if ($this->accessable) {
+            $name = $this->name;
+            return $model->$name;
+        } else if (! empty($this->getter)) {
+            $method = $this->getter;
+            return $model->$method();
+        }
+        throw new Exception("Property is not readable");
     }
-    
+
     public function setValue($model, $value)
     {
-        $name = $this->name;
-        return $model->$name = $value;
+        if ($this->accessable) {
+            $name = $this->name;
+            $model->$name = $value;
+            return;
+        } else if (! empty($this->setter)) {
+            $method = $this->setter;
+            $model->$method($value);
+            return;
+        }
+        throw new Exception("Property is not writable");
+    }
+
+    /**
+     * Checks whether the property is primitive
+     *
+     * A non primitive property may be an entity or a PHP object
+     *
+     * @return boolean true if the property is primitive
+     */
+    public function isPrimitive()
+    {
+        switch ($this->type) {
+            case 'int':
+            case 'float':
+            case 'bool':
+            case 'string':
+            case 'resource':
+            case 'numeric':
+            case 'array':
+            case Iterator::class:
+            case ArrayObject::class:
+            case DateTime::class:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public function getColumnName(): string
+    {
+        if (! empty($this->column) && ! empty($this->column->name)) {
+            return $this->column->name;
+        }
+        return $this->name;
     }
 }
 

@@ -40,8 +40,6 @@ class Exception extends RuntimeException implements JsonSerializable
 
     private array $params = [];
 
-    private int $status = 500;
-
     /**
      * Crates new instance of the exception
      *
@@ -58,18 +56,17 @@ class Exception extends RuntimeException implements JsonSerializable
      * @param array $solutions
      *            list of common way to solve the problem
      */
-    public function __construct($message = '', ?int $code = null, ?Throwable $previous = null, ?int $status = 500, ?array $params = [], ?array $solutions = [])
+    public function __construct($message = '', ?int $code = null, ?Throwable $previous = null, ?array $params = [], ?array $solutions = [])
     {
-        
         if (is_array($message)) {
             // message contain additional parameters
             $params = $message;
             $message = array_shift($this->params);
+        } else {
+            $this->params = $params;
+            $this->solutions = $solutions;
         }
         parent::__construct($message, $code ?? 0, $previous);
-        $this->status = $status;
-        $this->params = $params;
-        $this->solutions = $solutions;
     }
 
     /**
@@ -93,16 +90,6 @@ class Exception extends RuntimeException implements JsonSerializable
     }
 
     /**
-     * Get status of the error
-     *
-     * @return int
-     */
-    public function getStatus(): int
-    {
-        return $this->status;
-    }
-
-    /**
      *
      * {@inheritdoc}
      * @see JsonSerializable::jsonSerialize()
@@ -111,17 +98,16 @@ class Exception extends RuntimeException implements JsonSerializable
     {
         return [
             'code' => $this->code,
-            'status' => $this->status,
             'message' => $this->message,
             'parmas' => $this->params,
             'solutions' => $this->getSolutions()
         ];
     }
-    
-    public function jsonSerializeDebug(){
+
+    public function jsonSerializeDebug()
+    {
         return [
             'code' => $this->getCode(),
-            'status' => $this->getStatus(),
             'message' => $this->getMessage(),
             'parmas' => $this->getParams(),
             'solutions' => $this->getSolutions(),
@@ -130,7 +116,7 @@ class Exception extends RuntimeException implements JsonSerializable
             'stack' => $this->getTrace()
         ];
     }
-    
+
     /**
      *
      * {@inheritdoc}

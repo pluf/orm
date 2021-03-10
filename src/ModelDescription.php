@@ -45,6 +45,9 @@ class ModelDescription
         $this->primaryKey = $primaryKey;
         
         $this->properties = $properties;
+//         foreach ($properties as $propery) {
+//             $this->columns[$propery->column->name] = $propery;
+//         }
     }
 
     

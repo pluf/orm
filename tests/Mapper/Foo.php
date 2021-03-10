@@ -1,7 +1,9 @@
 <?php
 namespace Pluf\Tests\Mapper;
 
-# [Serializable]
+use Pluf\Orm\Attribute\Entity;
+
+#[Entity]
 class Foo
 {
 
@@ -12,5 +14,12 @@ class Foo
     public string $strValue = '';
 
     public bool $boolValue = false;
+    
+    public function __construct(int $intValue = 0, float $floatValue = 0.0, string $strValue = '', bool $boolValue = false){
+        $this->intValue = $intValue;
+        $this->floatValue = $floatValue;
+        $this->strValue = $strValue;
+        $this->boolValue = $boolValue;
+    }
 }
 

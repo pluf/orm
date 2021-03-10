@@ -1,8 +1,7 @@
 <?php
 namespace Pluf\Orm\ObjectMapper;
 
-use Pluf\Orm\ObjectMapperInterface;
-use Pluf\Orm\ObjectUtils;
+use Pluf\Orm\Exception;
 
 /**
  * JSON implementation of Object mapper
@@ -10,60 +9,47 @@ use Pluf\Orm\ObjectUtils;
  * @author maso
  *        
  */
-class ObjectMapperJson implements ObjectMapperInterface
+class ObjectMapperJson extends ObjectMapperArray
 {
 
     /**
      *
      * {@inheritdoc}
-     * @see ObjectMapperInterface::readValue()
+     * @see ObjectMapper::readValue()
      */
     public function readValue($input, $class, bool $isList = false)
     {
-        $data = json_decode($input);
-        $model = ObjectUtils::newInstance($class);
-        $model = ObjectUtils::fillModel($model, $data);
-        return $model;
+        if(is_array($input)){
+            $data = $input;
+        } else if(is_string($input)){
+            $data = json_decode($input, true);
+        } else {
+            throw new Exception("TODO: Unsupported media type");
+        }
+        return parent::readValue($data, $class, $isList);
     }
 
     /**
      *
      * {@inheritdoc}
-     * @see ObjectMapperInterface::canDeserialize()
+     * @see ObjectMapper::writeValue()
      */
-    public function canDeserialize(string $class): bool
+    public function writeValue(&$output, $entity, $class): self
     {
-        return true;
+        // TODO:
+        return $this;
     }
 
     /**
      *
      * {@inheritdoc}
-     * @see ObjectMapperInterface::canSerialize()
-     */
-    public function canSerialize(string $class): bool
-    {
-        return true;
-    }
-
-    /**
-     *
-     * {@inheritdoc}
-     * @see ObjectMapperInterface::writeValue()
-     */
-    public function writeValue($output, $entity, $class): self
-    {}
-
-    /**
-     *
-     * {@inheritdoc}
-     * @see ObjectMapperInterface::writeValueAsString()
+     * @see ObjectMapper::writeValueAsString()
      */
     public function writeValueAsString($entity, ?string $class = null): string
     {
-        // XXX: maso, 2021 consider the class definistion
-        $str = json_encode($entity);
-        return $str;
+        $arrayData = [];
+        parent::writeValue($arrayData, $entity, $class);
+        return json_encode($arrayData);
     }
 }
 

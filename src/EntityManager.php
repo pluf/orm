@@ -65,7 +65,9 @@ interface EntityManager
 
     /**
      * Find by primary key.
-     * Search for an entity of the specified class and primary key. If the entity instance is contained in the persistence context, it is returned from there.
+     * 
+     * Search for an entity of the specified class and primary key. If the entity 
+     * instance is contained in the persistence context, it is returned from there.
      *
      * @param string $entityType
      * @param mixed $primaryKey
@@ -77,6 +79,10 @@ interface EntityManager
      */
     public function flush();
 
+    /**
+     * Entity that is used to connect to the DB.
+     * 
+     */
     public function getDelegate();
 
     public function getEntityManagerFactory(): EntityManagerFactory;
@@ -137,10 +143,24 @@ interface EntityManager
     public function setProperty(string $propertyName, $value): void;
 
     /**
+     * Returns EntityQuery object with Entity Manager already set.
+     * 
      * Create an instance of Query for executing a Java Persistence query language statement.
      *
+     *
+     * @param string|array $properties
+     * @param array        $arguments
      * @return EntityQuery instance to create and execute a query.
      */
-    public function createQuery(): EntityQuery;
+    public function query($properties = []): EntityQuery;
+    
+    /**
+     * Returns Expression object with connection already set.
+     * 
+     * @param string|array $properties
+     * @param array        $arguments
+     * @return EntityQuery instance to create and execute a query.
+     */
+    public function expr($properties = [], $arguments = null): EntityExpression;
 }
 
